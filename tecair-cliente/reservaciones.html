@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--
+    =====================================
+    CONFIGURACIÓN DEL DOCUMENTO
+    =====================================
+    Página para gestionar reservaciones de vuelos
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECAir - Mis Reservaciones</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!--
+    =====================================
+    BARRA DE NAVEGACIÓN
+    =====================================
+    Menú superior con enlace activo a reservaciones
+    -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h2>✈️ TECAir</h2>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="menu.html">Inicio</a></li>
+                <li><a href="vuelos.html">Buscar Vuelos</a></li>
+                <li><a href="reservaciones.html" class="active">Mis Reservaciones</a></li>
+                <li><a href="promociones.html">Promociones</a></li>
+                <li><a href="perfil.html">Mi Perfil</a></li>
+                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--
+    =====================================
+    CONTENIDO PRINCIPAL: RESERVACIONES
+    =====================================
+    Tres tabs: Reservaciones Activas, Historial y Nueva Reservación
+    -->
+    <div class="container">
+        <div class="reservaciones-section">
+            <h1>Mis Reservaciones</h1>
+
+            <!--
+            NAVEGACIÓN POR TABS
+            Permite cambiar entre:
+            - Reservaciones activas (próximos viajes)
+            - Historial (viajes pasados)
+            - Nueva reservación (crear nueva)
+            -->
+            <div class="tabs-section">
+                <button class="tab-btn active" onclick="cambiarTabReservaciones('activas')">Reservaciones Activas</button>
+                <button class="tab-btn" onclick="cambiarTabReservaciones('historial')">Historial</button>
+                <button class="tab-btn" onclick="cambiarTabReservaciones('nueva')">Nueva Reservación</button>
+            </div>
+
+            <!--
+            TAB 1: RESERVACIONES ACTIVAS
+            Lista de reservaciones futuras con opciones de gestión
+            Muestra estado vacío si no hay reservaciones
+            -->
+            <div id="activasTab" class="tab-content active">
+                <div id="listadoActivas" class="reservaciones-grid">
+                    <div class="empty-state">
+                        <p>No tienes reservaciones activas</p>
+                        <button class="btn btn-primary" onclick="cambiarTabReservaciones('nueva')">
+                            Hacer nueva reservación
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!--
+            TAB 2: HISTORIAL
+            Lista de reservaciones pasadas completadas
+            Muestra estado vacío si no hay historial
+            -->
+            <div id="historialTab" class="tab-content">
+                <div id="listadoHistorial" class="reservaciones-grid">
+                    <div class="empty-state">
+                        <p>No tienes historial de reservaciones</p>
+                    </div>
+                </div>
+            </div>
+
+            <!--
+            TAB 3: NUEVA RESERVACIÓN
+            Formulario para crear una nueva reservación
+            Solicita datos del pasajero y selección de vuelo/asiento
+            -->
+            <div id="nuevaTab" class="tab-content">
+                <div class="card">
+                    <h3>Crear Nueva Reservación</h3>
+                    <form id="formReservacion" class="form-grid">
+                        <!--
+                        DATOS DEL PASAJERO
+                        Información básica requerida
+                        -->
+                        <div class="form-group">
+                            <label for="pasajeroNombre">Nombre del Pasajero</label>
+                            <input type="text" id="pasajeroNombre" name="pasajeroNombre" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pasajeroEmail">Correo Electrónico</label>
+                            <input type="email" id="pasajeroEmail" name="pasajeroEmail" required>
+                        </div>
+
+                        <!--
+                        SELECCIÓN DE VUELO Y ASIENTO
+                        Seleccionar vuelo de lista disponible
+                        Especificar número de asiento deseado
+                        -->
+                        <div class="form-group">
+                            <label for="vueloSeleccionado">Seleccionar Vuelo</label>
+                            <select id="vueloSeleccionado" name="vueloSeleccionado" required>
+                                <option value="">-- Selecciona un vuelo --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="asiento">Seleccionar Asiento</label>
+                            <input type="text" id="asiento" name="asiento" placeholder="Ej: 12A" required>
+                        </div>
+
+                        <!--
+                        DATOS DE PASAPORTE OPCIONAL
+                        Checkbox que muestra/oculta campos de pasaporte
+                        Necesario para vuelos internacionales
+                        -->
+                        <div class="form-group col-full">
+                            <label>
+                                <input type="checkbox" id="requerirPasaporte" name="requerirPasaporte">
+                                Incluir información de pasaporte
+                            </label>
+                        </div>
+
+                        <div id="datoPasaporte" style="display: none;" class="form-group col-full">
+                            <label for="numeroPasaporte">Número de Pasaporte</label>
+                            <input type="text" id="numeroPasaporte" name="numeroPasaporte">
+                        </div>
+
+                        <!--
+                        BOTÓN DE ACCIÓN
+                        Procede al formulario de pago
+                        -->
+                        <div class="form-group col-full">
+                            <button type="button" class="btn btn-primary" onclick="procederPago()">
+                                Proceder al Pago
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // protegerRuta(); // Desactivado para fase de prueba
+
+            // Cargar datos iniciales
+            cargarReservacionesSimuladas();
+
+            // Mostrar/ocultar datos de pasaporte
+            document.getElementById('requerirPasaporte').addEventListener('change', function() {
+                const datoPasaporte = document.getElementById('datoPasaporte');
+                if (this.checked) {
+                    datoPasaporte.style.display = 'block';
+                } else {
+                    datoPasaporte.style.display = 'none';
+                }
+            });
+
+            // Pre-llenar datos del usuario
+            const usuario = obtenerUsuarioActual();
+            if (usuario) {
+                document.getElementById('pasajeroNombre').value = usuario.nombreCompleto || '';
+                document.getElementById('pasajeroEmail').value = usuario.email || '';
+            }
+        });
+
+        function cambiarTabReservaciones(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelectorAll('.tab-btn')[['activas', 'historial', 'nueva'].indexOf(tab)].classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function cargarReservacionesSimuladas() {
+            const usuario = obtenerUsuarioActual();
+            
+            // Simular reservaciones activas
+            const reservacionesActivas = [
+                {
+                    id: 'RES001',
+                    numero: 'TEC4521',
+                    origen: 'SJO',
+                    destino: 'LIR',
+                    salida: '2026-05-15 08:00',
+                    llegada: '2026-05-15 10:15',
+                    asiento: '12A',
+                    estado: 'Confirmada'
+                }
+            ];
+
+            const activasDiv = document.getElementById('listadoActivas');
+            if (reservacionesActivas.length > 0) {
+                let html = '';
+                reservacionesActivas.forEach(res => {
+                    html += `
+                        <div class="reservacion-card">
+                            <div class="reservacion-header">
+                                <h3>${res.numero}</h3>
+                                <span class="estado-badge estado-${res.estado.toLowerCase()}">${res.estado}</span>
+                            </div>
+                            <div class="reservacion-body">
+                                <p><strong>ID:</strong> ${res.id}</p>
+                                <p><strong>Ruta:</strong> ${res.origen} → ${res.destino}</p>
+                                <p><strong>Salida:</strong> ${res.salida}</p>
+                                <p><strong>Asiento:</strong> ${res.asiento}</p>
+                            </div>
+                            <div class="reservacion-actions">
+                                <button class="btn btn-sm btn-info" onclick="verDetalles('${res.id}')">Ver Detalles</button>
+                                <button class="btn btn-sm btn-warning" onclick="modificarReservacion('${res.id}')">Modificar</button>
+                                <button class="btn btn-sm btn-danger" onclick="cancelarReservacion('${res.id}')">Cancelar</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                activasDiv.innerHTML = html;
+            }
+        }
+
+        function procederPago() {
+            const pasajero = document.getElementById('pasajeroNombre').value;
+            const vuelo = document.getElementById('vueloSeleccionado').value;
+            const asiento = document.getElementById('asiento').value;
+
+            if (!pasajero || !vuelo || !asiento) {
+                alert('Por favor completa todos los campos requeridos');
+                return;
+            }
+
+            // Guardar datos de reservación temporal
+            sessionStorage.setItem('reservacionTemporal', JSON.stringify({
+                pasajero,
+                vuelo,
+                asiento,
+                monto: Math.floor(Math.random() * 150) + 45
+            }));
+
+            window.location.href = 'pago.html';
+        }
+
+        function verDetalles(id) {
+            alert(`Ver detalles de ${id}`);
+        }
+
+        function modificarReservacion(id) {
+            alert(`Modificar reservación ${id}`);
+        }
+
+        function cancelarReservacion(id) {
+            if (confirm('¿Estás seguro que deseas cancelar esta reservación?')) {
+                alert(`Reservación ${id} cancelada`);
+            }
+        }
+    </script>
+</body>
+</html>
