@@ -3,7 +3,7 @@ using TecAir.Api.Models;
 
 namespace TecAir.Api.Data;
 
-public sealed class TecAirDb(DbOptions<TecAirDb> options) : Db(options)
+public sealed class TecAirDb(DbContextOptions<TecAirDb> options) : DbContext(options)
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Avion> Aviones => Set<Avion>();
