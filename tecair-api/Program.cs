@@ -1,3 +1,7 @@
+/*
+ * Este es el ejecutable del API
+ */
+
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TecAir.Api.Data;
