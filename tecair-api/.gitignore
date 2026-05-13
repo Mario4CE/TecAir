@@ -1,0 +1,7 @@
+# Base de datos local generada automáticamente al iniciar la API
+/data/*.sqlite
+/data/*.sqlite-*
+
+# Archivos generados por .NET
+/bin/
+/obj/

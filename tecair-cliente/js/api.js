@@ -2,8 +2,8 @@
  * API.js - Funciones para comunicación con la API
  */
 
-// URL base de la API (cambiar según necesidad)
-const API_BASE_URL = 'http://localhost:3000/api';
+// URL base de la API. Se toma desde js/config.js para no cambiarla en cada archivo.
+const API_BASE_URL = (window.TECAIR_CONFIG && window.TECAIR_CONFIG.API_BASE_URL) || 'http://localhost:3000/api';
 
 /**
  * Realiza una petición GET a la API

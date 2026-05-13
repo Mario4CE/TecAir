@@ -5,7 +5,7 @@ Sistema de reservación de vuelos para la aerolínea TECAir. Esta es la interfaz
 **ESTADO ACTUAL:** ⚠️ Fase de Prueba - Sin autenticación real
 - ✅ Sistema funcional como cascaron
 - ✅ Flujo de usuario completo
-- ⏳ Autenticación real: Pendiente conectar a BD PostgreSQL + API C#
+- ⏳ Autenticación real: Pendiente conectar completamente a la API C#
 
 ## 📁 Estructura del Proyecto
 
@@ -22,6 +22,7 @@ tecair-cliente/
 │   ├── styles.css          # Estilos generales
 │   └── login.css           # Estilos específicos del login
 └── js/
+    ├── config.js           # Configuración global (URL de API, locale, moneda)
     ├── api.js              # Funciones de comunicación con API
     ├── auth.js             # Funciones de autenticación
     └── utils.js            # Funciones utilitarias
@@ -126,7 +127,7 @@ El sistema actualmente guarda los datos del usuario en `localStorage`:
 **Cuando la BD esté lista:**
 - Se agregará `authToken` para JWT
 - Se implementarán validaciones reales en el servidor
-- Se conectará a la API REST en C#
+- Se conectará a la API REST en C# incluida en `tecair-api`
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -146,9 +147,11 @@ La página es completamente responsive:
 
 ## 🔧 Configuración de API
 
-Cambiar la URL base de la API en `js/api.js`:
+Cambiar la URL base de la API en `js/config.js` para no modificar todas las páginas:
 ```javascript
-const API_BASE_URL = 'http://localhost:3000/api';
+window.TECAIR_CONFIG = {
+  API_BASE_URL: 'http://localhost:3000/api'
+};
 ```
 
 ## 📊 Estructura de Datos
