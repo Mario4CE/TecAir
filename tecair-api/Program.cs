@@ -37,11 +37,15 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<TecAirDb>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("TecAirDb") ?? "Data Source=data/tecair.sqlite";
-    options.UseSqlite(connectionString);
+    //var connectionString = builder.Configuration.GetConnectionString("TecAirDb") ?? "Data Source=data/tecair.sqlite";
+    //options.UseSqlite(connectionString);
+     options.UseInMemoryDatabase("TecAirDb");
 });
 
 var app = builder.Build();
+
+app.MapGet("/", () => Results.Redirect("/api"));
+
 app.UseCors("TecAirCors");
 
 using (var scope = app.Services.CreateScope())
