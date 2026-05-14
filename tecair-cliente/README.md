@@ -5,7 +5,7 @@ Sistema de reservación de vuelos para la aerolínea TECAir. Esta es la interfaz
 **ESTADO ACTUAL:** ⚠️ Fase de Prueba - Sin autenticación real
 - ✅ Sistema funcional como cascaron
 - ✅ Flujo de usuario completo
-- ⏳ Autenticación real: Pendiente conectar a BD PostgreSQL + API C#
+- ⏳ Autenticación real: Pendiente integrar con el API C# y una base persistente
 
 ## 📁 Estructura del Proyecto
 
@@ -126,7 +126,7 @@ El sistema actualmente guarda los datos del usuario en `localStorage`:
 **Cuando la BD esté lista:**
 - Se agregará `authToken` para JWT
 - Se implementarán validaciones reales en el servidor
-- Se conectará a la API REST en C#
+- Se conectará al API REST en C# ya documentado en el backend
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -135,7 +135,7 @@ El sistema actualmente guarda los datos del usuario en `localStorage`:
 - **JavaScript ES6+**: Lógica de la aplicación
 - **Fetch API**: Comunicación con servidor
 - **LocalStorage**: Almacenamiento local de datos
-- **luego se debe implementar Angular/React, Bootstrap
+- **Próxima evolución**: migración gradual a Angular o React y Bootstrap
 
 ## 📱 Responsive Design
 
@@ -226,18 +226,18 @@ log('Error', 'error');
 **Datos Simulados**: Los vuelos, reservaciones y promociones son datos de ejemplo para pruebas.
 
 **Próxima Fase:**
-1. ✅ Crear API REST en C# con autenticación JWT
-2. ✅ Configurar BD PostgreSQL
-3. ✅ Conectar cliente web a API
-4. ✅ Habilitar validaciones reales (descomentar en auth.js y utils.js)
+1. ✅ Crear API REST en C# con endpoints base para usuarios, vuelos, reservaciones, pagos, promociones, check-ins y maletas
+2. ⏳ Configurar BD PostgreSQL o SQLite persistente
+3. ⏳ Conectar cliente web al API
+4. ⏳ Habilitar autenticación real y validaciones del lado servidor
 
 ## 🚦 Próximos Pasos
 
 ### Fase 1: Backend (EN PROGRESO)
-1. Crear API REST en C#
-2. Configurar base de datos PostgreSQL
+1. API REST base ya creada en C#
+2. Configurar base de datos PostgreSQL o SQLite persistente
 3. Implementar autenticación JWT
-4. Crear endpoints para:
+4. Ajustar los endpoints para:
    - Usuarios (login, registro, perfil)
    - Vuelos (búsqueda, creación)
    - Reservaciones (CRUD)
@@ -245,10 +245,10 @@ log('Error', 'error');
    - Pagos (procesamiento)
 
 ### Fase 2: Integración Frontend (en desarrollo)
-1. Conectar cliente web a API
+1. Conectar cliente web al API
 2. Habilitar validaciones reales
 3. Implementar manejo de errores
-4. Testing de flujo completo
+4. Probar el flujo completo de punta a punta
 
 ### Fase 3: Aplicación Móvil (en desarrollo)
 1. Crear app con SQLite

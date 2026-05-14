@@ -3,6 +3,12 @@ using TecAir.Api.Models;
 
 namespace TecAir.Api.Data;
 
+/*
+Descripción: Contexto de Entity Framework Core para el dominio de TECAir.
+Entradas: Opciones de configuración de base de datos.
+Salidas: Conjunto de DbSet y mapeos relacionales para las entidades del sistema.
+Restricciones: Debe mantenerse coherente con los nombres de tablas y relaciones del modelo.
+*/
 public sealed class TecAirDb(DbContextOptions<TecAirDb> options) : DbContext(options)
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();

@@ -1,5 +1,11 @@
 namespace TecAir.Api.Models;
 
+/*
+Descripción: Representa un vuelo programado sobre una ruta y un avión.
+Entradas: IdVuelo, FechaSalida, HoraSalida, Puerta, Estado, Matricula, IdRuta y Precio.
+Salidas: Entidad persistida en la tabla vuelo.
+Restricciones: Debe apuntar a una ruta y a un avión existentes.
+*/
 public sealed class Vuelo
 {
     public int IdVuelo { get; set; }

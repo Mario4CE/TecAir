@@ -1,5 +1,11 @@
 namespace TecAir.Api.Models;
 
+/*
+Descripción: Representa el registro de check-in de un usuario para un vuelo.
+Entradas: IdCheckin, Asiento, IdUsuario, IdVuelo y maletas asociadas.
+Salidas: Entidad persistida en la tabla checkin.
+Restricciones: No puede repetirse el mismo asiento para un vuelo.
+*/
 public sealed class CheckIn
 {
     public int IdCheckin { get; set; }

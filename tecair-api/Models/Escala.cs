@@ -1,5 +1,11 @@
 namespace TecAir.Api.Models;
 
+/*
+Descripción: Representa una parada u origen/destino dentro de una ruta.
+Entradas: IdRuta, Orden, IdAeropuerto y Tipo.
+Salidas: Entidad persistida en la tabla escala.
+Restricciones: Cada combinación de ruta y orden debe ser única.
+*/
 public sealed class Escala
 {
     public int IdRuta { get; set; }
