@@ -1,0 +1,8 @@
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.csproj.AssemblyReference.cache
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.AssemblyInfoInputs.cache
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.AssemblyInfo.cs
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.csproj.CoreCompileInputs.cache
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Usuario\TecAir\TecAir\tecair-api\obj\Debug\net8.0\TecAir.Api.sourcelink.json
