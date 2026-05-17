@@ -10,20 +10,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TECAir - Pago</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .metodo-pago { border: 2px solid #dee2e6; border-radius: 8px; padding: 0.9rem 1rem; cursor: pointer; transition: all 0.25s; }
+        .metodo-pago:hover { border-color: #0066cc; background: #f0f7ff; }
+        .metodo-pago.active { border-color: #0066cc; background: #f0f7ff; }
+        .desglose-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e9ecef; font-size: 0.9rem; }
+        .desglose-item.total { font-weight: 800; font-size: 1rem; color: #0066cc; border-bottom: 2px solid #0066cc; }
+    </style>
 </head>
 <body>
     <!--
     =====================================
     BARRA DE NAVEGACIÓN
     =====================================
-    Menú reducido (sin opciones) durante el proceso de pago
+    Menú reducido durante el proceso de pago
     -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <h2>✈️ TECAir</h2>
-            </div>
+    <nav class="navbar" style="background: linear-gradient(135deg, #0066cc, #004a99);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand text-white fw-bold fs-4" href="menu.html">✈️ TECAir</a>
+            <span class="text-white small opacity-75"><i class="bi bi-lock-fill me-1"></i>Pago Seguro</span>
         </div>
     </nav>
 
@@ -31,79 +41,70 @@
     =====================================
     CONTENIDO PRINCIPAL: FORMULARIO DE PAGO
     =====================================
-    Resumen de la reservación y métodos de pago disponibles
     -->
-    <div class="container">
-        <div class="pago-section">
-            <h1>Resumen de Pago</h1>
+    <div class="container my-4">
+        <h1 class="text-primary fw-bold mb-4"><i class="bi bi-credit-card me-2"></i>Resumen de Pago</h1>
 
-            <div class="pago-container">
+        <div class="row g-4">
+            <!--
+            COLUMNA IZQUIERDA: RESUMEN Y DESGLOSE
+            -->
+            <div class="col-lg-5">
                 <!--
-                COLUMNA IZQUIERDA: RESUMEN Y DESGLOSE
-                Muestra detalles de la reservación y costos desglosados
+                TARJETA 1: DETALLES DE RESERVACIÓN
                 -->
-                <div class="pago-resumen">
-                    <!--
-                    TARJETA 1: DETALLES DE RESERVACIÓN
-                    Información del vuelo seleccionado
-                    -->
-                    <div class="card">
-                        <h3>Detalles de tu Reservación</h3>
-                        <div id="detallesReservacion" class="detalles-grid">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-airplane me-2"></i>Detalles de tu Reservación</h6>
+                        <div id="detallesReservacion" class="small">
                             <!-- Se cargan aquí los detalles -->
-                        </div>
-                    </div>
-
-                    <!--
-                    TARJETA 2: DESGLOSE DE COSTOS
-                    Muestra tarifa base, impuestos, cargos y total
-                    -->
-                    <div class="card">
-                        <h3>Desglose de Costos</h3>
-                        <div class="desglose-costos">
-                            <div class="desglose-item">
-                                <span>Tarifa Base</span>
-                                <span id="tarifaBase">$0</span>
-                            </div>
-                            <div class="desglose-item">
-                                <span>Impuestos y Tasas</span>
-                                <span id="impuestos">$0</span>
-                            </div>
-                            <div class="desglose-item">
-                                <span>Cargo de Servicio</span>
-                                <span id="cargo">$0</span>
-                            </div>
-                            <hr>
-                            <div class="desglose-item total">
-                                <span>Total a Pagar</span>
-                                <span id="montoTotal">$0</span>
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!--
-                COLUMNA DERECHA: MÉTODOS Y FORMULARIO DE PAGO
-                Selección de método de pago y formulario correspondiente
+                TARJETA 2: DESGLOSE DE COSTOS
                 -->
-                <div class="formulario-pago">
-                    <div class="card">
-                        <h3>Información de Pago</h3>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-receipt me-2"></i>Desglose de Costos</h6>
+                        <div class="desglose-item">
+                            <span>Tarifa Base</span><span id="tarifaBase">$0</span>
+                        </div>
+                        <div class="desglose-item">
+                            <span>Impuestos y Tasas</span><span id="impuestos">$0</span>
+                        </div>
+                        <div class="desglose-item">
+                            <span>Cargo de Servicio</span><span id="cargo">$0</span>
+                        </div>
+                        <div class="desglose-item total mt-1">
+                            <span>Total a Pagar</span><span id="montoTotal">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--
+            COLUMNA DERECHA: MÉTODOS Y FORMULARIO DE PAGO
+            -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-wallet2 me-2"></i>Información de Pago</h6>
                         
                         <!--
                         SELECTOR DE MÉTODOS DE PAGO
-                        Tres opciones: Tarjeta, Transferencia, SINPE Móvil
                         -->
-                        <div class="metodos-pago">
-                            <label class="metodo-pago active" onclick="seleccionarMetodo('tarjeta')">
+                        <div class="d-flex flex-column gap-2 mb-4">
+                            <label class="metodo-pago active d-flex align-items-center gap-2" onclick="seleccionarMetodo('tarjeta', this)">
                                 <input type="radio" name="metodo" value="tarjeta" checked>
                                 <span>💳 Tarjeta de Crédito/Débito</span>
                             </label>
-                            <label class="metodo-pago" onclick="seleccionarMetodo('transferencia')">
+                            <label class="metodo-pago d-flex align-items-center gap-2" onclick="seleccionarMetodo('transferencia', this)">
                                 <input type="radio" name="metodo" value="transferencia">
                                 <span>🏦 Transferencia Bancaria</span>
                             </label>
-                            <label class="metodo-pago" onclick="seleccionarMetodo('sinpe')">
+                            <label class="metodo-pago d-flex align-items-center gap-2" onclick="seleccionarMetodo('sinpe', this)">
                                 <input type="radio" name="metodo" value="sinpe">
                                 <span>📱 SINPE Móvil</span>
                             </label>
@@ -111,60 +112,50 @@
 
                         <!--
                         FORMULARIO PARA TARJETA DE CRÉDITO/DÉBITO
-                        Solicita datos del titular y número de tarjeta
                         -->
-                        <form id="formTarjeta" class="pago-form">
-                            <div class="form-group col-full">
-                                <label for="titularTarjeta">Nombre del Titular</label>
-                                <input type="text" id="titularTarjeta" name="titularTarjeta" 
-                                    placeholder="Juan Pérez García" required>
+                        <form id="formTarjeta">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="titularTarjeta">Nombre del Titular</label>
+                                <input type="text" class="form-control" id="titularTarjeta" name="titularTarjeta" placeholder="Juan Pérez García" required>
                             </div>
-
-                            <div class="form-group col-full">
-                                <label for="numeroTarjeta">Número de Tarjeta</label>
-                                <input type="text" id="numeroTarjeta" name="numeroTarjeta" 
-                                    placeholder="4111 1111 1111 1111" maxlength="19" required>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="numeroTarjeta">Número de Tarjeta</label>
+                                <input type="text" class="form-control" id="numeroTarjeta" name="numeroTarjeta" placeholder="4111 1111 1111 1111" maxlength="19" required>
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="expiracion">Fecha de Vencimiento</label>
-                                    <input type="text" id="expiracion" name="expiracion" 
-                                        placeholder="MM/AA" maxlength="5" required>
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold" for="expiracion">Vencimiento</label>
+                                    <input type="text" class="form-control" id="expiracion" name="expiracion" placeholder="MM/AA" maxlength="5" required>
                                 </div>
-
-                                <div class="form-group">
-                                    <label for="cvv">CVV</label>
-                                    <input type="text" id="cvv" name="cvv" 
-                                        placeholder="123" maxlength="4" required>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold" for="cvv">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
                                 </div>
                             </div>
-
-                            <div class="form-group col-full">
-                                <label for="cedulaTitular">Cédula del Titular</label>
-                                <input type="text" id="cedulaTitular" name="cedulaTitular" 
-                                    placeholder="123456789" required>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold" for="cedulaTitular">Cédula del Titular</label>
+                                <input type="text" class="form-control" id="cedulaTitular" name="cedulaTitular" placeholder="123456789" required>
                             </div>
                         </form>
 
                         <!-- Términos y Condiciones -->
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" id="aceptarTerminos" required>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="aceptarTerminos" required>
+                            <label class="form-check-label small" for="aceptarTerminos">
                                 Acepto los términos y condiciones de TECAir
                             </label>
                         </div>
 
-                        <div id="alertaError" class="alert alert-error"></div>
-                        <div id="alertaExito" class="alert alert-success"></div>
+                        <div id="alertaError" class="alert alert-danger d-none"></div>
+                        <div id="alertaExito" class="alert alert-success d-none"></div>
 
                         <!-- Botones de Acción -->
-                        <div class="pago-acciones">
+                        <div class="d-flex gap-2">
                             <button type="button" class="btn btn-secondary" onclick="cancelarPago()">
-                                Cancelar
+                                <i class="bi bi-arrow-left me-1"></i>Cancelar
                             </button>
-                            <button type="button" class="btn btn-primary btn-lg" onclick="procesarPago()">
-                                Procesar Pago
+                            <button type="button" class="btn btn-primary flex-grow-1 fw-bold" id="btnPagar" onclick="procesarPago()">
+                                <i class="bi bi-lock-fill me-2"></i>Procesar Pago
                             </button>
                         </div>
                     </div>
@@ -174,10 +165,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer mt-5">
         <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
@@ -195,11 +187,10 @@
             const total = tarifa + impuestos + cargo;
 
             document.getElementById('detallesReservacion').innerHTML = `
-                <p><strong>Pasajero:</strong> ${reservacion.pasajero || 'No especificado'}</p>
-                <p><strong>Vuelo:</strong> ${reservacion.vuelo || 'TEC1234'}</p>
-                <p><strong>Asiento:</strong> ${reservacion.asiento || '12A'}</p>
-                <p><strong>Ruta:</strong> San José → Liberia</p>
-            `;
+                <p class="mb-1"><strong>Pasajero:</strong> ${reservacion.pasajero || 'No especificado'}</p>
+                <p class="mb-1"><strong>Vuelo:</strong> ${reservacion.vuelo || 'TEC1234'}</p>
+                <p class="mb-1"><strong>Asiento:</strong> ${reservacion.asiento || '12A'}</p>
+                <p class="mb-0"><strong>Ruta:</strong> San José → Liberia</p>`;
 
             document.getElementById('tarifaBase').textContent = `$${tarifa}`;
             document.getElementById('impuestos').textContent = `$${impuestos}`;
@@ -207,9 +198,9 @@
             document.getElementById('montoTotal').textContent = `$${total}`;
         }
 
-        function seleccionarMetodo(metodo) {
+        function seleccionarMetodo(metodo, el) {
             document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            el.classList.add('active');
             document.querySelector(`input[value="${metodo}"]`).checked = true;
         }
 
@@ -224,9 +215,7 @@
             // Formatear fecha de vencimiento
             document.getElementById('expiracion').addEventListener('input', function(e) {
                 let valor = e.target.value.replace(/\D/g, '');
-                if (valor.length >= 2) {
-                    valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
-                }
+                if (valor.length >= 2) valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
                 e.target.value = valor;
             });
 
@@ -238,38 +227,25 @@
 
         function procesarPago() {
             const aceptarTerminos = document.getElementById('aceptarTerminos').checked;
+            if (!aceptarTerminos) { mostrarAlerta('Debes aceptar los términos y condiciones', 'error'); return; }
 
-            if (!aceptarTerminos) {
-                mostrarAlerta('Debes aceptar los términos y condiciones', 'error');
-                return;
-            }
-
-            // Validar datos de tarjeta
             const numeroTarjeta = document.getElementById('numeroTarjeta').value.replace(/\s/g, '');
             if (numeroTarjeta.length < 13 || numeroTarjeta.length > 16) {
                 mostrarAlerta('Número de tarjeta inválido', 'error');
                 return;
             }
 
-            // Procesar pago
-            try {
-                document.querySelector('.btn-lg').disabled = true;
-                document.querySelector('.btn-lg').textContent = 'Procesando...';
+            const btn = document.getElementById('btnPagar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
-                // Simular procesamiento
+            setTimeout(() => {
+                mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
                 setTimeout(() => {
-                    mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
-                    
-                    setTimeout(() => {
-                        sessionStorage.removeItem('reservacionTemporal');
-                        window.location.href = 'reservaciones.html';
-                    }, 2000);
+                    sessionStorage.removeItem('reservacionTemporal');
+                    window.location.href = 'reservaciones.html';
                 }, 2000);
-            } catch (error) {
-                mostrarAlerta('Error al procesar el pago', 'error');
-                document.querySelector('.btn-lg').disabled = false;
-                document.querySelector('.btn-lg').textContent = 'Procesar Pago';
-            }
+            }, 2000);
         }
 
         function cancelarPago() {
@@ -282,15 +258,15 @@
         function mostrarAlerta(mensaje, tipo) {
             const alertaError = document.getElementById('alertaError');
             const alertaExito = document.getElementById('alertaExito');
+            alertaError.classList.add('d-none');
+            alertaExito.classList.add('d-none');
 
             if (tipo === 'error') {
                 alertaError.textContent = mensaje;
-                alertaError.style.display = 'block';
-                alertaExito.style.display = 'none';
+                alertaError.classList.remove('d-none');
             } else {
                 alertaExito.textContent = mensaje;
-                alertaExito.style.display = 'block';
-                alertaError.style.display = 'none';
+                alertaExito.classList.remove('d-none');
             }
         }
     </script>

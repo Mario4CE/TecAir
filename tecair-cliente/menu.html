@@ -11,7 +11,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TECAir - Menú Principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .welcome-item { cursor: pointer; transition: all 0.3s; border: 2px solid transparent; border-radius: 12px; padding: 1.5rem; text-align: center; background: #f8f9fa; }
+        .welcome-item:hover { border-color: #0066cc; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,102,204,0.2); background: #fff; }
+        .welcome-item .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .info-card { border-left: 4px solid #0066cc; border-radius: 0 8px 8px 0; }
+        .promo-item { padding: 0.5rem 0; border-bottom: 1px solid #e9ecef; font-size: 0.9rem; }
+        .promo-item:last-child { border-bottom: none; }
+        .descuento { color: #27ae60; font-weight: 600; }
+        .millas-badge-mini { background: linear-gradient(135deg, #0066cc, #004a99); color: white; border-radius: 8px; padding: 1rem; text-align: center; }
+        .millas-badge-mini .numero { font-size: 1.8rem; font-weight: 800; }
+    </style>
 </head>
 <body>
     <!--
@@ -21,19 +36,22 @@
     Menú superior con logo y enlaces a todas las secciones principales
     Incluye opción de cerrar sesión
     -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <h2>✈️ TECAir</h2>
+    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, #0066cc, #004a99);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand text-white fw-bold fs-4" href="menu.html">✈️ TECAir</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto gap-1">
+                    <li class="nav-item"><a class="nav-link text-white active fw-semibold" href="menu.html"><i class="bi bi-house me-1"></i>Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="vuelos.html"><i class="bi bi-search me-1"></i>Buscar Vuelos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="reservaciones.html"><i class="bi bi-journal-check me-1"></i>Mis Reservaciones</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="promociones.html"><i class="bi bi-tag me-1"></i>Promociones</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="perfil.html"><i class="bi bi-person me-1"></i>Mi Perfil</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#" onclick="salir(); return false;"><i class="bi bi-box-arrow-right me-1"></i>Salir</a></li>
+                </ul>
             </div>
-            <ul class="navbar-menu">
-                <li><a href="menu.html" class="active">Inicio</a></li>
-                <li><a href="vuelos.html">Buscar Vuelos</a></li>
-                <li><a href="reservaciones.html">Mis Reservaciones</a></li>
-                <li><a href="promociones.html">Promociones</a></li>
-                <li><a href="perfil.html">Mi Perfil</a></li>
-                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
-            </ul>
         </div>
     </nav>
 
@@ -43,45 +61,50 @@
     =====================================
     Página de bienvenida con tarjeta de presentación e información sobre servicios
     -->
-    <div class="container">
+    <div class="container my-4">
+
         <!--
         TARJETA DE BIENVENIDA
         Saludo personalizado y accesos rápidos a funciones principales
         -->
-        <div class="card welcome-card">
-            <div class="card-header text-center">
-                <h2>Bienvenido a TECAir</h2>
-                <p id="bienvenidaUsuario">¡Tu aerolínea de bajo costo para estudiantes!</p>
-            </div>
-            <div class="card-body text-center">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center py-4">
+                <h2 class="text-primary fw-bold">Bienvenido a TECAir</h2>
+                <p id="bienvenidaUsuario" class="text-muted mb-4">¡Tu aerolínea de bajo costo para estudiantes!</p>
+
                 <!--
                 GRID DE ACCESOS RÁPIDOS
                 Muestra 4 opciones principales con iconos y descripción
                 Cada uno redirige a su página correspondiente
                 -->
-                <div class="welcome-grid">
-                    <div class="welcome-item" onclick="redirigir('vuelos.html')">
-                        <div class="icon">🔍</div>
-                        <h3>Buscar Vuelos</h3>
-                        <p>Encuentra el vuelo perfecto para tu destino</p>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="welcome-item h-100" onclick="redirigir('vuelos.html')">
+                            <div class="icon">🔍</div>
+                            <h6 class="fw-bold">Buscar Vuelos</h6>
+                            <p class="text-muted small mb-0">Encuentra el vuelo perfecto para tu destino</p>
+                        </div>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('reservaciones.html')">
-                        <div class="icon">📋</div>
-                        <h3>Mis Reservaciones</h3>
-                        <p>Consulta y gestiona tus reservaciones</p>
+                    <div class="col-6 col-md-3">
+                        <div class="welcome-item h-100" onclick="redirigir('reservaciones.html')">
+                            <div class="icon">📋</div>
+                            <h6 class="fw-bold">Mis Reservaciones</h6>
+                            <p class="text-muted small mb-0">Consulta y gestiona tus reservaciones</p>
+                        </div>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('promociones.html')">
-                        <div class="icon">🎉</div>
-                        <h3>Promociones</h3>
-                        <p>Descubre las mejores ofertas disponibles</p>
+                    <div class="col-6 col-md-3">
+                        <div class="welcome-item h-100" onclick="redirigir('promociones.html')">
+                            <div class="icon">🎉</div>
+                            <h6 class="fw-bold">Promociones</h6>
+                            <p class="text-muted small mb-0">Descubre las mejores ofertas disponibles</p>
+                        </div>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('perfil.html')">
-                        <div class="icon">👤</div>
-                        <h3>Mi Perfil</h3>
-                        <p>Actualiza tu información personal</p>
+                    <div class="col-6 col-md-3">
+                        <div class="welcome-item h-100" onclick="redirigir('perfil.html')">
+                            <div class="icon">👤</div>
+                            <h6 class="fw-bold">Mi Perfil</h6>
+                            <p class="text-muted small mb-0">Actualiza tu información personal</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -93,19 +116,23 @@
         =====================================
         Tres cards con información relevante sobre la aerolínea
         -->
-        <div class="info-section">
+        <div class="row g-3">
             <!--
             CARD 1: BENEFICIOS
             Lista de ventajas de viajar con TECAir
             -->
-            <div class="info-card">
-                <h3>¿Por qué viajar con TECAir?</h3>
-                <ul>
-                    <li>✓ Tarifas especiales para estudiantes</li>
-                    <li>✓ Programa de millas de lealtad</li>
-                    <li>✓ Reservaciones seguras y confiables</li>
-                    <li>✓ Atención al cliente 24/7</li>
-                </ul>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 info-card">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-star-fill me-2"></i>¿Por qué viajar con TECAir?</h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li class="py-1">✓ Tarifas especiales para estudiantes</li>
+                            <li class="py-1">✓ Programa de millas de lealtad</li>
+                            <li class="py-1">✓ Reservaciones seguras y confiables</li>
+                            <li class="py-1">✓ Atención al cliente 24/7</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!--
@@ -113,10 +140,14 @@
             Muestra últimas promociones disponibles
             Se cargan dinámicamente desde la API
             -->
-            <div class="info-card">
-                <h3>Últimas Promociones</h3>
-                <div id="promocionesRecientes">
-                    <p>Cargando promociones...</p>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 info-card">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-tag-fill me-2"></i>Últimas Promociones</h6>
+                        <div id="promocionesRecientes">
+                            <p class="text-muted small">Cargando promociones...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -125,11 +156,18 @@
             Información sobre millas y beneficios
             Muestra millas acumuladas del usuario actual
             -->
-            <div class="info-card">
-                <h3>Programa de Lealtad</h3>
-                <p>Acumula millas en cada reservación y canjéalas por vuelos gratis.</p>
-                <div id="milasUsuario" class="millas-info">
-                    <p>Millas disponibles: <strong>0</strong></p>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 info-card">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-award-fill me-2"></i>Programa de Lealtad</h6>
+                        <p class="small text-muted mb-3">Acumula millas en cada reservación y canjéalas por vuelos gratis.</p>
+                        <div id="milasUsuario">
+                            <div class="millas-badge-mini">
+                                <div class="numero">0</div>
+                                <div class="small">Millas Disponibles</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,7 +179,7 @@
     =====================================
     Información de copyright
     -->
-    <footer class="footer">
+    <footer class="footer mt-5">
         <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
     </footer>
 
@@ -149,6 +187,7 @@
     SCRIPTS
     Carga de librerías utilitarias y lógica específica de la página
     -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
@@ -172,7 +211,7 @@
             const usuarioActual = obtenerUsuarioActual();
             if (usuarioActual && usuarioActual.nombreCompleto) {
                 document.getElementById('bienvenidaUsuario').innerHTML = 
-                    `¡Bienvenido, <strong>${usuarioActual.nombreCompleto}</strong>!<br><em>Busca tu próximo destino</em>`;
+                    `¡Bienvenido, <strong>${usuarioActual.nombreCompleto}</strong>! Busca tu próximo destino`;
             }
 
             // Simular carga de promociones
@@ -203,7 +242,10 @@
             const usuario = obtenerUsuarioActual();
             if (usuario && usuario.millas !== undefined) {
                 document.getElementById('milasUsuario').innerHTML = 
-                    `<p>Millas disponibles: <strong>${usuario.millas}</strong></p>`;
+                    `<div class="millas-badge-mini">
+                        <div class="numero">${usuario.millas}</div>
+                        <div class="small">Millas Disponibles</div>
+                    </div>`;
             }
         }
 

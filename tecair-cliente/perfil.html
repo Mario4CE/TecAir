@@ -10,28 +10,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TECAir - Mi Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .tab-btn-custom { padding: 0.6rem 1.2rem; border: none; background: none; font-family: 'Nunito', sans-serif; font-weight: 600; color: #6c757d; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.25s; }
+        .tab-btn-custom:hover { color: #0066cc; }
+        .tab-btn-custom.active { color: #0066cc; border-bottom-color: #0066cc; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .millas-badge { background: linear-gradient(135deg, #0066cc, #004a99); color: white; border-radius: 10px; padding: 1.5rem; text-align: center; }
+        .millas-badge .numero { font-size: 2rem; font-weight: 800; }
+        .sesion-item { border-left: 3px solid #0066cc; background: #f8f9fa; border-radius: 0 6px 6px 0; }
+    </style>
 </head>
 <body>
     <!--
     =====================================
     BARRA DE NAVEGACIÓN
     =====================================
-    Menú superior con enlace activo a perfil
     -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <h2>✈️ TECAir</h2>
+    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, #0066cc, #004a99);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand text-white fw-bold fs-4" href="menu.html">✈️ TECAir</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto gap-1">
+                    <li class="nav-item"><a class="nav-link text-white" href="menu.html"><i class="bi bi-house me-1"></i>Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="vuelos.html"><i class="bi bi-search me-1"></i>Buscar Vuelos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="reservaciones.html"><i class="bi bi-journal-check me-1"></i>Mis Reservaciones</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="promociones.html"><i class="bi bi-tag me-1"></i>Promociones</a></li>
+                    <li class="nav-item"><a class="nav-link text-white active fw-semibold" href="perfil.html"><i class="bi bi-person me-1"></i>Mi Perfil</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#" onclick="salir(); return false;"><i class="bi bi-box-arrow-right me-1"></i>Salir</a></li>
+                </ul>
             </div>
-            <ul class="navbar-menu">
-                <li><a href="menu.html">Inicio</a></li>
-                <li><a href="vuelos.html">Buscar Vuelos</a></li>
-                <li><a href="reservaciones.html">Mis Reservaciones</a></li>
-                <li><a href="promociones.html">Promociones</a></li>
-                <li><a href="perfil.html" class="active">Mi Perfil</a></li>
-                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
-            </ul>
         </div>
     </nav>
 
@@ -39,201 +55,204 @@
     =====================================
     CONTENIDO PRINCIPAL: GESTIÓN DE PERFIL
     =====================================
-    Tres tabs: Datos Personales, Seguridad y Preferencias
     -->
-    <div class="container">
-        <div class="perfil-section">
-            <h1>Mi Perfil</h1>
+    <div class="container my-4">
+        <h1 class="text-primary fw-bold mb-4"><i class="bi bi-person-circle me-2"></i>Mi Perfil</h1>
 
-            <!--
-            NAVEGACIÓN POR TABS
-            Permite cambiar entre diferentes secciones del perfil
-            -->
-            <div class="tabs-section">
-                <button class="tab-btn active" onclick="cambiarTabPerfil('datos')">Datos Personales</button>
-                <button class="tab-btn" onclick="cambiarTabPerfil('seguridad')">Seguridad</button>
-                <button class="tab-btn" onclick="cambiarTabPerfil('preferencias')">Preferencias</button>
-            </div>
+        <!--
+        NAVEGACIÓN POR TABS
+        -->
+        <div class="border-bottom mb-4">
+            <button class="tab-btn-custom active" onclick="cambiarTabPerfil('datos')">
+                <i class="bi bi-person me-1"></i>Datos Personales
+            </button>
+            <button class="tab-btn-custom" onclick="cambiarTabPerfil('seguridad')">
+                <i class="bi bi-shield-lock me-1"></i>Seguridad
+            </button>
+            <button class="tab-btn-custom" onclick="cambiarTabPerfil('preferencias')">
+                <i class="bi bi-bell me-1"></i>Preferencias
+            </button>
+        </div>
 
-            <!--
-            TAB 1: DATOS PERSONALES
-            Formulario para editar información básica del usuario
-            -->
-            <div id="datosTab" class="tab-content active">
-                <div class="card">
-                    <h3>Información Personal</h3>
-                    <form id="formDatos" class="form-grid">
-                        <!--
-                        DATOS BÁSICOS
-                        Nombre, correo y teléfono del usuario
-                        -->
-                        <div class="form-group">
-                            <label for="nombre">Nombre Completo</label>
-                            <input type="text" id="nombre" name="nombre" required>
-                        </div>
+        <!--
+        TAB 1: DATOS PERSONALES
+        -->
+        <div id="datosTab" class="tab-panel active">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-primary mb-4"><i class="bi bi-person me-2"></i>Información Personal</h5>
+                            <form id="formDatos">
+                                <div class="row g-3">
+                                    <!--
+                                    DATOS BÁSICOS
+                                    -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="nombre">Nombre Completo</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="email">Correo Electrónico</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="telefono">Teléfono</label>
+                                        <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                                    </div>
 
-                        <div class="form-group">
-                            <label for="email">Correo Electrónico</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
+                                    <!--
+                                    ESTADO ESTUDIANTE
+                                    -->
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="esEstudiante" name="esEstudiante">
+                                            <label class="form-check-label fw-semibold" for="esEstudiante">
+                                                <i class="bi bi-mortarboard me-1"></i>Soy estudiante
+                                            </label>
+                                        </div>
+                                    </div>
 
-                        <div class="form-group">
-                            <label for="telefono">Teléfono</label>
-                            <input type="tel" id="telefono" name="telefono" required>
-                        </div>
+                                    <!--
+                                    DATOS ESTUDIANTILES
+                                    -->
+                                    <div id="datosEstudiantePerfil" class="col-12 d-none">
+                                        <div class="row g-3 p-3 rounded" style="background:#f0f7ff; border-left: 4px solid #0066cc;">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="universidad">Universidad</label>
+                                                <input type="text" class="form-control" id="universidad" name="universidad">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="carnet">Carnet Estudiantil</label>
+                                                <input type="text" class="form-control" id="carnet" name="carnet">
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <!--
-                        ESTADO ESTUDIANTE
-                        Checkbox para indicar si es estudiante
-                        Si se marca, aparecen campos adicionales
-                        -->
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" id="esEstudiante" name="esEstudiante">
-                                Soy estudiante
-                            </label>
-                        </div>
-
-                        <!--
-                        DATOS ESTUDIANTILES
-                        Aparecen solo cuando se marca "Soy estudiante"
-                        -->
-                        <div id="datosEstudiantePerfil" style="display: none;" class="form-group col-full">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="universidad">Universidad</label>
-                                    <input type="text" id="universidad" name="universidad">
+                                    <!--
+                                    BOTONES DE ACCIÓN
+                                    -->
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary fw-bold px-4">
+                                            <i class="bi bi-check-lg me-1"></i>Guardar Cambios
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="cancelarEdicion()">
+                                            Cancelar
+                                        </button>
+                                    </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <label for="carnet">Carnet Estudiantil</label>
-                                    <input type="text" id="carnet" name="carnet">
-                                </div>
-                            </div>
+                            </form>
                         </div>
-
-                        <!--
-                        BOTONES DE ACCIÓN
-                        Guardar cambios o cancelar edición
-                        -->
-                        <div class="form-group col-full">
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                            <button type="button" class="btn btn-secondary" onclick="cancelarEdicion()">Cancelar</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <!--
                 PROGRAMA DE LEALTAD
-                Información sobre millas acumuladas y beneficios
                 -->
-                <div class="card">
-                    <h3>Programa de Lealtad</h3>
-                    <div class="lealtad-info">
-                        <div class="millas-badge">
-                            <div class="numero">2,450</div>
-                            <div class="label">Millas Disponibles</div>
-                        </div>
-                        <div class="lealtad-descripcion">
-                            <p>Acumula millas en cada reservación y canjéalas por:</p>
-                            <ul>
-                                <li>🎫 Vuelos gratis</li>
-                                <li>🎁 Descuentos especiales</li>
-                                <li>🛏️ Upgrades de clase</li>
-                                <li>🏨 Promociones en hoteles asociados</li>
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-award me-2"></i>Programa de Lealtad</h5>
+                            <div class="millas-badge mb-3">
+                                <div class="numero">2,450</div>
+                                <div class="small">Millas Disponibles</div>
+                            </div>
+                            <p class="small text-muted mb-2">Acumula millas y canjéalas por:</p>
+                            <ul class="list-unstyled small">
+                                <li class="py-1">🎫 Vuelos gratis</li>
+                                <li class="py-1">🎁 Descuentos especiales</li>
+                                <li class="py-1">🛏️ Upgrades de clase</li>
+                                <li class="py-1">🏨 Promociones en hoteles</li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Tab: Seguridad -->
-            <div id="seguridadTab" class="tab-content">
-                <div class="card">
-                    <h3>Cambiar Contraseña</h3>
-                    <form id="formPassword" class="form-grid">
-                        <div class="form-group col-full">
-                            <label for="passwordActual">Contraseña Actual</label>
-                            <input type="password" id="passwordActual" name="passwordActual" required>
+        <!-- Tab: Seguridad -->
+        <div id="seguridadTab" class="tab-panel">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-primary mb-4"><i class="bi bi-key me-2"></i>Cambiar Contraseña</h5>
+                            <form id="formPassword">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="passwordActual">Contraseña Actual</label>
+                                    <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="passwordNueva">Nueva Contraseña</label>
+                                    <input type="password" class="form-control" id="passwordNueva" name="passwordNueva" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold" for="passwordConfirmar">Confirmar Nueva Contraseña</label>
+                                    <input type="password" class="form-control" id="passwordConfirmar" name="passwordConfirmar" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary fw-bold px-4">
+                                    <i class="bi bi-key me-1"></i>Actualizar Contraseña
+                                </button>
+                            </form>
                         </div>
-
-                        <div class="form-group col-full">
-                            <label for="passwordNueva">Nueva Contraseña</label>
-                            <input type="password" id="passwordNueva" name="passwordNueva" required>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <label for="passwordConfirmar">Confirmar Nueva Contraseña</label>
-                            <input type="password" id="passwordConfirmar" name="passwordConfirmar" required>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-
-                <div class="card">
-                    <h3>Sesiones Activas</h3>
-                    <div class="sesiones-list">
-                        <div class="sesion-item">
-                            <div>
-                                <strong>💻 Navegador Chrome</strong><br>
-                                <small>Última actividad: Hace 5 minutos</small>
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-primary mb-4"><i class="bi bi-display me-2"></i>Sesiones Activas</h5>
+                            <div class="sesion-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="bi bi-laptop me-1"></i>Navegador Chrome</strong><br>
+                                    <small class="text-muted">Última actividad: Hace 5 minutos</small>
+                                </div>
+                                <button class="btn btn-danger btn-sm">Cerrar</button>
                             </div>
-                            <button class="btn btn-sm btn-danger">Cerrar</button>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Tab: Preferencias -->
-            <div id="preferencesTab" class="tab-content">
-                <div class="card">
-                    <h3>Preferencias de Notificaciones</h3>
-                    <form id="formNotificaciones" class="form-grid">
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" name="emailReservacion" checked>
-                                Email de confirmación de reservación
-                            </label>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" name="emailReminder" checked>
-                                Recordatorio 24h antes del vuelo
-                            </label>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" name="emailPromociones" checked>
-                                Notificaciones de promociones
-                            </label>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" name="emailMillas">
-                                Actualizaciones del programa de millas
-                            </label>
-                        </div>
-
-                        <div class="form-group col-full">
-                            <button type="submit" class="btn btn-primary">Guardar Preferencias</button>
-                        </div>
-                    </form>
+        <!-- Tab: Preferencias -->
+        <div id="preferenciasTab" class="tab-panel">
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-primary mb-4"><i class="bi bi-bell me-2"></i>Preferencias de Notificaciones</h5>
+                        <form id="formNotificaciones">
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="emailReservacion" name="emailReservacion" checked>
+                                <label class="form-check-label" for="emailReservacion">Email de confirmación de reservación</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="emailReminder" name="emailReminder" checked>
+                                <label class="form-check-label" for="emailReminder">Recordatorio 24h antes del vuelo</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="emailPromociones" name="emailPromociones" checked>
+                                <label class="form-check-label" for="emailPromociones">Notificaciones de promociones</label>
+                            </div>
+                            <div class="mb-4 form-check">
+                                <input type="checkbox" class="form-check-input" id="emailMillas" name="emailMillas">
+                                <label class="form-check-label" for="emailMillas">Actualizaciones del programa de millas</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary fw-bold px-4">
+                                <i class="bi bi-check-lg me-1"></i>Guardar Preferencias
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer mt-5">
         <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
@@ -249,7 +268,7 @@
                 
                 if (usuario.esEstudiante) {
                     document.getElementById('esEstudiante').checked = true;
-                    document.getElementById('datosEstudiantePerfil').style.display = 'block';
+                    document.getElementById('datosEstudiantePerfil').classList.remove('d-none');
                     document.getElementById('universidad').value = usuario.universidad || '';
                     document.getElementById('carnet').value = usuario.carnet || '';
                 }
@@ -257,12 +276,7 @@
 
             // Mostrar/ocultar datos de estudiante
             document.getElementById('esEstudiante').addEventListener('change', function() {
-                const datosEstudiante = document.getElementById('datosEstudiantePerfil');
-                if (this.checked) {
-                    datosEstudiante.style.display = 'block';
-                } else {
-                    datosEstudiante.style.display = 'none';
-                }
+                document.getElementById('datosEstudiantePerfil').classList.toggle('d-none', !this.checked);
             });
 
             // Manejar formularios
@@ -275,12 +289,7 @@
                 e.preventDefault();
                 const nueva = document.getElementById('passwordNueva').value;
                 const confirmar = document.getElementById('passwordConfirmar').value;
-                
-                if (nueva !== confirmar) {
-                    alert('Las contraseñas no coinciden');
-                    return;
-                }
-
+                if (nueva !== confirmar) { alert('Las contraseñas no coinciden'); return; }
                 alert('Contraseña actualizada exitosamente');
                 document.getElementById('formPassword').reset();
             });
@@ -292,16 +301,14 @@
         });
 
         function cambiarTabPerfil(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn-custom').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
 
-            document.querySelectorAll('.tab-btn')[['datos', 'seguridad', 'preferencias'].indexOf(tab)].classList.add('active');
+            document.querySelectorAll('.tab-btn-custom')[['datos', 'seguridad', 'preferencias'].indexOf(tab)].classList.add('active');
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
-        function cancelarEdicion() {
-            window.location.reload();
-        }
+        function cancelarEdicion() { window.location.reload(); }
     </script>
 </body>
 </html>
