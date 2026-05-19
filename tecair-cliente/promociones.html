@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--
+    =====================================
+    CONFIGURACIÓN DEL DOCUMENTO
+    =====================================
+    Página para mostrar promociones y ofertas especiales
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECAir - Promociones</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!--
+    =====================================
+    BARRA DE NAVEGACIÓN
+    =====================================
+    Menú superior con enlace activo a promociones
+    -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h2>✈️ TECAir</h2>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="menu.html">Inicio</a></li>
+                <li><a href="vuelos.html">Buscar Vuelos</a></li>
+                <li><a href="reservaciones.html">Mis Reservaciones</a></li>
+                <li><a href="promociones.html" class="active">Promociones</a></li>
+                <li><a href="perfil.html">Mi Perfil</a></li>
+                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--
+    =====================================
+    CONTENIDO PRINCIPAL: PROMOCIONES
+    =====================================
+    Listado de promociones con filtros y modal de detalles
+    -->
+    <div class="container">
+        <div class="promociones-section">
+            <h1>Promociones Especiales</h1>
+            <p class="subtitle">Descubre las mejores ofertas y viaja al mejor precio</p>
+
+            <!--
+            FILTROS
+            Permite filtrar promociones por categoría:
+            - Todas
+            - Para Estudiantes
+            - Vigentes Ahora
+            -->
+            <div class="filtros-section">
+                <button class="filter-btn active" onclick="filtrarPromociones('todas')">Todas</button>
+                <button class="filter-btn" onclick="filtrarPromociones('estudiantes')">Para Estudiantes</button>
+                <button class="filter-btn" onclick="filtrarPromociones('vigentes')">Vigentes Ahora</button>
+            </div>
+
+            <!--
+            GRID DE PROMOCIONES
+            Muestra tarjetas de promociones que pueden ser clickeadas para ver detalles
+            -->
+            <div id="promocionesGrid" class="promociones-grid">
+                <!-- Se cargan aquí las promociones -->
+            </div>
+        </div>
+    </div>
+
+    <!--
+    MODAL DE DETALLE DE PROMOCIÓN
+    Muestra información detallada de una promoción seleccionada
+    -->
+    <div id="modalPromocion" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <div id="detallePromocion">
+                <!-- Detalles se cargan aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!--
+    =====================================
+    FOOTER
+    =====================================
+    -->
+    <footer class="footer">
+        <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
+    </footer>
+
+    <!--
+    SCRIPTS
+    Carga de librerías y lógica específica
+    -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const promociones = [
+            {
+                id: 1,
+                origen: 'San José',
+                destino: 'Liberia',
+                descuento: 30,
+                precioOriginal: 150,
+                precioPromocional: 105,
+                validos: 'May 1 - May 31, 2026',
+                estudiantes: true,
+                imagen: '🏖️',
+                descripcion: 'Vuela a las playas de Guanacaste con 30% de descuento'
+            },
+            {
+                id: 2,
+                origen: 'San José',
+                destino: 'Limón',
+                descuento: 25,
+                precioOriginal: 120,
+                precioPromocional: 90,
+                validos: 'May 1 - May 15, 2026',
+                estudiantes: false,
+                imagen: '🌴',
+                descripcion: 'Caribe a tu alcance con tarifa promocional'
+            },
+            {
+                id: 3,
+                origen: 'San José',
+                destino: 'Quepos',
+                descuento: 35,
+                precioOriginal: 140,
+                precioPromocional: 91,
+                validos: 'May 10 - May 25, 2026',
+                estudiantes: true,
+                imagen: '🏝️',
+                descripcion: 'Descuento especial para estudiantes en ruta Quepos'
+            },
+            {
+                id: 4,
+                origen: 'Liberia',
+                destino: 'San José',
+                descuento: 20,
+                precioOriginal: 150,
+                precioPromocional: 120,
+                validos: 'May 5 - May 30, 2026',
+                estudiantes: false,
+                imagen: '✈️',
+                descripcion: 'Promoción en vuelos de regreso'
+            },
+            {
+                id: 5,
+                origen: 'San José',
+                destino: 'Palmar',
+                descuento: 40,
+                precioOriginal: 100,
+                precioPromocional: 60,
+                validos: 'May 1 - May 10, 2026',
+                estudiantes: true,
+                imagen: '🌊',
+                descripcion: 'Súper descuento para estudiantes en Palmar'
+            }
+        ];
+
+        let promocionesActuales = promociones;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // protegerRuta(); // Desactivado para fase de prueba
+            mostrarPromociones(promocionesActuales);
+        });
+
+        function mostrarPromociones(lista) {
+            const grid = document.getElementById('promocionesGrid');
+            let html = '';
+
+            if (lista.length === 0) {
+                html = '<div class="empty-state"><p>No hay promociones disponibles</p></div>';
+            } else {
+                lista.forEach(promo => {
+                    html += `
+                        <div class="promo-card" onclick="abrirModal(${promo.id})">
+                            <div class="promo-imagen">${promo.imagen}</div>
+                            <div class="promo-cuerpo">
+                                <h3>${promo.origen} → ${promo.destino}</h3>
+                                <p class="promo-descripcion">${promo.descripcion}</p>
+                                <div class="promo-precios">
+                                    <span class="precio-original">$${promo.precioOriginal}</span>
+                                    <span class="precio-promo">$${promo.precioPromocional}</span>
+                                </div>
+                                <div class="promo-badge">
+                                    <span class="descuento-badge">-${promo.descuento}%</span>
+                                    ${promo.estudiantes ? '<span class="estudiantes-badge">👨‍🎓 Estudiantes</span>' : ''}
+                                </div>
+                                <p class="promo-validez"><small>Válido: ${promo.validos}</small></p>
+                            </div>
+                            <button class="btn btn-sm btn-success btn-block">Ver Más</button>
+                        </div>
+                    `;
+                });
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function filtrarPromociones(filtro) {
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (filtro === 'todas') {
+                promocionesActuales = promociones;
+            } else if (filtro === 'estudiantes') {
+                promocionesActuales = promociones.filter(p => p.estudiantes);
+            } else if (filtro === 'vigentes') {
+                promocionesActuales = promociones;
+            }
+
+            mostrarPromociones(promocionesActuales);
+        }
+
+        function abrirModal(promoId) {
+            const promo = promociones.find(p => p.id === promoId);
+            if (!promo) return;
+
+            const detalle = document.getElementById('detallePromocion');
+            detalle.innerHTML = `
+                <div class="modal-header">
+                    <h2>${promo.origen} → ${promo.destino}</h2>
+                    <span class="descuento-grande">-${promo.descuento}%</span>
+                </div>
+                <div class="modal-body">
+                    <div class="detalle-imagen">${promo.imagen}</div>
+                    <h3>${promo.descripcion}</h3>
+                    <p>${promo.descripcion}</p>
+                    
+                    <div class="detalle-precios">
+                        <div class="precio-item">
+                            <span>Precio Original:</span>
+                            <strong>$${promo.precioOriginal}</strong>
+                        </div>
+                        <div class="precio-item">
+                            <span>Precio Promocional:</span>
+                            <strong style="color: #27ae60; font-size: 24px;">$${promo.precioPromocional}</strong>
+                        </div>
+                        <div class="precio-item">
+                            <span>Ahorras:</span>
+                            <strong style="color: #e74c3c;">$${promo.precioOriginal - promo.precioPromocional}</strong>
+                        </div>
+                    </div>
+
+                    <div class="detalle-info">
+                        <p><strong>Período válido:</strong> ${promo.validos}</p>
+                        ${promo.estudiantes ? '<p>✓ Disponible para estudiantes</p>' : ''}
+                    </div>
+
+                    <button class="btn btn-primary btn-block" onclick="reservarPromo(${promo.id})">
+                        Reservar Ahora
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('modalPromocion').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalPromocion').style.display = 'none';
+        }
+
+        function reservarPromo(promoId) {
+            const promo = promociones.find(p => p.id === promoId);
+            sessionStorage.setItem('promocionSeleccionada', JSON.stringify(promo));
+            cerrarModal();
+            alert('Redirigiendo a búsqueda de vuelos...');
+            window.location.href = 'vuelos.html';
+        }
+
+        // Cerrar modal al hacer click fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalPromocion');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

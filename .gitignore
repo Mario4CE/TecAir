@@ -1,0 +1,50 @@
+# .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.suo
+*.user
+*.sln.docstates
+*.userprefs
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.CopilotSnapshots/
+.copilot-snapshots/
+
+# IDE
+.idea/
+.vs/
+ProjectSettings.json
+slnx.sqlite
+state.mpack
+
+# IIS
+applicationhost.config
+
+# Runtime
+*.log
+*.trx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+.nuget/
+
+# Testing
+TestResults/
+
+# Build outputs
+bin/
+obj/
+/packages/
+
+# Generated files
+*.g.cs
+*.designer.cs
