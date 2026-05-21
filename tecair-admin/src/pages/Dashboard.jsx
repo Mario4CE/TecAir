@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { MOCK_STATS, MOCK_VUELOS } from "../config/mockData";
+import SeccionVuelos from "./vuelos/SeccionVuelos";
 
 // Colores y configuración visual
 const COLOR_PRINCIPAL = "#6d4fc2";
@@ -129,7 +130,7 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
     case "inicio":
       return <SeccionInicio usuario={usuario} onNavegar={onNavegar} />;
     case "vuelos":
-      return <SeccionPlaceholder titulo="Gestión de vuelos" />;
+      return <SeccionVuelos usuario={usuario} onNavegar={onNavegar} />;
     case "checkin":
       return <SeccionPlaceholder titulo="Check-in de pasajeros" />;
     case "maletas":
