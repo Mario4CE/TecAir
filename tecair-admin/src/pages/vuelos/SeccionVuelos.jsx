@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────
 // SeccionVuelos.jsx — Gestión de vuelos del aeropuerto
 //
 // Funcionalidad:
@@ -7,7 +6,6 @@
 //   - Abrir un vuelo (pendiente → abierto)
 //   - Cerrar un vuelo (abierto → cerrado)
 //     solo si falta menos de 1 hora para la salida
-// ─────────────────────────────────────────────────────────
 
 import { useState } from "react";
 import { MOCK_VUELOS } from "../../config/mockData";
@@ -48,7 +46,7 @@ export default function SeccionVuelos() {
     setTimeout(() => setMensaje(null), 3000);
   };
 
-  // ── Abrir vuelo ──
+  // Abrir vuelo
   // Cambia el estado de pendiente a abierto
   const handleAbrir = (id_vuelo) => {
     setVuelos((prev) =>
@@ -63,7 +61,7 @@ export default function SeccionVuelos() {
     // luego recargar la lista
   };
 
-  // ── Cerrar vuelo ──
+  // Cerrar vuelo 
   // Solo permite cerrar si falta menos de 1 hora para la salida
   const handleCerrar = (vuelo) => {
     const ahora = new Date();
@@ -87,7 +85,7 @@ export default function SeccionVuelos() {
     mostrarMensaje("Vuelo cerrado correctamente.");
   };
 
-  // ── Agregar vuelo nuevo ──
+  // Agregar vuelo nuevo 
   // Recibe los datos del formulario y los agrega a la lista
   const handleNuevoVuelo = (datosVuelo) => {
     const nuevoVuelo = {
@@ -103,7 +101,7 @@ export default function SeccionVuelos() {
 
   return (
     <div>
-      {/* ── Encabezado ── */}
+      {/*Encabezado*/}
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
           Gestión de vuelos
@@ -117,7 +115,7 @@ export default function SeccionVuelos() {
         </button>
       </div>
 
-      {/* ── Mensaje de éxito o error ── */}
+      {/* Mensaje de éxito o error */}
       {/* Solo aparece cuando hay un mensaje activo */}
       {mensaje && (
         <div
@@ -127,7 +125,7 @@ export default function SeccionVuelos() {
         </div>
       )}
 
-      {/* ── Tabla de vuelos ── */}
+      {/* Tabla de vuelos */}
       <div className="card border-0 shadow-sm rounded-4 mb-4">
         <div className="card-body">
           <h5 className="fw-bold mb-3" style={{ color: "#3c3489" }}>
@@ -209,7 +207,7 @@ export default function SeccionVuelos() {
         </div>
       </div>
 
-      {/* ── Modal de nuevo vuelo ── */}
+      {/* Modal de nuevo vuelo */}
       {/* Solo se renderiza si modalAbierto = true */}
       {modalAbierto && (
         <ModalNuevoVuelo
@@ -221,13 +219,11 @@ export default function SeccionVuelos() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
 // ModalNuevoVuelo — formulario para registrar un vuelo
 //
 // Recibe:
 //   onGuardar  → función que recibe los datos del formulario
 //   onCancelar → función para cerrar el modal sin guardar
-// ─────────────────────────────────────────────────────────
 function ModalNuevoVuelo({ onGuardar, onCancelar }) {
   // Estado del formulario con valores iniciales vacíos
   const [form, setForm] = useState({

@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { MOCK_STATS, MOCK_VUELOS } from "../config/mockData";
 import SeccionVuelos from "./vuelos/SeccionVuelos";
+import SeccionCheckin from "./checkin/SeccionCheckin";
 
 // Colores y configuración visual
 const COLOR_PRINCIPAL = "#6d4fc2";
@@ -120,11 +121,9 @@ export default function Dashboard({ usuario, onLogout }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────
 // ContenidoSeccion — decide qué pantalla mostrar
 // Es como un "router" simple: según la sección activa
 // muestra el componente correspondiente
-// ─────────────────────────────────────────────────────────
 function ContenidoSeccion({ seccion, usuario, onNavegar }) {
   switch (seccion) {
     case "inicio":
@@ -132,7 +131,7 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
     case "vuelos":
       return <SeccionVuelos usuario={usuario} onNavegar={onNavegar} />;
     case "checkin":
-      return <SeccionPlaceholder titulo="Check-in de pasajeros" />;
+      return <SeccionCheckin usuario={usuario} onNavegar={onNavegar} />;
     case "maletas":
       return <SeccionPlaceholder titulo="Maletas" />;
     case "promociones":
@@ -144,9 +143,7 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
   }
 }
 
-// ─────────────────────────────────────────────────────────
 // SeccionInicio — pantalla de inicio con tarjetas y tabla
-// ─────────────────────────────────────────────────────────
 function SeccionInicio({ usuario, onNavegar }) {
   // Datos mockeados — reemplazar por llamada a la API cuando esté lista
   const stats = MOCK_STATS;
@@ -346,10 +343,8 @@ function SeccionInicio({ usuario, onNavegar }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────
 // SeccionPlaceholder — pantalla temporal para secciones
 // que todavía no están desarrolladas
-// ─────────────────────────────────────────────────────────
 function SeccionPlaceholder({ titulo }) {
   return (
     <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">

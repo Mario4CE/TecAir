@@ -25,7 +25,7 @@ export default function LoginPage({ onLoginSuccess }) {
     >
       <div style={{ width: "100%", maxWidth: 420 }}>
 
-        {/* ── Encabezado ── */}
+        {/* Encabezado */}
         <div className="text-center mb-4">
           <h1 className="fw-bold mb-0" style={{ color: "#3c3489", fontSize: 26 }}>
             TECAir
@@ -33,7 +33,7 @@ export default function LoginPage({ onLoginSuccess }) {
           <p className="text-muted small mb-0">Portal de Administración</p>
         </div>
 
-        {/* ── Tarjeta del formulario ── */}
+        {/* Tarjeta del formulario */}
         <div
           className="card border-0 shadow-sm rounded-4"
           style={{ borderTop: `4px solid ${COLOR_PRINCIPAL}` }}
@@ -59,13 +59,11 @@ export default function LoginPage({ onLoginSuccess }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────
 // FormLogin — formulario con correo y contraseña
 //
 // useState guarda lo que el usuario escribe en cada campo
 // handleChange actualiza el estado cada vez que se escribe algo
 // handleSubmit se ejecuta cuando el usuario presiona "Ingresar"
-// ─────────────────────────────────────────────────────────
 function FormLogin({ onLoginSuccess }) {
   // Estado del formulario — guarda los valores de los inputs
   const [form, setForm] = useState({ correo: "", contrasena: "" });
@@ -90,7 +88,7 @@ function FormLogin({ onLoginSuccess }) {
 
     try {
       if (USE_MOCK) {
-        // ── Modo desarrollo: simula la llamada al API ──
+        // Modo desarrollo: simula la llamada al API 
         // setTimeout simula el tiempo de respuesta del servidor
         await new Promise((r) => setTimeout(r, 600));
 
@@ -104,7 +102,7 @@ function FormLogin({ onLoginSuccess }) {
           setError("Correo o contraseña incorrectos.");
         }
       } else {
-        // ── Producción: llamada real al API ──
+        //  Producción: llamada real al API 
         // Descomentar cuando el backend esté listo
         const data = await apiFetch(ENDPOINTS.auth.login, "POST", {
           correo: form.correo,
