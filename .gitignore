@@ -48,3 +48,13 @@ obj/
 # Generated files
 *.g.cs
 *.designer.cs
+
+# Dependencias de React — se regeneran con npm install
+node_modules/
+
+# Build de React — se regenera con npm run build
+dist/
+
+# Variables de entorno
+.env
+.env.local
