@@ -9,6 +9,7 @@ import { useState } from "react";
 import { MOCK_STATS, MOCK_VUELOS } from "../config/mockData";
 import SeccionVuelos from "./vuelos/SeccionVuelos";
 import SeccionCheckin from "./checkin/SeccionCheckin";
+import SeccionMaletas from "./maletas/SeccionMaletas";
 
 // Colores y configuración visual
 const COLOR_PRINCIPAL = "#6d4fc2";
@@ -133,7 +134,7 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
     case "checkin":
       return <SeccionCheckin usuario={usuario} onNavegar={onNavegar} />;
     case "maletas":
-      return <SeccionPlaceholder titulo="Maletas" />;
+      return <SeccionMaletas usuario={usuario} onNavegar={onNavegar} />;
     case "promociones":
       return <SeccionPlaceholder titulo="Promociones" />;
     case "usuarios":
