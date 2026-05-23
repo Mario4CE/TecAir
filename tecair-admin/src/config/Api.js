@@ -6,7 +6,7 @@
  * la URL directamente en los componentes.
  */
 
-// URL base del API. Cambia esto cuando el backend esté listo.
+// URL base del API. Cambiar esto cuando el backend esté listo.
 export const BASE_URL = "http://localhost:5000/api";
 
 /**

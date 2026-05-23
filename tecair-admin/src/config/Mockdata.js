@@ -90,3 +90,8 @@ export const MOCK_STATS = {
   checkins_pendientes: 12,
   vuelos_cerrados: 1,
 };
+
+export const MOCK_RUTAS = [
+  { id_ruta: 1, descripcion: "SJO → MIA" },
+  { id_ruta: 2, descripcion: "SJO → BOG" },
+];
