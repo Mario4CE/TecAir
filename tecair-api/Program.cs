@@ -38,6 +38,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAeropuertoRepository, AeropuertoRepository>();
 builder.Services.AddScoped<IAeropuertoService, AeropuertoService>();
+builder.Services.AddScoped<IAvionRepository, AvionRepository>();
+builder.Services.AddScoped<IAvionService, AvionService>();
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
