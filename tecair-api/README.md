@@ -30,8 +30,8 @@ Motivo de no usar MVC tradicional: este proyecto expone una API y las vistas web
 
 ## Patrones de diseño aplicados
 
-- Repository Pattern: `IUsuarioRepository` y `UsuarioRepository`.
-- Service Layer: `IUsuarioService` y `UsuarioService`.
+- Repository Pattern: `IUsuarioRepository`/`UsuarioRepository`, `IAeropuertoRepository`/`AeropuertoRepository`, `IAvionRepository`/`AvionRepository`, `IRutaRepository`/`RutaRepository`, `IVueloRepository`/`VueloRepository`.
+- Service Layer: `IUsuarioService`/`UsuarioService`, `IAeropuertoService`/`AeropuertoService`, `IAvionService`/`AvionService`, `IRutaService`/`RutaService`, `IVueloService`/`VueloService`.
 - DTO Pattern: contratos de entrada en `Dtos/Requests.cs`.
 - Dependency Injection: registro de servicios y repositorios en `Program.cs`.
 
@@ -83,6 +83,11 @@ Por compatibilidad, durante esta refactorización no se cambian rutas HTTP, mét
 
 ## Recomendaciones pendientes
 
-- Completar refactor por capas para los demás módulos (`vuelos`, `reservaciones`, `pagos`, `checkins`, `maletas`).
+- Ejecutar compilación y pruebas automáticas en entorno con SDK .NET disponible.
 - Incorporar pruebas automáticas de integración por endpoint.
-- Activar y validar conexión PostgreSQL en ambiente de integración.
+- Activar y validar conexión PostgreSQL en ambiente de integración (actualmente runtime en InMemory).
+
+## Estado de app móvil y SQLite
+
+En esta revisión no se encontró un proyecto móvil dedicado dentro del repositorio (carpetas típicas como `mobile/`, `app/`, `android/`, `ios/` o .NET MAUI).
+Sí existe un archivo local `tecair-api/Data/tecair.sqlite`, pero no evidencia integración móvil ni sincronización implementada con la base principal.
