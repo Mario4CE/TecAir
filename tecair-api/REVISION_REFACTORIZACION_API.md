@@ -50,3 +50,9 @@ Evaluado para check-in, no aplicado para evitar sobrecomplejidad en esta versió
 1. Ejecutar `dotnet build` y pruebas en entorno con SDK .NET.
 2. Activar PostgreSQL con Npgsql en ambiente de integración, manteniendo fallback documentado.
 3. Agregar pruebas de integración por endpoint crítico.
+
+
+## Estado de tests
+- Carpeta creada: `tests/TecAir.Api.Tests/`.
+- Cobertura inicial: estrategia de maletas y pruebas smoke de servicios (aeropuertos, aviones, reservaciones/pagos).
+- Pendiente: ampliar pruebas de integración con `WebApplicationFactory` cuando SDK y dependencias estén disponibles.

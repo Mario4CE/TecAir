@@ -91,3 +91,14 @@ Por compatibilidad, durante esta refactorización no se cambian rutas HTTP, mét
 
 En esta revisión no se encontró un proyecto móvil dedicado dentro del repositorio (carpetas típicas como `mobile/`, `app/`, `android/`, `ios/` o .NET MAUI).
 Sí existe un archivo local `tecair-api/Data/tecair.sqlite`, pero no evidencia integración móvil ni sincronización implementada con la base principal.
+
+
+## Pruebas automatizadas
+
+Se creó una base de pruebas en `tests/TecAir.Api.Tests/` con xUnit y EF Core InMemory para validar estrategia y servicios principales sin depender de PostgreSQL.
+
+Comandos de ejecución:
+- `dotnet test`
+- `dotnet test tests/TecAir.Api.Tests/TecAir.Api.Tests.csproj`
+
+Nota: en este entorno no se pudieron ejecutar por ausencia de SDK .NET.
