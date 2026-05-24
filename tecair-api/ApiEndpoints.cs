@@ -86,103 +86,68 @@ public static class ApiEndpoints
             }
         });
 
-        api.MapGet("/aeropuertos", async (TecAirDb db) =>
-            Results.Ok(new
-            {
-                aeropuertos = await db.Aeropuertos
-                    .AsNoTracking()
-                    .OrderBy(x => x.Nombre)
-                    .ToListAsync()
-            }));
+        api.MapGet("/aeropuertos", async (IAeropuertoService aeropuertoService) =>
+            Results.Ok(new { aeropuertos = await aeropuertoService.GetAeropuertosAsync() }));
 
-        api.MapPost("/aeropuertos", async (AeropuertoRequest datos, TecAirDb db) =>
+        api.MapPost("/aeropuertos", async (AeropuertoRequest datos, IAeropuertoService aeropuertoService) =>
         {
-            if (string.IsNullOrWhiteSpace(datos.Nombre))
-                return Results.BadRequest(new { mensaje = "El nombre del aeropuerto es obligatorio." });
-
-            var aeropuerto = new Aeropuerto
+            try
             {
-                Nombre = datos.Nombre,
-                Ubicacion = datos.Ubicacion ?? string.Empty
-            };
+                var aeropuerto = await aeropuertoService.CrearAeropuertoAsync(datos);
 
-            db.Aeropuertos.Add(aeropuerto);
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/aeropuertos/{aeropuerto.IdAeropuerto}",
-                new { mensaje = "Aeropuerto creado.", aeropuerto }
-            );
-        });
-
-        api.MapGet("/aviones", async (TecAirDb db) =>
-            Results.Ok(new
-            {
-                aviones = await db.Aviones
-                    .AsNoTracking()
-                    .OrderBy(x => x.Matricula)
-                    .ToListAsync()
-            }));
-
-        api.MapPost("/aviones", async (AvionRequest datos, TecAirDb db) =>
-        {
-            if (string.IsNullOrWhiteSpace(datos.Matricula))
-                return Results.BadRequest(new { mensaje = "La matrícula es obligatoria." });
-
-            if (datos.Capacidad <= 0)
-                return Results.BadRequest(new { mensaje = "La capacidad debe ser mayor a cero." });
-
-            var avion = new Avion
-            {
-                Matricula = datos.Matricula,
-                Capacidad = datos.Capacidad
-            };
-
-            db.Aviones.Add(avion);
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/aviones/{avion.Matricula}",
-                new { mensaje = "Avión creado.", avion }
-            );
-        });
-
-        api.MapGet("/rutas", async (TecAirDb db) =>
-            Results.Ok(new { rutas = await ObtenerRutasAsync(db) }));
-
-        api.MapPost("/rutas", async (RutaRequest datos, TecAirDb db) =>
-        {
-            if (datos.Escalas.Count < 2)
-                return Results.BadRequest(new { mensaje = "Debe indicar al menos origen y destino en escalas." });
-
-            var ruta = new Ruta();
-
-            db.Rutas.Add(ruta);
-            await db.SaveChangesAsync();
-
-            for (var index = 0; index < datos.Escalas.Count; index++)
-            {
-                var escala = datos.Escalas[index];
-
-                db.Escalas.Add(new Escala
-                {
-                    IdRuta = ruta.IdRuta,
-                    Orden = escala.Orden ?? index + 1,
-                    IdAeropuerto = escala.IdAeropuerto,
-                    Tipo = escala.Tipo ?? (index == 0 ? "origen" : index == datos.Escalas.Count - 1 ? "destino" : "escala")
-                });
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/aeropuertos/{aeropuerto.IdAeropuerto}",
+                    new { mensaje = "Aeropuerto creado.", aeropuerto }
+                );
             }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+        });
 
-            await db.SaveChangesAsync();
+        api.MapGet("/aviones", async (IAvionService avionService) =>
+            Results.Ok(new { aviones = await avionService.GetAvionesAsync() }));
 
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/rutas/{ruta.IdRuta}",
-                new
-                {
-                    mensaje = "Ruta creada.",
-                    ruta = await ObtenerRutaAsync(db, ruta.IdRuta)
-                }
-            );
+        api.MapPost("/aviones", async (AvionRequest datos, IAvionService avionService) =>
+        {
+            try
+            {
+                var avion = await avionService.CrearAvionAsync(datos);
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/aviones/{avion.Matricula}",
+                    new { mensaje = "Avión creado.", avion }
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+        });
+
+        api.MapGet("/rutas", async (IRutaService rutaService) =>
+            Results.Ok(new { rutas = await rutaService.GetRutasAsync() }));
+
+        api.MapPost("/rutas", async (RutaRequest datos, IRutaService rutaService) =>
+        {
+            try
+            {
+                var ruta = await rutaService.CrearRutaAsync(datos);
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/rutas/{ruta.id_ruta}",
+                    new
+                    {
+                        mensaje = "Ruta creada.",
+                        ruta
+                    }
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/vuelos", async (string? origen, string? destino, TecAirDb db) =>
@@ -540,54 +505,6 @@ public static class ApiEndpoints
     Entradas: Contexto de base de datos.
     Salidas: Lista de rutas serializables.
     Restricciones: Devuelve solo rutas existentes en la base.
-    */
-    private static async Task<List<object>> ObtenerRutasAsync(TecAirDb db)
-    {
-        var rutas = await db.Rutas.AsNoTracking().OrderBy(x => x.IdRuta).ToListAsync();
-        var resultado = new List<object>();
-
-        foreach (var ruta in rutas)
-        {
-            resultado.Add(await ObtenerRutaAsync(db, ruta.IdRuta));
-        }
-
-        return resultado;
-    }
-
-    /*
-    Descripción: Obtiene una ruta con sus escalas y aeropuertos relacionados.
-    Entradas: Contexto de base de datos e identificador de ruta.
-    Salidas: Objeto serializable con id_ruta y escalas.
-    Restricciones: La ruta debe existir o el resultado será una ruta vacía en escalas.
-    */
-    private static async Task<object> ObtenerRutaAsync(TecAirDb db, int idRuta)
-    {
-        var escalas = await db.Escalas.AsNoTracking()
-            .Where(x => x.IdRuta == idRuta)
-            .OrderBy(x => x.Orden)
-            .Join(
-                db.Aeropuertos.AsNoTracking(),
-                escala => escala.IdAeropuerto,
-                aeropuerto => aeropuerto.IdAeropuerto,
-                (escala, aeropuerto) => new
-                {
-                    escala.IdRuta,
-                    escala.Orden,
-                    escala.Tipo,
-                    aeropuerto.IdAeropuerto,
-                    aeropuerto.Nombre,
-                    aeropuerto.Ubicacion
-                })
-            .ToListAsync();
-
-        return new { id_ruta = idRuta, escalas };
-    }
-
-    /*
-    Descripción: Calcula el catálogo de vuelos con disponibilidad y escalas.
-    Entradas: Contexto de base de datos y filtros opcionales de origen y destino.
-    Salidas: Lista tipada de vuelos listos para respuesta HTTP.
-    Restricciones: El filtro por origen y destino acepta id o nombre del aeropuerto.
     */
     private static async Task<List<VueloResponse>> ObtenerVuelosAsync(TecAirDb db, string? origen, string? destino)
     {

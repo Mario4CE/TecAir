@@ -36,6 +36,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAeropuertoRepository, AeropuertoRepository>();
+builder.Services.AddScoped<IAeropuertoService, AeropuertoService>();
+builder.Services.AddScoped<IAvionRepository, AvionRepository>();
+builder.Services.AddScoped<IAvionService, AvionService>();
+builder.Services.AddScoped<IRutaRepository, RutaRepository>();
+builder.Services.AddScoped<IRutaService, RutaService>();
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
