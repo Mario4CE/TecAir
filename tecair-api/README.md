@@ -1,158 +1,88 @@
 # TECAir API
 
-API REST mínima para el sistema TECAir. Expone recursos para usuarios, aeropuertos, aviones, rutas, vuelos, reservaciones, pagos, promociones, check-ins y maletas.
+## Descripción general
 
-## Estado actual
+TECAir API es un backend Web API en C# para gestionar usuarios, aeropuertos, aviones, rutas, vuelos, reservaciones, pagos, promociones, check-ins y maletas. La API es consumida por las vistas web del proyecto y por clientes externos (incluida la app móvil cuando sincroniza con el backend).
 
-El API ya tiene implementados los flujos principales de prueba y desarrollo:
+## Arquitectura aplicada
 
-- Registro y consulta de usuarios.
-- Perfil de usuario con lectura y actualización.
-- Registro y consulta de aeropuertos y aviones.
-- Creación y consulta de rutas con escalas.
-- Creación, consulta y cambio de estado de vuelos.
-- Creación y consulta de reservaciones.
-- Registro y consulta de pagos.
-- Creación y consulta de promociones.
-- Check-in y generación de pase de abordar.
-- Registro y consulta de maletas.
-- Semilla automática de datos de prueba al iniciar la app.
+Se mantiene una arquitectura por capas (no MVC tradicional con vistas renderizadas):
 
-## Persistencia actual
+- Capa de entrada HTTP: endpoints en `ApiEndpoints.cs`.
+- Capa de servicios: reglas de negocio en `Services/`.
+- Capa de repositorios: acceso a datos en `Repositories/`.
+- Capa de contratos: DTOs en `Dtos/`.
+- Capa de datos: `TecAirDb`, configuración y seeding en `Data/`.
+- Capa de dominio: entidades en `Models/`.
 
-La configuración activa usa base de datos en memoria para pruebas locales. La opción de SQLite está preparada en el proyecto, pero actualmente está comentada en `Program.cs`.
+Motivo de no usar MVC tradicional: este proyecto expone una API y las vistas web/app móvil viven por separado y consumen HTTP.
+
+## Estructura de carpetas del API
+
+- `Data/`: contexto EF Core, opciones y seeding.
+- `Dtos/`: contratos de entrada de requests.
+- `Interfaces/`: contratos de servicios y repositorios.
+- `Repositories/`: implementación del acceso a datos.
+- `Services/`: reglas de negocio.
+- `Models/`: entidades del dominio persistente.
+- `ApiEndpoints.cs`: definición de endpoints públicos.
+- `Program.cs`: configuración, DI, CORS y arranque.
+
+## Patrones de diseño aplicados
+
+- Repository Pattern: `IUsuarioRepository` y `UsuarioRepository`.
+- Service Layer: `IUsuarioService` y `UsuarioService`.
+- DTO Pattern: contratos de entrada en `Dtos/Requests.cs`.
+- Dependency Injection: registro de servicios y repositorios en `Program.cs`.
+
+## PostgreSQL y capa de datos
+
+La fuente de verdad de esquema y datos iniciales está en scripts SQL del repositorio:
+
+- `database/01_create.sql` (DDL).
+- `database/02_populate.sql` (datos iniciales).
+
+Actualmente el API está configurado para base en memoria para pruebas locales. La estructura del dominio se mantiene alineada para uso con base relacional. No se usan procedimientos almacenados, vistas de base de datos ni triggers.
 
 ## Endpoints principales
 
-### Salud del servicio
+Se mantienen las rutas y métodos existentes:
 
-- `GET /api`.
-- Devuelve un mensaje de estado y el catálogo de recursos disponibles.
+- Usuarios: `GET/POST /api/usuarios`, `GET /api/usuarios/{idUsuario}`, `GET/PUT /api/usuarios/perfil`.
+- Aeropuertos: `GET/POST /api/aeropuertos`.
+- Aviones: `GET/POST /api/aviones`.
+- Rutas: `GET/POST /api/rutas`.
+- Vuelos: `GET /api/vuelos`, `GET /api/vuelos/{idVuelo}`, `POST /api/vuelos`, `PATCH /api/vuelos/{idVuelo}/abrir|cerrar`.
+- Reservaciones: `GET/POST /api/reservaciones`, `GET /api/reservaciones/{idReservacion}`, `PATCH /api/reservaciones/{idReservacion}/cancelar`.
+- Pagos: `GET/POST /api/pagos`.
+- Promociones: `GET/POST /api/promociones`.
+- Check-ins: `GET/POST /api/checkins`, `GET /api/checkins/{idCheckin}/pase-abordar`.
+- Maletas: `GET/POST /api/maletas`.
 
-### Usuarios
+## Ejecución básica
 
-- `GET /api/usuarios`.
-- `GET /api/usuarios/{idUsuario}`.
-- `GET /api/usuarios/perfil`.
-- `PUT /api/usuarios/perfil`.
-- `POST /api/usuarios`.
+1. Restaurar dependencias del proyecto.
+2. Ejecutar el proyecto `TecAir.Api.csproj`.
+3. Abrir `GET /api` para validar disponibilidad.
 
-Restricciones principales:
+## Conexión con vistas web y app móvil
 
-- El usuario requiere nombre y correo válidos.
-- El perfil se identifica por el encabezado `X-User-Id`.
-- Si el encabezado no existe, el sistema usa el usuario `1` como valor por defecto.
+Se detectan clientes web con base URL a `http://localhost:5000/api` en:
 
-### Aeropuertos
+- `tecair-admin/src/config/Api.js`.
+- `tecair-cliente/js/api.js`.
 
-- `GET /api/aeropuertos`.
-- `POST /api/aeropuertos`.
+Por compatibilidad, durante esta refactorización no se cambian rutas HTTP, métodos, ni forma general de payload JSON existente.
 
-Restricciones principales:
+## Cambios realizados en esta refactorización
 
-- El nombre del aeropuerto es obligatorio.
+- Se extrajo la lógica del módulo de usuarios a capas de servicio y repositorio.
+- Se registró DI para `IUsuarioRepository` e `IUsuarioService`.
+- Los endpoints de usuarios ahora dependen de servicios, evitando acceso directo al contexto en esas operaciones.
+- Se documentaron internamente las nuevas clases y métodos con formato estándar.
 
-### Aviones
+## Recomendaciones pendientes
 
-- `GET /api/aviones`.
-- `POST /api/aviones`.
-
-Restricciones principales:
-
-- La matrícula es obligatoria.
-- La capacidad debe ser mayor a cero.
-
-### Rutas
-
-- `GET /api/rutas`.
-- `POST /api/rutas`.
-
-Restricciones principales:
-
-- Una ruta debe incluir al menos origen y destino.
-- Las escalas se crean en orden y se asocian a aeropuertos existentes.
-
-### Vuelos
-
-- `GET /api/vuelos`.
-- `GET /api/vuelos/{idVuelo}`.
-- `POST /api/vuelos`.
-- `PATCH /api/vuelos/{idVuelo}/abrir`.
-- `PATCH /api/vuelos/{idVuelo}/cerrar`.
-
-Restricciones principales:
-
-- La ruta, la matrícula y la fecha de salida son obligatorias.
-- El filtro por origen y destino acepta id o nombre del aeropuerto.
-- El estado del vuelo solo puede cambiar si el vuelo existe.
-
-### Reservaciones
-
-- `GET /api/reservaciones`.
-- `GET /api/reservaciones/{idReservacion}`.
-- `POST /api/reservaciones`.
-- `PATCH /api/reservaciones/{idReservacion}/cancelar`.
-
-Restricciones principales:
-
-- El usuario y el vuelo son obligatorios.
-- La consulta puede filtrar por `id_usuario`, `usuario_id`, `idUsuario` o `usuarioId`.
-- Al crear una reservación se agregan millas al usuario según la configuración.
-
-### Pagos
-
-- `GET /api/pagos`.
-- `POST /api/pagos`.
-
-Restricciones principales:
-
-- La reservación debe existir.
-- El monto debe ser mayor a cero.
-- Al registrar el pago, la reservación pasa a estado `pagada`.
-
-### Promociones
-
-- `GET /api/promociones`.
-- `POST /api/promociones`.
-
-Restricciones principales:
-
-- La ruta es obligatoria.
-- El precio promocional debe ser mayor a cero.
-
-### Check-ins
-
-- `GET /api/checkins`.
-- `GET /api/checkins/{idCheckin}/pase-abordar`.
-- `POST /api/checkins`.
-
-Restricciones principales:
-
-- El usuario, el vuelo y el asiento son obligatorios.
-- Un asiento no puede repetirse dentro del mismo vuelo.
-
-### Maletas
-
-- `GET /api/maletas`.
-- `POST /api/maletas`.
-
-Restricciones principales:
-
-- El número de maleta es obligatorio.
-- La maleta debe asociarse a un check-in existente.
-
-## Respuestas comunes
-
-El API devuelve objetos con una estructura simple de mensajes y recursos. Algunos ejemplos:
-
-- `mensaje`: texto de confirmación o error.
-- `usuario`, `aeropuerto`, `avion`, `ruta`, `vuelo`, `reservacion`, `pago`, `promocion`, `checkin`, `maleta`: entidad creada o consultada.
-- `pase_abordar`: información del check-in.
-- `resumen`: detalle de maletas.
-
-## Próximos pasos sugeridos
-
-- Activar persistencia con SQLite o PostgreSQL.
-- Añadir autenticación real.
-- Separar contratos de entrada y salida en archivos dedicados.
-- Agregar pruebas automáticas de los endpoints principales.
+- Completar refactor por capas para los demás módulos (`vuelos`, `reservaciones`, `pagos`, `checkins`, `maletas`).
+- Incorporar pruebas automáticas de integración por endpoint.
+- Activar y validar conexión PostgreSQL en ambiente de integración.
