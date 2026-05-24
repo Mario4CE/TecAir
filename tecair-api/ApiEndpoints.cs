@@ -184,139 +184,58 @@ public static class ApiEndpoints
             return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { mensaje = "Vuelo cerrado.", vuelo });
         });
 
-        api.MapGet("/reservaciones", async (HttpRequest request, TecAirDb db) =>
+        api.MapGet("/reservaciones", async (HttpRequest request, IReservacionService reservacionService) =>
         {
-            var filtroUsuario = ObtenerEnteroQuery(request, "id_usuario")
-                ?? ObtenerEnteroQuery(request, "usuario_id")
-                ?? ObtenerEnteroQuery(request, "idUsuario")
-                ?? ObtenerEnteroQuery(request, "usuarioId");
-
-            var query = db.Reservaciones
-                .AsNoTracking()
-                .OrderByDescending(x => x.FechaReservacion)
-                .AsQueryable();
-
-            if (filtroUsuario.HasValue)
-                query = query.Where(x => x.IdUsuario == filtroUsuario.Value);
-
-            return Results.Ok(new { reservaciones = await query.ToListAsync() });
+            var filtroUsuario = ObtenerEnteroQuery(request, "id_usuario") ?? ObtenerEnteroQuery(request, "usuario_id") ?? ObtenerEnteroQuery(request, "idUsuario") ?? ObtenerEnteroQuery(request, "usuarioId");
+            return Results.Ok(new { reservaciones = await reservacionService.GetReservacionesAsync(filtroUsuario) });
         });
 
-        api.MapGet("/reservaciones/{idReservacion:int}", async (int idReservacion, TecAirDb db) =>
+        api.MapGet("/reservaciones/{idReservacion:int}", async (int idReservacion, IReservacionService reservacionService) =>
         {
-            var reservacion = await ObtenerReservacionAsync(db, idReservacion);
-
-            return reservacion is null
-                ? Results.NotFound(new { mensaje = "Reservación no encontrada." })
-                : Results.Ok(new { reservacion });
+            var reservacion = await reservacionService.GetReservacionByIdAsync(idReservacion);
+            return reservacion is null ? Results.NotFound(new { mensaje = "Reservación no encontrada." }) : Results.Ok(new { reservacion });
         });
 
-        api.MapPost("/reservaciones", async (ReservacionRequest datos, TecAirDb db, IConfiguration configuration) =>
+        api.MapPost("/reservaciones", async (ReservacionRequest datos, IReservacionService reservacionService) =>
         {
-            var idUsuario = datos.IdUsuario ?? datos.UsuarioId;
-            var idVuelo = datos.IdVuelo ?? datos.VueloId;
-
-            if (idUsuario is null)
-                return Results.BadRequest(new { mensaje = "El usuario es obligatorio." });
-
-            if (idVuelo is null)
-                return Results.BadRequest(new { mensaje = "El vuelo es obligatorio." });
-
-            var usuario = await db.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario.Value);
-
-            if (usuario is null)
-                return Results.NotFound(new { mensaje = "Usuario no encontrado." });
-
-            if (!await db.Vuelos.AnyAsync(x => x.IdVuelo == idVuelo.Value))
-                return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
-
-            var options = configuration.GetSection("TecAir").Get<TecAirOptions>() ?? new TecAirOptions();
-
-            var reservacion = new Reservacion
+            try
             {
-                Estado = datos.Estado ?? "pendiente_pago",
-                FechaReservacion = DateTime.UtcNow,
-                IdUsuario = idUsuario.Value,
-                IdVuelo = idVuelo.Value
-            };
-
-            usuario.Millas += options.LoyaltyMilesPerReservation;
-
-            db.Reservaciones.Add(reservacion);
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/reservaciones/{reservacion.IdReservacion}",
-                new
-                {
-                    mensaje = "Reservación creada.",
-                    reservacion = await ObtenerReservacionAsync(db, reservacion.IdReservacion)
-                }
-            );
+                var reservacion = await reservacionService.CrearReservacionAsync(datos);
+                return Results.Created($"{ApiGlobals.ApiBasePath}/reservaciones/{reservacion.IdReservacion}", new { mensaje = "Reservación creada.", reservacion });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { mensaje = ex.Message });
+            }
         });
 
-        api.MapPatch("/reservaciones/{idReservacion:int}/cancelar", async (int idReservacion, TecAirDb db) =>
+        api.MapPatch("/reservaciones/{idReservacion:int}/cancelar", async (int idReservacion, IReservacionService reservacionService) =>
         {
-            var reservacion = await db.Reservaciones.FirstOrDefaultAsync(x => x.IdReservacion == idReservacion);
-
-            if (reservacion is null)
-                return Results.NotFound(new { mensaje = "Reservación no encontrada." });
-
-            reservacion.Estado = "cancelada";
-
-            await db.SaveChangesAsync();
-
-            return Results.Ok(new
-            {
-                mensaje = "Reservación cancelada.",
-                reservacion = await ObtenerReservacionAsync(db, idReservacion)
-            });
+            var reservacion = await reservacionService.CancelarReservacionAsync(idReservacion);
+            return reservacion is null ? Results.NotFound(new { mensaje = "Reservación no encontrada." }) : Results.Ok(new { mensaje = "Reservación cancelada.", reservacion });
         });
 
-        api.MapGet("/pagos", async (TecAirDb db) =>
-            Results.Ok(new
-            {
-                pagos = await db.Pagos
-                    .AsNoTracking()
-                    .OrderByDescending(x => x.IdPago)
-                    .ToListAsync()
-            }));
+        api.MapGet("/pagos", async (IPagoService pagoService) => Results.Ok(new { pagos = await pagoService.GetPagosAsync() }));
 
-        api.MapPost("/pagos", async (PagoRequest datos, TecAirDb db) =>
+        api.MapPost("/pagos", async (PagoRequest datos, IPagoService pagoService) =>
         {
-            var idReservacion = datos.IdReservacion ?? datos.ReservacionId;
-
-            if (idReservacion is null)
-                return Results.BadRequest(new { mensaje = "La reservación es obligatoria." });
-
-            if (datos.Monto <= 0)
-                return Results.BadRequest(new { mensaje = "El monto debe ser mayor a cero." });
-
-            var reservacion = await db.Reservaciones.FirstOrDefaultAsync(x => x.IdReservacion == idReservacion.Value);
-
-            if (reservacion is null)
-                return Results.NotFound(new { mensaje = "Reservación no encontrada." });
-
-            var pago = new Pago
+            try
             {
-                IdReservacion = idReservacion.Value,
-                Monto = datos.Monto,
-                Metodo = datos.Metodo ?? "tarjeta"
-            };
-
-            reservacion.Estado = "pagada";
-
-            db.Pagos.Add(pago);
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/pagos/{pago.IdPago}",
-                new
-                {
-                    mensaje = "Pago registrado.",
-                    pago
-                }
-            );
+                var pago = await pagoService.CrearPagoAsync(datos);
+                return Results.Created($"{ApiGlobals.ApiBasePath}/pagos/{pago.IdPago}", new { mensaje = "Pago registrado.", pago });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/promociones", async (TecAirDb db) =>

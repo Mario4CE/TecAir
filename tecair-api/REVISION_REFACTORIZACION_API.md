@@ -5,11 +5,11 @@
 - Aeropuertos
 - Aviones
 - Rutas
-- Vuelos (iteración actual)
+- Vuelos
+- Reservaciones (iteración actual)
+- Pagos (iteración actual)
 
 ## Módulos pendientes
-- Reservaciones
-- Pagos
 - Promociones
 - Check-ins
 - Maletas

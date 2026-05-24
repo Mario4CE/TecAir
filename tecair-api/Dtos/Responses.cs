@@ -39,3 +39,22 @@ public sealed record VueloResponse(
     int AsientosDisponibles,
     List<EscalaResponse> Escalas
 );
+
+
+public sealed record ReservacionResponse(
+    int IdReservacion,
+    string Estado,
+    DateTime FechaReservacion,
+    int IdUsuario,
+    int IdVuelo,
+    object? Usuario,
+    object? Vuelo,
+    object? Pago
+);
+
+public sealed record PagoResponse(
+    int IdPago,
+    int IdReservacion,
+    decimal Monto,
+    string Metodo
+);

@@ -44,6 +44,10 @@ builder.Services.AddScoped<IRutaRepository, RutaRepository>();
 builder.Services.AddScoped<IRutaService, RutaService>();
 builder.Services.AddScoped<IVueloRepository, VueloRepository>();
 builder.Services.AddScoped<IVueloService, VueloService>();
+builder.Services.AddScoped<IReservacionRepository, ReservacionRepository>();
+builder.Services.AddScoped<IReservacionService, ReservacionService>();
+builder.Services.AddScoped<IPagoRepository, PagoRepository>();
+builder.Services.AddScoped<IPagoService, PagoService>();
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
