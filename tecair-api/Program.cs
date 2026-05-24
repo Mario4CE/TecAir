@@ -48,6 +48,13 @@ builder.Services.AddScoped<IReservacionRepository, ReservacionRepository>();
 builder.Services.AddScoped<IReservacionService, ReservacionService>();
 builder.Services.AddScoped<IPagoRepository, PagoRepository>();
 builder.Services.AddScoped<IPagoService, PagoService>();
+builder.Services.AddScoped<IPromocionRepository, PromocionRepository>();
+builder.Services.AddScoped<IPromocionService, PromocionService>();
+builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
+builder.Services.AddScoped<ICheckInService, CheckInService>();
+builder.Services.AddScoped<IMaletaRepository, MaletaRepository>();
+builder.Services.AddScoped<IMaletaService, MaletaService>();
+builder.Services.AddScoped<ICalculoCobroMaletaStrategy, CalculoCobroMaletaStrategy>();
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {

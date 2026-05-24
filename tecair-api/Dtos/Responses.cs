@@ -58,3 +58,11 @@ public sealed record PagoResponse(
     decimal Monto,
     string Metodo
 );
+
+
+public sealed record PromocionResponse(int IdPromocion, decimal Precio, DateOnly? FechaInicio, DateOnly? FechaFin, string Imagen, int IdRuta, string origen, string destino);
+public sealed record CheckInResponse(int IdCheckin, int IdUsuario, int IdVuelo, string Asiento);
+public sealed record PaseAbordarResponse(int IdCheckin, string Asiento, int IdUsuario, string Nombre1, string Apellido1, int IdVuelo, string Puerta, DateOnly FechaSalida, TimeOnly HoraSalida, int TotalMaletas = 0, decimal CostoExtraMaletas = 0);
+public sealed record MaletaResponse(string NumMaleta, decimal Peso, string Color, int IdCheckin);
+public sealed record ResumenMaletaResponse(int total, decimal costo_extra, List<MaletaResponse> maletas);
+public sealed record MaletaRegistroResponse(MaletaResponse maleta, ResumenMaletaResponse resumen);

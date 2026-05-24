@@ -7,7 +7,10 @@
 - Rutas
 - Vuelos
 - Reservaciones (iteración actual)
-- Pagos (iteración actual)
+- Pagos
+- Promociones (iteración actual)
+- Check-ins (iteración actual)
+- Maletas (iteración actual)
 
 ## Módulos pendientes
 - Promociones

@@ -1,13 +1,9 @@
 # API_IMPACTO_CLIENTES
 
-## Estado de esta iteración
+Sin cambios de contrato público en esta iteración.
 
-No se realizaron cambios de contrato público en esta iteración.
-
-- Endpoints afectados: Ninguno (sin cambios de ruta pública).
-- Métodos HTTP afectados: Ninguno.
-- JSON anterior: Sin cambios.
-- JSON nuevo: Sin cambios.
-- Frontends posiblemente afectados: `tecair-admin` y `tecair-cliente` continúan compatibles.
-- Prioridad: Baja.
-- Motivo: Refactorización interna por capas (Service/Repository) sin alterar contratos externos.
+- Endpoints: `/api/promociones`, `/api/checkins`, `/api/checkins/{idCheckin}/pase-abordar`, `/api/maletas`
+- Método HTTP: sin cambios.
+- Rutas: sin cambios.
+- JSON: se preserva estructura pública general (`mensaje`, recursos principales y resumen).
+- Impacto esperado: ninguno para `tecair-admin` y `tecair-cliente`.
