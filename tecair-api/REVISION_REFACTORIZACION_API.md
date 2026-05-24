@@ -4,10 +4,10 @@
 - Usuarios
 - Aeropuertos
 - Aviones
-- Rutas (iteración actual)
+- Rutas
+- Vuelos (iteración actual)
 
 ## Módulos pendientes
-- Vuelos
 - Reservaciones
 - Pagos
 - Promociones

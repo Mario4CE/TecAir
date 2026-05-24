@@ -150,64 +150,39 @@ public static class ApiEndpoints
             }
         });
 
-        api.MapGet("/vuelos", async (string? origen, string? destino, TecAirDb db) =>
-            Results.Ok(new { vuelos = await ObtenerVuelosAsync(db, origen, destino) }));
+        api.MapGet("/vuelos", async (string? origen, string? destino, IVueloService vueloService) =>
+            Results.Ok(new { vuelos = await vueloService.GetVuelosAsync(origen, destino) }));
 
-        api.MapGet("/vuelos/{idVuelo:int}", async (int idVuelo, TecAirDb db) =>
+        api.MapGet("/vuelos/{idVuelo:int}", async (int idVuelo, IVueloService vueloService) =>
         {
-            var vuelo = (await ObtenerVuelosAsync(db, null, null))
-                .FirstOrDefault(x => x.IdVuelo == idVuelo);
-
-            return vuelo is null
-                ? Results.NotFound(new { mensaje = "Vuelo no encontrado." })
-                : Results.Ok(new { vuelo });
+            var vuelo = await vueloService.GetVueloByIdAsync(idVuelo);
+            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { vuelo });
         });
 
-        api.MapPost("/vuelos", async (VueloRequest datos, TecAirDb db, IConfiguration configuration) =>
+        api.MapPost("/vuelos", async (VueloRequest datos, IVueloService vueloService) =>
         {
-            var options = configuration.GetSection("TecAir").Get<TecAirOptions>() ?? new TecAirOptions();
-
-            if (datos.IdRuta <= 0)
-                return Results.BadRequest(new { mensaje = "La ruta es obligatoria." });
-
-            if (string.IsNullOrWhiteSpace(datos.Matricula))
-                return Results.BadRequest(new { mensaje = "La matrícula del avión es obligatoria." });
-
-            if (datos.FechaSalida is null)
-                return Results.BadRequest(new { mensaje = "La fecha de salida es obligatoria." });
-
-            var vuelo = new Vuelo
+            try
             {
-                IdRuta = datos.IdRuta,
-                Matricula = datos.Matricula,
-                FechaSalida = datos.FechaSalida.Value,
-                HoraSalida = datos.HoraSalida ?? new TimeOnly(8, 0),
-                Puerta = datos.Puerta ?? options.DefaultGate,
-                Estado = datos.Estado ?? "programado",
-                Precio = datos.Precio ?? options.DefaultFlightPrice
-            };
-
-            db.Vuelos.Add(vuelo);
-            await db.SaveChangesAsync();
-
-            var respuesta = (await ObtenerVuelosAsync(db, null, null))
-                .First(x => x.IdVuelo == vuelo.IdVuelo);
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/vuelos/{vuelo.IdVuelo}",
-                new
-                {
-                    mensaje = "Vuelo creado.",
-                    vuelo = respuesta
-                }
-            );
+                var vuelo = await vueloService.CrearVueloAsync(datos);
+                return Results.Created($"{ApiGlobals.ApiBasePath}/vuelos/{vuelo.IdVuelo}", new { mensaje = "Vuelo creado.", vuelo });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
         });
 
-        api.MapPatch("/vuelos/{idVuelo:int}/abrir", async (int idVuelo, TecAirDb db) =>
-            await CambiarEstadoVueloAsync(idVuelo, "abierto", db));
+        api.MapPatch("/vuelos/{idVuelo:int}/abrir", async (int idVuelo, IVueloService vueloService) =>
+        {
+            var vuelo = await vueloService.CambiarEstadoAsync(idVuelo, "abierto");
+            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { mensaje = "Vuelo abierto.", vuelo });
+        });
 
-        api.MapPatch("/vuelos/{idVuelo:int}/cerrar", async (int idVuelo, TecAirDb db) =>
-            await CambiarEstadoVueloAsync(idVuelo, "cerrado", db));
+        api.MapPatch("/vuelos/{idVuelo:int}/cerrar", async (int idVuelo, IVueloService vueloService) =>
+        {
+            var vuelo = await vueloService.CambiarEstadoAsync(idVuelo, "cerrado");
+            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { mensaje = "Vuelo cerrado.", vuelo });
+        });
 
         api.MapGet("/reservaciones", async (HttpRequest request, TecAirDb db) =>
         {
@@ -500,11 +475,12 @@ public static class ApiEndpoints
         return int.TryParse(request.Query[nombre].FirstOrDefault(), out var valor) ? valor : null;
     }
 
+
     /*
-    Descripción: Construye el listado de rutas con sus escalas asociadas.
-    Entradas: Contexto de base de datos.
-    Salidas: Lista de rutas serializables.
-    Restricciones: Devuelve solo rutas existentes en la base.
+    Descripción: Construye el listado de vuelos para procesos internos dependientes.
+    Entradas: Contexto de base de datos y filtros opcionales de origen/destino.
+    Salidas: Lista de vuelos en DTO de respuesta.
+    Restricciones: No presenta restricciones adicionales.
     */
     private static async Task<List<VueloResponse>> ObtenerVuelosAsync(TecAirDb db, string? origen, string? destino)
     {
@@ -522,8 +498,7 @@ public static class ApiEndpoints
             var escalas = await db.Escalas.AsNoTracking()
                 .Where(x => x.IdRuta == vuelo.IdRuta)
                 .OrderBy(x => x.Orden)
-                .Join(
-                    db.Aeropuertos.AsNoTracking(),
+                .Join(db.Aeropuertos.AsNoTracking(),
                     escala => escala.IdAeropuerto,
                     aeropuerto => aeropuerto.IdAeropuerto,
                     (escala, aeropuerto) => new EscalaResponse(
@@ -544,42 +519,21 @@ public static class ApiEndpoints
             var reservacionesActivas = vuelo.Reservaciones.Count(x => x.Estado != "cancelada");
 
             respuestas.Add(new VueloResponse(
-                vuelo.IdVuelo,
-                vuelo.FechaSalida,
-                vuelo.HoraSalida,
-                vuelo.Puerta,
-                vuelo.Estado,
-                vuelo.Matricula,
-                vuelo.IdRuta,
-                vuelo.Precio,
-                vuelo.Avion?.Capacidad ?? 0,
-                escalaOrigen?.Nombre ?? string.Empty,
-                escalaDestino?.Nombre ?? string.Empty,
-                escalaOrigen?.IdAeropuerto ?? 0,
-                escalaDestino?.IdAeropuerto ?? 0,
-                (vuelo.Avion?.Capacidad ?? 0) - reservacionesActivas,
-                escalas));
+                vuelo.IdVuelo, vuelo.FechaSalida, vuelo.HoraSalida, vuelo.Puerta, vuelo.Estado,
+                vuelo.Matricula, vuelo.IdRuta, vuelo.Precio, vuelo.Avion?.Capacidad ?? 0,
+                escalaOrigen?.Nombre ?? string.Empty, escalaDestino?.Nombre ?? string.Empty,
+                escalaOrigen?.IdAeropuerto ?? 0, escalaDestino?.IdAeropuerto ?? 0,
+                (vuelo.Avion?.Capacidad ?? 0) - reservacionesActivas, escalas));
         }
 
         return respuestas;
     }
 
-    /*
-    Descripción: Verifica si una escala coincide con un filtro de aeropuerto.
-    Entradas: Escala calculada y texto de filtro.
-    Salidas: Verdadero si coincide por id o por nombre.
-    Restricciones: Un filtro vacío siempre se considera coincidencia.
-    */
     private static bool CoincideAeropuerto(EscalaResponse? escala, string? filtro)
     {
-        if (string.IsNullOrWhiteSpace(filtro))
-            return true;
-
-        if (escala is null)
-            return false;
-
-        return escala.IdAeropuerto.ToString() == filtro
-            || escala.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(filtro)) return true;
+        if (escala is null) return false;
+        return escala.IdAeropuerto.ToString() == filtro || escala.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase);
     }
 
     /*
@@ -612,32 +566,6 @@ public static class ApiEndpoints
             vuelo,
             reservacion.Pago
         };
-    }
-
-    /*
-    Descripción: Actualiza el estado de un vuelo a un valor específico.
-    Entradas: Id del vuelo, estado destino y contexto de base de datos.
-    Salidas: Respuesta HTTP con el vuelo actualizado o NotFound.
-    Restricciones: El vuelo debe existir para poder cambiar su estado.
-    */
-    private static async Task<IResult> CambiarEstadoVueloAsync(int idVuelo, string estado, TecAirDb db)
-    {
-        var vuelo = await db.Vuelos.FirstOrDefaultAsync(x => x.IdVuelo == idVuelo);
-
-        if (vuelo is null)
-            return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
-
-        vuelo.Estado = estado;
-        await db.SaveChangesAsync();
-
-        var respuesta = (await ObtenerVuelosAsync(db, null, null))
-            .First(x => x.IdVuelo == idVuelo);
-
-        return Results.Ok(new
-        {
-            mensaje = $"Vuelo {estado}.",
-            vuelo = respuesta
-        });
     }
 
     /*
@@ -747,29 +675,3 @@ public static class ApiEndpoints
     }
 }
 
-public sealed record EscalaResponse(
-    int IdRuta,
-    int Orden,
-    string Tipo,
-    int IdAeropuerto,
-    string Nombre,
-    string Ubicacion
-);
-
-public sealed record VueloResponse(
-    int IdVuelo,
-    DateOnly FechaSalida,
-    TimeOnly HoraSalida,
-    string Puerta,
-    string Estado,
-    string Matricula,
-    int IdRuta,
-    decimal Precio,
-    int Capacidad,
-    string Origen,
-    string Destino,
-    int IdOrigen,
-    int IdDestino,
-    int AsientosDisponibles,
-    List<EscalaResponse> Escalas
-);
