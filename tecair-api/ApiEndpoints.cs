@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TecAir.Api.Data;
 using TecAir.Api.Dtos;
 using TecAir.Api.Models;
+using TecAir.Api.Interfaces;
 
 namespace TecAir.Api;
 
@@ -23,59 +24,40 @@ public static class ApiEndpoints
             recursos = new[] { "usuarios", "aeropuertos", "aviones", "rutas", "vuelos", "reservaciones", "pagos", "promociones", "checkins", "maletas" }
         }));
 
-        api.MapGet("/usuarios", async (TecAirDb db) =>
-            Results.Ok(new { usuarios = await db.Usuarios.AsNoTracking().OrderBy(x => x.IdUsuario).ToListAsync() }));
+        api.MapGet("/usuarios", async (IUsuarioService usuarioService) =>
+            Results.Ok(new { usuarios = await usuarioService.GetUsuariosAsync() }));
 
-        api.MapGet("/usuarios/perfil", async (HttpRequest request, TecAirDb db) =>
+        api.MapGet("/usuarios/perfil", async (HttpRequest request, IUsuarioService usuarioService) =>
         {
             var idUsuario = ObtenerIdUsuarioHeader(request);
-            var usuario = await db.Usuarios.AsNoTracking().FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
+            var usuario = await usuarioService.GetPerfilAsync(idUsuario);
             return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { usuario });
         });
 
-        api.MapPut("/usuarios/perfil", async (HttpRequest request, UsuarioRequest datos, TecAirDb db) =>
+        api.MapPut("/usuarios/perfil", async (HttpRequest request, UsuarioRequest datos, IUsuarioService usuarioService) =>
         {
             var idUsuario = ObtenerIdUsuarioHeader(request);
-            var usuario = await db.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
-            if (usuario is null) return Results.NotFound(new { mensaje = "Usuario no encontrado." });
-
-            ActualizarUsuario(usuario, datos);
-            await db.SaveChangesAsync();
-            return Results.Ok(new { mensaje = "Perfil actualizado.", usuario });
+            var usuario = await usuarioService.ActualizarPerfilAsync(idUsuario, datos);
+            return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { mensaje = "Perfil actualizado.", usuario });
         });
 
-        api.MapGet("/usuarios/{idUsuario:int}", async (int idUsuario, TecAirDb db) =>
+        api.MapGet("/usuarios/{idUsuario:int}", async (int idUsuario, IUsuarioService usuarioService) =>
         {
-            var usuario = await db.Usuarios.AsNoTracking().FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
+            var usuario = await usuarioService.GetUsuarioByIdAsync(idUsuario);
             return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { usuario });
         });
 
-        api.MapPost("/usuarios", async (UsuarioRequest datos, TecAirDb db) =>
+        api.MapPost("/usuarios", async (UsuarioRequest datos, IUsuarioService usuarioService) =>
         {
-            var correo = datos.Correo ?? datos.Email;
-            if (string.IsNullOrWhiteSpace(datos.Nombre1) && string.IsNullOrWhiteSpace(datos.NombreCompleto))
-                return Results.BadRequest(new { mensaje = "El nombre es obligatorio." });
-            if (string.IsNullOrWhiteSpace(correo))
-                return Results.BadRequest(new { mensaje = "El correo es obligatorio." });
-
-            var nombre = SepararNombre(datos.NombreCompleto);
-            var usuario = new Usuario
+            try
             {
-                Nombre1 = datos.Nombre1 ?? nombre.Nombre1,
-                Nombre2 = datos.Nombre2 ?? nombre.Nombre2,
-                Apellido1 = datos.Apellido1 ?? nombre.Apellido1,
-                Apellido2 = datos.Apellido2 ?? nombre.Apellido2,
-                Telefono = datos.Telefono ?? string.Empty,
-                Correo = correo,
-                EsEstudiante = datos.EsEstudiante ?? false,
-                Universidad = datos.Universidad ?? string.Empty,
-                Carnet = datos.Carnet ?? string.Empty,
-                Millas = datos.Millas ?? 0
-            };
-
-            db.Usuarios.Add(usuario);
-            await db.SaveChangesAsync();
-            return Results.Created($"/api/usuarios/{usuario.IdUsuario}", new { mensaje = "Usuario creado.", usuario });
+                var usuario = await usuarioService.CrearUsuarioAsync(datos);
+                return Results.Created($"/api/usuarios/{usuario.IdUsuario}", new { mensaje = "Usuario creado.", usuario });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/aeropuertos", async (TecAirDb db) =>
@@ -321,42 +303,6 @@ public static class ApiEndpoints
     private static int? ObtenerEnteroQuery(HttpRequest request, string nombre)
     {
         return int.TryParse(request.Query[nombre].FirstOrDefault(), out var valor) ? valor : null;
-    }
-
-    /*
-    Descripción: Aplica cambios parciales al usuario existente.
-    Entradas: Entidad Usuario y datos del request.
-    Salidas: Usuario actualizado en memoria.
-    Restricciones: Solo reemplaza campos cuando el request trae un valor válido.
-    */
-    private static void ActualizarUsuario(Usuario usuario, UsuarioRequest datos)
-    {
-        var nombre = SepararNombre(datos.NombreCompleto);
-        usuario.Nombre1 = datos.Nombre1 ?? (string.IsNullOrWhiteSpace(nombre.Nombre1) ? usuario.Nombre1 : nombre.Nombre1);
-        usuario.Nombre2 = datos.Nombre2 ?? (string.IsNullOrWhiteSpace(nombre.Nombre2) ? usuario.Nombre2 : nombre.Nombre2);
-        usuario.Apellido1 = datos.Apellido1 ?? (string.IsNullOrWhiteSpace(nombre.Apellido1) ? usuario.Apellido1 : nombre.Apellido1);
-        usuario.Apellido2 = datos.Apellido2 ?? (string.IsNullOrWhiteSpace(nombre.Apellido2) ? usuario.Apellido2 : nombre.Apellido2);
-        usuario.Telefono = datos.Telefono ?? usuario.Telefono;
-        usuario.Correo = datos.Correo ?? datos.Email ?? usuario.Correo;
-        usuario.EsEstudiante = datos.EsEstudiante ?? usuario.EsEstudiante;
-        usuario.Universidad = datos.Universidad ?? usuario.Universidad;
-        usuario.Carnet = datos.Carnet ?? usuario.Carnet;
-    }
-
-    /*
-    Descripción: Divide un nombre completo en nombres y apellidos.
-    Entradas: Texto opcional con el nombre completo.
-    Salidas: Tupla con Nombre1, Nombre2, Apellido1 y Apellido2.
-    Restricciones: Si faltan partes, se completan con cadenas vacías.
-    */
-    private static (string Nombre1, string Nombre2, string Apellido1, string Apellido2) SepararNombre(string? nombreCompleto)
-    {
-        var partes = (nombreCompleto ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return (
-            partes.ElementAtOrDefault(0) ?? string.Empty,
-            partes.ElementAtOrDefault(1) ?? string.Empty,
-            partes.ElementAtOrDefault(2) ?? string.Empty,
-            string.Join(' ', partes.Skip(3)));
     }
 
     /*

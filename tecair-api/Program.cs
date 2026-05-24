@@ -2,6 +2,9 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TecAir.Api;
 using TecAir.Api.Data;
+using TecAir.Api.Interfaces;
+using TecAir.Api.Repositories;
+using TecAir.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +33,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddDbContext<TecAirDb>(options =>
+
 {
     //var connectionString = builder.Configuration.GetConnectionString("TecAirDb") ?? "Data Source=data/tecair.sqlite";
     //options.UseSqlite(connectionString);
