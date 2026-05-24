@@ -1,0 +1,6 @@
+@TecAir.Api_HostAddress = http://localhost:5283
+
+GET {{TecAir.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

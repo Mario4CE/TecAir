@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TecAir</name>
+    </assembly>
+    <members>
+        <member name="T:TecAir.Models.Aircraft">
+            <summary>
+            Modelo de Aeronave para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Airport">
+            <summary>
+            Modelo de Aeropuerto para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.BoardingPass">
+            <summary>
+            Modelo de Pase de Abordar para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Flight">
+            <summary>
+            Modelo de Vuelo para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Luggage">
+            <summary>
+            Modelo de Maleta/Equipaje para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Promotion">
+            <summary>
+            Modelo de Promoción para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Reservation">
+            <summary>
+            Modelo de Reservación para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.Route">
+            <summary>
+            Modelo de Ruta para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.User">
+            <summary>
+            Modelo de Usuario para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Services.AuthenticationService">
+            <summary>
+            Servicio para gestionar autenticación y sesión del usuario
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.AuthenticationService.LoginAsync(System.String,System.String)">
+            <summary>
+            Intenta autenticar un usuario con email y contraseña
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.AuthenticationService.Logout">
+            <summary>
+            Cierra la sesión actual
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.AuthenticationService.RegisterAsync(TecAir.Models.User)">
+            <summary>
+            Registra un nuevo usuario
+            </summary>
+        </member>
+        <member name="T:TecAir.Services.DatabaseService">
+            <summary>
+            Servicio de base de datos local (SQLite) para operaciones sin conexión
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.DatabaseService.EnsureConnectionAsync">
+            <summary>
+            Asegura que la conexión esté disponible
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.DatabaseService.InitializeAsync">
+            <summary>
+            Inicializa la conexión a la base de datos y crea las tablas
+            </summary>
+        </member>
+        <member name="M:TecAir.Services.DatabaseService.SeedDataAsync">
+            <summary>
+            Carga datos iniciales si la base de datos está vacía
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.BaseViewModel">
+            <summary>
+            Clase base para todos los ViewModels - implementa INotifyPropertyChanged
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.FlightViewModel">
+            <summary>
+            ViewModel para búsqueda y gestión de vuelos
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.PromotionViewModel">
+            <summary>
+            ViewModel para gestión de promociones
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.ReservationViewModel">
+            <summary>
+            ViewModel para gestión de reservaciones
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.UserViewModel">
+            <summary>
+            ViewModel para gestión de usuarios
+            </summary>
+        </member>
+        <member name="T:TecAir.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+    </members>
+</doc>

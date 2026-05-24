@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TecAir.Views.HomePage"
+             Title="TECAir - Inicio"
+             BackgroundColor="#F5F5F5">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <!-- Logo y Título -->
+            <VerticalStackLayout 
+                HorizontalOptions="Center" 
+                Spacing="10"
+                Padding="0,20">
+                <Label 
+                    Text="✈️"
+                    FontSize="48"
+                    HorizontalOptions="Center"/>
+                <Label 
+                    Text="TECAIR"
+                    FontSize="32"
+                    FontAttributes="Bold"
+                    TextColor="#1F4788"
+                    HorizontalOptions="Center"/>
+                <Label 
+                    Text="Tu aerolínea de confianza"
+                    FontSize="14"
+                    TextColor="#666666"
+                    HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Separador -->
+            <BoxView Color="#CCCCCC" HeightRequest="1" Margin="0,10"/>
+
+            <!-- Botones principales -->
+            <Button 
+                x:Name="SearchFlightsBtn"
+                Text="🔍 Buscar Vuelos"
+                FontSize="16"
+                FontAttributes="Bold"
+                Padding="20"
+                CornerRadius="10"
+                BackgroundColor="#007AFF"
+                TextColor="White"
+                Clicked="OnSearchFlightsClicked"/>
+
+            <Button 
+                x:Name="MyReservationsBtn"
+                Text="📋 Mis Reservaciones"
+                FontSize="16"
+                FontAttributes="Bold"
+                Padding="20"
+                CornerRadius="10"
+                BackgroundColor="#34C759"
+                TextColor="White"
+                Clicked="OnMyReservationsClicked"/>
+
+            <Button 
+                x:Name="PromotionsBtn"
+                Text="🎉 Promociones"
+                FontSize="16"
+                FontAttributes="Bold"
+                Padding="20"
+                CornerRadius="10"
+                BackgroundColor="#FF9500"
+                TextColor="White"
+                Clicked="OnPromotionsClicked"/>
+
+            <Button 
+                x:Name="MyAccountBtn"
+                Text="👤 Mi Cuenta"
+                FontSize="16"
+                FontAttributes="Bold"
+                Padding="20"
+                CornerRadius="10"
+                BackgroundColor="#5856D6"
+                TextColor="White"
+                Clicked="OnMyAccountClicked"/>
+
+            <!-- Información de usuario logueado -->
+            <BoxView Color="#CCCCCC" HeightRequest="1" Margin="0,20"/>
+            
+            <Label 
+                x:Name="UserInfoLabel"
+                Text="Usuario: No autenticado"
+                FontSize="12"
+                TextColor="#666666"
+                Padding="10,5"/>
+
+            <Button 
+                x:Name="LogoutBtn"
+                Text="Cerrar Sesión"
+                FontSize="14"
+                Padding="15"
+                CornerRadius="8"
+                BackgroundColor="#FF3B30"
+                TextColor="White"
+                Clicked="OnLogoutClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

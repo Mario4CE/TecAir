@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TecAir.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TecAir"
+    xmlns:views="clr-namespace:TecAir.Views"
+    Title="TecAir">
+
+    <!-- Rutas de navegación -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="login" />
+
+    <TabBar>
+        <!-- Inicio -->
+        <ShellContent
+            Title="Inicio"
+            Icon="{FontImage Glyph=🏠, FontFamily=Arial, Size=24}"
+            ContentTemplate="{DataTemplate views:HomePage}"
+            Route="home" />
+
+        <!-- Búsqueda de Vuelos -->
+        <ShellContent
+            Title="Vuelos"
+            Icon="{FontImage Glyph=✈️, FontFamily=Arial, Size=24}"
+            ContentTemplate="{DataTemplate views:FlightsSearchPage}"
+            Route="flights" />
+
+        <!-- Mis Reservaciones -->
+        <ShellContent
+            Title="Reservaciones"
+            Icon="{FontImage Glyph=📋, FontFamily=Arial, Size=24}"
+            ContentTemplate="{DataTemplate views:ReservationsPage}"
+            Route="reservations" />
+
+        <!-- Promociones -->
+        <ShellContent
+            Title="Promociones"
+            Icon="{FontImage Glyph=🎉, FontFamily=Arial, Size=24}"
+            ContentTemplate="{DataTemplate views:PromotionsPage}"
+            Route="promotions" />
+    </TabBar>
+
+    <!-- Estilos globales -->
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Style x:Key="BaseStyle" TargetType="Element">
+                <Setter Property="Shell.BackgroundColor" Value="#007AFF" />
+                <Setter Property="Shell.ForegroundColor" Value="White" />
+                <Setter Property="Shell.TitleColor" Value="White" />
+                <Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
+                <Setter Property="Shell.UnselectedColor" Value="#95FFFFFF" />
+            </Style>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+</Shell>

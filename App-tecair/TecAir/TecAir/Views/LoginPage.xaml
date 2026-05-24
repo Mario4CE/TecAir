@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TecAir.Views.LoginPage"
+             Title="TECAir - Login"
+             BackgroundColor="#F5F5F5">
+    
+    <VerticalStackLayout Padding="20" Spacing="15" VerticalOptions="Center">
+        
+        <!-- Logo -->
+        <VerticalStackLayout 
+            HorizontalOptions="Center" 
+            Spacing="10"
+            Padding="0,0,0,40">
+            <Label 
+                Text="✈️"
+                FontSize="48"
+                HorizontalOptions="Center"/>
+            <Label 
+                Text="TECAIR"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#1F4788"
+                HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Email Input -->
+        <Label Text="Email:" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
+        <Entry 
+            x:Name="EmailEntry"
+            Placeholder="usuario@ejemplo.com"
+            Keyboard="Email"
+            Margin="0,0,0,10"
+            TextColor="Black"
+            />
+
+        <!-- Password Input -->
+        <Label Text="Contraseña:" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
+        <Entry 
+            x:Name="PasswordEntry"
+            Placeholder="Contraseña"
+            IsPassword="True"
+            Margin="0,0,0,20"
+            TextColor="Black"/>
+
+        <!-- Login Button -->
+        <Button 
+            x:Name="LoginBtn"
+            Text="Iniciar Sesión"
+            FontSize="16"
+            FontAttributes="Bold"
+            Padding="20"
+            CornerRadius="10"
+            BackgroundColor="#007AFF"
+            TextColor="White"
+            Clicked="OnLoginClicked"/>
+
+        <!-- Register Link -->
+        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="5">
+            <Label Text="¿No tienes cuenta?" FontSize="12" TextColor="Black"/>
+            <Label 
+                x:Name="RegisterLabel"
+                Text="Regístrate"
+                FontSize="12"
+                TextColor="#007AFF"/>
+        </StackLayout>
+
+    </VerticalStackLayout>
+
+</ContentPage>

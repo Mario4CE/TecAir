@@ -1,0 +1,25 @@
+﻿namespace TecAir.Views;
+
+public partial class LoginPage : ContentPage
+{
+	public LoginPage()
+	{
+		InitializeComponent();
+	}
+
+	private async void OnLoginClicked(object sender, EventArgs e)
+	{
+		var email = EmailEntry.Text;
+		var password = PasswordEntry.Text;
+
+		if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+		{
+			await DisplayAlert("Error", "Por favor completa todos los campos", "OK");
+			return;
+		}
+
+		// TODO: Validar credenciales con base de datos
+		// Por ahora, solo navegamos a la página principal
+		await Shell.Current.GoToAsync("home");
+	}
+}

@@ -1,0 +1,33 @@
+﻿namespace TecAir.Views;
+
+public partial class LoginPage : ContentPage
+{
+	public LoginPage()
+	{
+		InitializeComponent();
+	}
+
+	private async void OnLoginClicked(object sender, EventArgs e)
+	{
+		var email = EmailEntry.Text;
+		var password = PasswordEntry.Text;
+
+		if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+		{
+			await DisplayAlert("Error", "Por favor completa todos los campos", "OK");
+			return;
+		}
+
+		// Validar credenciales con el servicio de autenticación
+		var (success, message, user) = await MauiProgram.AuthenticationService.LoginAsync(email, password);
+
+		if (success)
+		{
+			await Shell.Current.GoToAsync("home");
+		}
+		else
+		{
+			await DisplayAlert("Error de autenticación", message, "OK");
+		}
+	}
+}
