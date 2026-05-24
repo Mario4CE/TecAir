@@ -30,8 +30,8 @@ Motivo de no usar MVC tradicional: este proyecto expone una API y las vistas web
 
 ## Patrones de diseño aplicados
 
-- Repository Pattern: `IUsuarioRepository`/`UsuarioRepository`, `IAeropuertoRepository`/`AeropuertoRepository`, `IAvionRepository`/`AvionRepository`.
-- Service Layer: `IUsuarioService`/`UsuarioService`, `IAeropuertoService`/`AeropuertoService`, `IAvionService`/`AvionService`.
+- Repository Pattern: `IUsuarioRepository`/`UsuarioRepository`, `IAeropuertoRepository`/`AeropuertoRepository`, `IAvionRepository`/`AvionRepository`, `IRutaRepository`/`RutaRepository`.
+- Service Layer: `IUsuarioService`/`UsuarioService`, `IAeropuertoService`/`AeropuertoService`, `IAvionService`/`AvionService`, `IRutaService`/`RutaService`.
 - DTO Pattern: contratos de entrada en `Dtos/Requests.cs`.
 - Dependency Injection: registro de servicios y repositorios en `Program.cs`.
 
@@ -83,7 +83,7 @@ Por compatibilidad, durante esta refactorización no se cambian rutas HTTP, mét
 
 ## Recomendaciones pendientes
 
-- Completar refactor por capas para los demás módulos (`vuelos`, `reservaciones`, `pagos`, `checkins`, `maletas`).
+- Completar refactor por capas para los módulos pendientes (`vuelos`, `reservaciones`, `pagos`, `promociones`, `checkins`, `maletas`).
 - Incorporar pruebas automáticas de integración por endpoint.
 - Activar y validar conexión PostgreSQL en ambiente de integración.
 

@@ -126,42 +126,28 @@ public static class ApiEndpoints
             }
         });
 
-        api.MapGet("/rutas", async (TecAirDb db) =>
-            Results.Ok(new { rutas = await ObtenerRutasAsync(db) }));
+        api.MapGet("/rutas", async (IRutaService rutaService) =>
+            Results.Ok(new { rutas = await rutaService.GetRutasAsync() }));
 
-        api.MapPost("/rutas", async (RutaRequest datos, TecAirDb db) =>
+        api.MapPost("/rutas", async (RutaRequest datos, IRutaService rutaService) =>
         {
-            if (datos.Escalas.Count < 2)
-                return Results.BadRequest(new { mensaje = "Debe indicar al menos origen y destino en escalas." });
-
-            var ruta = new Ruta();
-
-            db.Rutas.Add(ruta);
-            await db.SaveChangesAsync();
-
-            for (var index = 0; index < datos.Escalas.Count; index++)
+            try
             {
-                var escala = datos.Escalas[index];
+                var ruta = await rutaService.CrearRutaAsync(datos);
 
-                db.Escalas.Add(new Escala
-                {
-                    IdRuta = ruta.IdRuta,
-                    Orden = escala.Orden ?? index + 1,
-                    IdAeropuerto = escala.IdAeropuerto,
-                    Tipo = escala.Tipo ?? (index == 0 ? "origen" : index == datos.Escalas.Count - 1 ? "destino" : "escala")
-                });
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/rutas/{ruta.id_ruta}",
+                    new
+                    {
+                        mensaje = "Ruta creada.",
+                        ruta
+                    }
+                );
             }
-
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/rutas/{ruta.IdRuta}",
-                new
-                {
-                    mensaje = "Ruta creada.",
-                    ruta = await ObtenerRutaAsync(db, ruta.IdRuta)
-                }
-            );
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/vuelos", async (string? origen, string? destino, TecAirDb db) =>
@@ -519,54 +505,6 @@ public static class ApiEndpoints
     Entradas: Contexto de base de datos.
     Salidas: Lista de rutas serializables.
     Restricciones: Devuelve solo rutas existentes en la base.
-    */
-    private static async Task<List<object>> ObtenerRutasAsync(TecAirDb db)
-    {
-        var rutas = await db.Rutas.AsNoTracking().OrderBy(x => x.IdRuta).ToListAsync();
-        var resultado = new List<object>();
-
-        foreach (var ruta in rutas)
-        {
-            resultado.Add(await ObtenerRutaAsync(db, ruta.IdRuta));
-        }
-
-        return resultado;
-    }
-
-    /*
-    Descripción: Obtiene una ruta con sus escalas y aeropuertos relacionados.
-    Entradas: Contexto de base de datos e identificador de ruta.
-    Salidas: Objeto serializable con id_ruta y escalas.
-    Restricciones: La ruta debe existir o el resultado será una ruta vacía en escalas.
-    */
-    private static async Task<object> ObtenerRutaAsync(TecAirDb db, int idRuta)
-    {
-        var escalas = await db.Escalas.AsNoTracking()
-            .Where(x => x.IdRuta == idRuta)
-            .OrderBy(x => x.Orden)
-            .Join(
-                db.Aeropuertos.AsNoTracking(),
-                escala => escala.IdAeropuerto,
-                aeropuerto => aeropuerto.IdAeropuerto,
-                (escala, aeropuerto) => new
-                {
-                    escala.IdRuta,
-                    escala.Orden,
-                    escala.Tipo,
-                    aeropuerto.IdAeropuerto,
-                    aeropuerto.Nombre,
-                    aeropuerto.Ubicacion
-                })
-            .ToListAsync();
-
-        return new { id_ruta = idRuta, escalas };
-    }
-
-    /*
-    Descripción: Calcula el catálogo de vuelos con disponibilidad y escalas.
-    Entradas: Contexto de base de datos y filtros opcionales de origen y destino.
-    Salidas: Lista tipada de vuelos listos para respuesta HTTP.
-    Restricciones: El filtro por origen y destino acepta id o nombre del aeropuerto.
     */
     private static async Task<List<VueloResponse>> ObtenerVuelosAsync(TecAirDb db, string? origen, string? destino)
     {
