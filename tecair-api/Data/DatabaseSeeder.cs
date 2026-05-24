@@ -4,30 +4,34 @@ using TecAir.Api.Models;
 namespace TecAir.Api.Data;
 
 /*
-Descripción: Inicializa la base de datos con datos de ejemplo cuando no existen registros.
-Entradas: Contexto TecAirDb.
-Salidas: Datos semilla para probar el flujo principal del API.
-Restricciones: Solo debe ejecutarse sobre una base vacía o recién creada.
+Descripción:
+Inicializa la base de datos con datos de ejemplo cuando no existen registros.
+Entradas:
+No recibe parámetros directos.
+Salidas:
+No retorna valor.
+Restricciones:
+Solo debe ejecutarse sobre una base vacía o recién creada.
 */
 public static class DatabaseSeeder
 {
     /*
-    DESCRIPCIÓN: Inicializa la base de datos de la aplicación con datos predeterminados
-    en caso de estar vacía.
-    ENTRADAS: db (TecAirDb) - Contexto de base de datos.
-    SALIDAS: Task - Operación asíncrona.
-    RESTRICCIONES: Si la base de datos aún no está configurada, el seed se omite
-    para evitar que la aplicación se caiga.
+    Descripción:
+    Inicializa la base de la aplicación con datos predeterminados cuando está vacía.
+    Entradas:
+    Recibe una instancia de TecAirDb para verificar y cargar datos.
+    Salidas:
+    No retorna valor.
+    Restricciones:
+    Si la base de datos no está configurada, el seed se omite para evitar que la aplicación falle.
     */
     public static async Task SeedAsync(TecAirDb db)
     {
         try
-        Descripción: Inicializa la base de la aplicación con datos predeterminados
-        en caso de estar vacía.
-        Entradas: db (TecAirDb) - Contexto de base de datos.
-        Salidas: Task - Operación asíncrona.
-        Restricciones: Si la base de datos aún no está configurada, el seed se omite
-        para evitar que la aplicación se caiga.
+        {
+            if (await db.Usuarios.AnyAsync())
+            {
+                return;
             }
 
             db.Usuarios.Add(new Usuario

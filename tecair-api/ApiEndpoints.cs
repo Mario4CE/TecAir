@@ -86,33 +86,24 @@ public static class ApiEndpoints
             }
         });
 
-        api.MapGet("/aeropuertos", async (TecAirDb db) =>
-            Results.Ok(new
-            {
-                aeropuertos = await db.Aeropuertos
-                    .AsNoTracking()
-                    .OrderBy(x => x.Nombre)
-                    .ToListAsync()
-            }));
+        api.MapGet("/aeropuertos", async (IAeropuertoService aeropuertoService) =>
+            Results.Ok(new { aeropuertos = await aeropuertoService.GetAeropuertosAsync() }));
 
-        api.MapPost("/aeropuertos", async (AeropuertoRequest datos, TecAirDb db) =>
+        api.MapPost("/aeropuertos", async (AeropuertoRequest datos, IAeropuertoService aeropuertoService) =>
         {
-            if (string.IsNullOrWhiteSpace(datos.Nombre))
-                return Results.BadRequest(new { mensaje = "El nombre del aeropuerto es obligatorio." });
-
-            var aeropuerto = new Aeropuerto
+            try
             {
-                Nombre = datos.Nombre,
-                Ubicacion = datos.Ubicacion ?? string.Empty
-            };
+                var aeropuerto = await aeropuertoService.CrearAeropuertoAsync(datos);
 
-            db.Aeropuertos.Add(aeropuerto);
-            await db.SaveChangesAsync();
-
-            return Results.Created(
-                $"{ApiGlobals.ApiBasePath}/aeropuertos/{aeropuerto.IdAeropuerto}",
-                new { mensaje = "Aeropuerto creado.", aeropuerto }
-            );
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/aeropuertos/{aeropuerto.IdAeropuerto}",
+                    new { mensaje = "Aeropuerto creado.", aeropuerto }
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/aviones", async (TecAirDb db) =>
