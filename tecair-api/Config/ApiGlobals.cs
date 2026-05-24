@@ -59,4 +59,16 @@ public static class ApiGlobals
     Debe mantenerse por compatibilidad con clientes existentes.
     */
     public const string UserIdHeaderName = "X-User-Id";
+
+    /*
+    Descripción:
+    Identificador de usuario por defecto usado cuando el encabezado X-User-Id no está presente o es inválido.
+    Entradas:
+    No recibe parámetros directos.
+    Salidas:
+    Retorna el id de usuario de fallback.
+    Restricciones:
+    Debe corresponder a un usuario válido en ambientes de prueba o desarrollo.
+    */
+    public const int DefaultUserId = 1;
 }
