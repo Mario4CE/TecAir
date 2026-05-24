@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using TecAir.Api.Config;
 using TecAir.Api.Data;
 using TecAir.Api.Dtos;
-using TecAir.Api.Models;
 using TecAir.Api.Interfaces;
+using TecAir.Api.Models;
 
 namespace TecAir.Api;
 
@@ -10,7 +11,7 @@ public static class ApiEndpoints
 {
     public static WebApplication MapTecAirApiEndpoints(this WebApplication app)
     {
-        var api = app.MapGroup("/api");
+        var api = app.MapGroup(ApiGlobals.ApiBasePath);
 
         /*
         Descripción: Punto de entrada informativo del API.
@@ -21,7 +22,19 @@ public static class ApiEndpoints
         api.MapGet("/", () => Results.Ok(new
         {
             mensaje = "API TECAir activa",
-            recursos = new[] { "usuarios", "aeropuertos", "aviones", "rutas", "vuelos", "reservaciones", "pagos", "promociones", "checkins", "maletas" }
+            recursos = new[]
+            {
+                "usuarios",
+                "aeropuertos",
+                "aviones",
+                "rutas",
+                "vuelos",
+                "reservaciones",
+                "pagos",
+                "promociones",
+                "checkins",
+                "maletas"
+            }
         }));
 
         api.MapGet("/usuarios", async (IUsuarioService usuarioService) =>
@@ -31,20 +44,29 @@ public static class ApiEndpoints
         {
             var idUsuario = ObtenerIdUsuarioHeader(request);
             var usuario = await usuarioService.GetPerfilAsync(idUsuario);
-            return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { usuario });
+
+            return usuario is null
+                ? Results.NotFound(new { mensaje = "Usuario no encontrado." })
+                : Results.Ok(new { usuario });
         });
 
         api.MapPut("/usuarios/perfil", async (HttpRequest request, UsuarioRequest datos, IUsuarioService usuarioService) =>
         {
             var idUsuario = ObtenerIdUsuarioHeader(request);
             var usuario = await usuarioService.ActualizarPerfilAsync(idUsuario, datos);
-            return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { mensaje = "Perfil actualizado.", usuario });
+
+            return usuario is null
+                ? Results.NotFound(new { mensaje = "Usuario no encontrado." })
+                : Results.Ok(new { mensaje = "Perfil actualizado.", usuario });
         });
 
         api.MapGet("/usuarios/{idUsuario:int}", async (int idUsuario, IUsuarioService usuarioService) =>
         {
             var usuario = await usuarioService.GetUsuarioByIdAsync(idUsuario);
-            return usuario is null ? Results.NotFound(new { mensaje = "Usuario no encontrado." }) : Results.Ok(new { usuario });
+
+            return usuario is null
+                ? Results.NotFound(new { mensaje = "Usuario no encontrado." })
+                : Results.Ok(new { usuario });
         });
 
         api.MapPost("/usuarios", async (UsuarioRequest datos, IUsuarioService usuarioService) =>
@@ -52,7 +74,11 @@ public static class ApiEndpoints
             try
             {
                 var usuario = await usuarioService.CrearUsuarioAsync(datos);
-                return Results.Created($"/api/usuarios/{usuario.IdUsuario}", new { mensaje = "Usuario creado.", usuario });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/usuarios/{usuario.IdUsuario}",
+                    new { mensaje = "Usuario creado.", usuario }
+                );
             }
             catch (InvalidOperationException ex)
             {
@@ -61,28 +87,64 @@ public static class ApiEndpoints
         });
 
         api.MapGet("/aeropuertos", async (TecAirDb db) =>
-            Results.Ok(new { aeropuertos = await db.Aeropuertos.AsNoTracking().OrderBy(x => x.Nombre).ToListAsync() }));
+            Results.Ok(new
+            {
+                aeropuertos = await db.Aeropuertos
+                    .AsNoTracking()
+                    .OrderBy(x => x.Nombre)
+                    .ToListAsync()
+            }));
 
         api.MapPost("/aeropuertos", async (AeropuertoRequest datos, TecAirDb db) =>
         {
-            if (string.IsNullOrWhiteSpace(datos.Nombre)) return Results.BadRequest(new { mensaje = "El nombre del aeropuerto es obligatorio." });
-            var aeropuerto = new Aeropuerto { Nombre = datos.Nombre, Ubicacion = datos.Ubicacion ?? string.Empty };
+            if (string.IsNullOrWhiteSpace(datos.Nombre))
+                return Results.BadRequest(new { mensaje = "El nombre del aeropuerto es obligatorio." });
+
+            var aeropuerto = new Aeropuerto
+            {
+                Nombre = datos.Nombre,
+                Ubicacion = datos.Ubicacion ?? string.Empty
+            };
+
             db.Aeropuertos.Add(aeropuerto);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/aeropuertos/{aeropuerto.IdAeropuerto}", new { mensaje = "Aeropuerto creado.", aeropuerto });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/aeropuertos/{aeropuerto.IdAeropuerto}",
+                new { mensaje = "Aeropuerto creado.", aeropuerto }
+            );
         });
 
         api.MapGet("/aviones", async (TecAirDb db) =>
-            Results.Ok(new { aviones = await db.Aviones.AsNoTracking().OrderBy(x => x.Matricula).ToListAsync() }));
+            Results.Ok(new
+            {
+                aviones = await db.Aviones
+                    .AsNoTracking()
+                    .OrderBy(x => x.Matricula)
+                    .ToListAsync()
+            }));
 
         api.MapPost("/aviones", async (AvionRequest datos, TecAirDb db) =>
         {
-            if (string.IsNullOrWhiteSpace(datos.Matricula)) return Results.BadRequest(new { mensaje = "La matrícula es obligatoria." });
-            if (datos.Capacidad <= 0) return Results.BadRequest(new { mensaje = "La capacidad debe ser mayor a cero." });
-            var avion = new Avion { Matricula = datos.Matricula, Capacidad = datos.Capacidad };
+            if (string.IsNullOrWhiteSpace(datos.Matricula))
+                return Results.BadRequest(new { mensaje = "La matrícula es obligatoria." });
+
+            if (datos.Capacidad <= 0)
+                return Results.BadRequest(new { mensaje = "La capacidad debe ser mayor a cero." });
+
+            var avion = new Avion
+            {
+                Matricula = datos.Matricula,
+                Capacidad = datos.Capacidad
+            };
+
             db.Aviones.Add(avion);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/aviones/{avion.Matricula}", new { mensaje = "Avión creado.", avion });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/aviones/{avion.Matricula}",
+                new { mensaje = "Avión creado.", avion }
+            );
         });
 
         api.MapGet("/rutas", async (TecAirDb db) =>
@@ -90,15 +152,18 @@ public static class ApiEndpoints
 
         api.MapPost("/rutas", async (RutaRequest datos, TecAirDb db) =>
         {
-            if (datos.Escalas.Count < 2) return Results.BadRequest(new { mensaje = "Debe indicar al menos origen y destino en escalas." });
+            if (datos.Escalas.Count < 2)
+                return Results.BadRequest(new { mensaje = "Debe indicar al menos origen y destino en escalas." });
 
             var ruta = new Ruta();
+
             db.Rutas.Add(ruta);
             await db.SaveChangesAsync();
 
             for (var index = 0; index < datos.Escalas.Count; index++)
             {
                 var escala = datos.Escalas[index];
+
                 db.Escalas.Add(new Escala
                 {
                     IdRuta = ruta.IdRuta,
@@ -109,7 +174,15 @@ public static class ApiEndpoints
             }
 
             await db.SaveChangesAsync();
-            return Results.Created($"/api/rutas/{ruta.IdRuta}", new { mensaje = "Ruta creada.", ruta = await ObtenerRutaAsync(db, ruta.IdRuta) });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/rutas/{ruta.IdRuta}",
+                new
+                {
+                    mensaje = "Ruta creada.",
+                    ruta = await ObtenerRutaAsync(db, ruta.IdRuta)
+                }
+            );
         });
 
         api.MapGet("/vuelos", async (string? origen, string? destino, TecAirDb db) =>
@@ -117,16 +190,26 @@ public static class ApiEndpoints
 
         api.MapGet("/vuelos/{idVuelo:int}", async (int idVuelo, TecAirDb db) =>
         {
-            var vuelo = (await ObtenerVuelosAsync(db, null, null)).FirstOrDefault(x => x.IdVuelo == idVuelo);
-            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { vuelo });
+            var vuelo = (await ObtenerVuelosAsync(db, null, null))
+                .FirstOrDefault(x => x.IdVuelo == idVuelo);
+
+            return vuelo is null
+                ? Results.NotFound(new { mensaje = "Vuelo no encontrado." })
+                : Results.Ok(new { vuelo });
         });
 
         api.MapPost("/vuelos", async (VueloRequest datos, TecAirDb db, IConfiguration configuration) =>
         {
             var options = configuration.GetSection("TecAir").Get<TecAirOptions>() ?? new TecAirOptions();
-            if (datos.IdRuta <= 0) return Results.BadRequest(new { mensaje = "La ruta es obligatoria." });
-            if (string.IsNullOrWhiteSpace(datos.Matricula)) return Results.BadRequest(new { mensaje = "La matrícula del avión es obligatoria." });
-            if (datos.FechaSalida is null) return Results.BadRequest(new { mensaje = "La fecha de salida es obligatoria." });
+
+            if (datos.IdRuta <= 0)
+                return Results.BadRequest(new { mensaje = "La ruta es obligatoria." });
+
+            if (string.IsNullOrWhiteSpace(datos.Matricula))
+                return Results.BadRequest(new { mensaje = "La matrícula del avión es obligatoria." });
+
+            if (datos.FechaSalida is null)
+                return Results.BadRequest(new { mensaje = "La fecha de salida es obligatoria." });
 
             var vuelo = new Vuelo
             {
@@ -141,12 +224,25 @@ public static class ApiEndpoints
 
             db.Vuelos.Add(vuelo);
             await db.SaveChangesAsync();
-            var respuesta = (await ObtenerVuelosAsync(db, null, null)).First(x => x.IdVuelo == vuelo.IdVuelo);
-            return Results.Created($"/api/vuelos/{vuelo.IdVuelo}", new { mensaje = "Vuelo creado.", vuelo = respuesta });
+
+            var respuesta = (await ObtenerVuelosAsync(db, null, null))
+                .First(x => x.IdVuelo == vuelo.IdVuelo);
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/vuelos/{vuelo.IdVuelo}",
+                new
+                {
+                    mensaje = "Vuelo creado.",
+                    vuelo = respuesta
+                }
+            );
         });
 
-        api.MapPatch("/vuelos/{idVuelo:int}/abrir", async (int idVuelo, TecAirDb db) => await CambiarEstadoVueloAsync(idVuelo, "abierto", db));
-        api.MapPatch("/vuelos/{idVuelo:int}/cerrar", async (int idVuelo, TecAirDb db) => await CambiarEstadoVueloAsync(idVuelo, "cerrado", db));
+        api.MapPatch("/vuelos/{idVuelo:int}/abrir", async (int idVuelo, TecAirDb db) =>
+            await CambiarEstadoVueloAsync(idVuelo, "abierto", db));
+
+        api.MapPatch("/vuelos/{idVuelo:int}/cerrar", async (int idVuelo, TecAirDb db) =>
+            await CambiarEstadoVueloAsync(idVuelo, "cerrado", db));
 
         api.MapGet("/reservaciones", async (HttpRequest request, TecAirDb db) =>
         {
@@ -154,29 +250,48 @@ public static class ApiEndpoints
                 ?? ObtenerEnteroQuery(request, "usuario_id")
                 ?? ObtenerEnteroQuery(request, "idUsuario")
                 ?? ObtenerEnteroQuery(request, "usuarioId");
-            var query = db.Reservaciones.AsNoTracking().OrderByDescending(x => x.FechaReservacion).AsQueryable();
-            if (filtroUsuario.HasValue) query = query.Where(x => x.IdUsuario == filtroUsuario.Value);
+
+            var query = db.Reservaciones
+                .AsNoTracking()
+                .OrderByDescending(x => x.FechaReservacion)
+                .AsQueryable();
+
+            if (filtroUsuario.HasValue)
+                query = query.Where(x => x.IdUsuario == filtroUsuario.Value);
+
             return Results.Ok(new { reservaciones = await query.ToListAsync() });
         });
 
         api.MapGet("/reservaciones/{idReservacion:int}", async (int idReservacion, TecAirDb db) =>
         {
             var reservacion = await ObtenerReservacionAsync(db, idReservacion);
-            return reservacion is null ? Results.NotFound(new { mensaje = "Reservación no encontrada." }) : Results.Ok(new { reservacion });
+
+            return reservacion is null
+                ? Results.NotFound(new { mensaje = "Reservación no encontrada." })
+                : Results.Ok(new { reservacion });
         });
 
         api.MapPost("/reservaciones", async (ReservacionRequest datos, TecAirDb db, IConfiguration configuration) =>
         {
             var idUsuario = datos.IdUsuario ?? datos.UsuarioId;
             var idVuelo = datos.IdVuelo ?? datos.VueloId;
-            if (idUsuario is null) return Results.BadRequest(new { mensaje = "El usuario es obligatorio." });
-            if (idVuelo is null) return Results.BadRequest(new { mensaje = "El vuelo es obligatorio." });
+
+            if (idUsuario is null)
+                return Results.BadRequest(new { mensaje = "El usuario es obligatorio." });
+
+            if (idVuelo is null)
+                return Results.BadRequest(new { mensaje = "El vuelo es obligatorio." });
 
             var usuario = await db.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario.Value);
-            if (usuario is null) return Results.NotFound(new { mensaje = "Usuario no encontrado." });
-            if (!await db.Vuelos.AnyAsync(x => x.IdVuelo == idVuelo.Value)) return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
+
+            if (usuario is null)
+                return Results.NotFound(new { mensaje = "Usuario no encontrado." });
+
+            if (!await db.Vuelos.AnyAsync(x => x.IdVuelo == idVuelo.Value))
+                return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
 
             var options = configuration.GetSection("TecAir").Get<TecAirOptions>() ?? new TecAirOptions();
+
             var reservacion = new Reservacion
             {
                 Estado = datos.Estado ?? "pendiente_pago",
@@ -186,37 +301,82 @@ public static class ApiEndpoints
             };
 
             usuario.Millas += options.LoyaltyMilesPerReservation;
+
             db.Reservaciones.Add(reservacion);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/reservaciones/{reservacion.IdReservacion}", new { mensaje = "Reservación creada.", reservacion = await ObtenerReservacionAsync(db, reservacion.IdReservacion) });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/reservaciones/{reservacion.IdReservacion}",
+                new
+                {
+                    mensaje = "Reservación creada.",
+                    reservacion = await ObtenerReservacionAsync(db, reservacion.IdReservacion)
+                }
+            );
         });
 
         api.MapPatch("/reservaciones/{idReservacion:int}/cancelar", async (int idReservacion, TecAirDb db) =>
         {
             var reservacion = await db.Reservaciones.FirstOrDefaultAsync(x => x.IdReservacion == idReservacion);
-            if (reservacion is null) return Results.NotFound(new { mensaje = "Reservación no encontrada." });
+
+            if (reservacion is null)
+                return Results.NotFound(new { mensaje = "Reservación no encontrada." });
+
             reservacion.Estado = "cancelada";
+
             await db.SaveChangesAsync();
-            return Results.Ok(new { mensaje = "Reservación cancelada.", reservacion = await ObtenerReservacionAsync(db, idReservacion) });
+
+            return Results.Ok(new
+            {
+                mensaje = "Reservación cancelada.",
+                reservacion = await ObtenerReservacionAsync(db, idReservacion)
+            });
         });
 
         api.MapGet("/pagos", async (TecAirDb db) =>
-            Results.Ok(new { pagos = await db.Pagos.AsNoTracking().OrderByDescending(x => x.IdPago).ToListAsync() }));
+            Results.Ok(new
+            {
+                pagos = await db.Pagos
+                    .AsNoTracking()
+                    .OrderByDescending(x => x.IdPago)
+                    .ToListAsync()
+            }));
 
         api.MapPost("/pagos", async (PagoRequest datos, TecAirDb db) =>
         {
             var idReservacion = datos.IdReservacion ?? datos.ReservacionId;
-            if (idReservacion is null) return Results.BadRequest(new { mensaje = "La reservación es obligatoria." });
-            if (datos.Monto <= 0) return Results.BadRequest(new { mensaje = "El monto debe ser mayor a cero." });
+
+            if (idReservacion is null)
+                return Results.BadRequest(new { mensaje = "La reservación es obligatoria." });
+
+            if (datos.Monto <= 0)
+                return Results.BadRequest(new { mensaje = "El monto debe ser mayor a cero." });
 
             var reservacion = await db.Reservaciones.FirstOrDefaultAsync(x => x.IdReservacion == idReservacion.Value);
-            if (reservacion is null) return Results.NotFound(new { mensaje = "Reservación no encontrada." });
 
-            var pago = new Pago { IdReservacion = idReservacion.Value, Monto = datos.Monto, Metodo = datos.Metodo ?? "tarjeta" };
+            if (reservacion is null)
+                return Results.NotFound(new { mensaje = "Reservación no encontrada." });
+
+            var pago = new Pago
+            {
+                IdReservacion = idReservacion.Value,
+                Monto = datos.Monto,
+                Metodo = datos.Metodo ?? "tarjeta"
+            };
+
             reservacion.Estado = "pagada";
+
             db.Pagos.Add(pago);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/pagos/{pago.IdPago}", new { mensaje = "Pago registrado.", pago });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/pagos/{pago.IdPago}",
+                new
+                {
+                    mensaje = "Pago registrado.",
+                    pago
+                }
+            );
         });
 
         api.MapGet("/promociones", async (TecAirDb db) =>
@@ -224,8 +384,11 @@ public static class ApiEndpoints
 
         api.MapPost("/promociones", async (PromocionRequest datos, TecAirDb db) =>
         {
-            if (datos.IdRuta <= 0) return Results.BadRequest(new { mensaje = "La ruta es obligatoria." });
-            if (datos.Precio <= 0) return Results.BadRequest(new { mensaje = "El precio promocional debe ser mayor a cero." });
+            if (datos.IdRuta <= 0)
+                return Results.BadRequest(new { mensaje = "La ruta es obligatoria." });
+
+            if (datos.Precio <= 0)
+                return Results.BadRequest(new { mensaje = "El precio promocional debe ser mayor a cero." });
 
             var promocion = new Promocion
             {
@@ -235,49 +398,114 @@ public static class ApiEndpoints
                 FechaFin = datos.FechaFin,
                 Imagen = datos.Imagen ?? string.Empty
             };
+
             db.Promociones.Add(promocion);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/promociones/{promocion.IdPromocion}", new { mensaje = "Promoción creada.", promocion });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/promociones/{promocion.IdPromocion}",
+                new
+                {
+                    mensaje = "Promoción creada.",
+                    promocion
+                }
+            );
         });
 
         api.MapGet("/checkins", async (TecAirDb db) =>
-            Results.Ok(new { checkins = await db.CheckIns.AsNoTracking().OrderByDescending(x => x.IdCheckin).ToListAsync() }));
+            Results.Ok(new
+            {
+                checkins = await db.CheckIns
+                    .AsNoTracking()
+                    .OrderByDescending(x => x.IdCheckin)
+                    .ToListAsync()
+            }));
 
         api.MapGet("/checkins/{idCheckin:int}/pase-abordar", async (int idCheckin, TecAirDb db) =>
         {
             var pase = await ObtenerPaseAbordarAsync(db, idCheckin);
-            return pase is null ? Results.NotFound(new { mensaje = "Check-in no encontrado." }) : Results.Ok(new { pase_abordar = pase });
+
+            return pase is null
+                ? Results.NotFound(new { mensaje = "Check-in no encontrado." })
+                : Results.Ok(new { pase_abordar = pase });
         });
 
         api.MapPost("/checkins", async (CheckInRequest datos, TecAirDb db) =>
         {
             var idUsuario = datos.IdUsuario ?? datos.UsuarioId;
             var idVuelo = datos.IdVuelo ?? datos.VueloId;
-            if (idUsuario is null) return Results.BadRequest(new { mensaje = "El usuario es obligatorio." });
-            if (idVuelo is null) return Results.BadRequest(new { mensaje = "El vuelo es obligatorio." });
-            if (string.IsNullOrWhiteSpace(datos.Asiento)) return Results.BadRequest(new { mensaje = "El asiento es obligatorio." });
+
+            if (idUsuario is null)
+                return Results.BadRequest(new { mensaje = "El usuario es obligatorio." });
+
+            if (idVuelo is null)
+                return Results.BadRequest(new { mensaje = "El vuelo es obligatorio." });
+
+            if (string.IsNullOrWhiteSpace(datos.Asiento))
+                return Results.BadRequest(new { mensaje = "El asiento es obligatorio." });
 
             var asientoOcupado = await db.CheckIns.AnyAsync(x => x.IdVuelo == idVuelo.Value && x.Asiento == datos.Asiento);
-            if (asientoOcupado) return Results.Conflict(new { mensaje = "El asiento ya está ocupado para este vuelo." });
 
-            var checkIn = new CheckIn { IdUsuario = idUsuario.Value, IdVuelo = idVuelo.Value, Asiento = datos.Asiento };
+            if (asientoOcupado)
+                return Results.Conflict(new { mensaje = "El asiento ya está ocupado para este vuelo." });
+
+            var checkIn = new CheckIn
+            {
+                IdUsuario = idUsuario.Value,
+                IdVuelo = idVuelo.Value,
+                Asiento = datos.Asiento
+            };
+
             db.CheckIns.Add(checkIn);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/checkins/{checkIn.IdCheckin}", new { mensaje = "Check-in realizado.", pase_abordar = await ObtenerPaseAbordarAsync(db, checkIn.IdCheckin) });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/checkins/{checkIn.IdCheckin}",
+                new
+                {
+                    mensaje = "Check-in realizado.",
+                    pase_abordar = await ObtenerPaseAbordarAsync(db, checkIn.IdCheckin)
+                }
+            );
         });
 
         api.MapGet("/maletas", async (TecAirDb db) =>
-            Results.Ok(new { maletas = await db.Maletas.AsNoTracking().OrderBy(x => x.IdCheckin).ThenBy(x => x.NumMaleta).ToListAsync() }));
+            Results.Ok(new
+            {
+                maletas = await db.Maletas
+                    .AsNoTracking()
+                    .OrderBy(x => x.IdCheckin)
+                    .ThenBy(x => x.NumMaleta)
+                    .ToListAsync()
+            }));
 
         api.MapPost("/maletas", async (MaletaRequest datos, TecAirDb db) =>
         {
-            if (string.IsNullOrWhiteSpace(datos.NumMaleta)) return Results.BadRequest(new { mensaje = "El número de maleta es obligatorio." });
-            if (!await db.CheckIns.AnyAsync(x => x.IdCheckin == datos.IdCheckin)) return Results.NotFound(new { mensaje = "Check-in no encontrado." });
+            if (string.IsNullOrWhiteSpace(datos.NumMaleta))
+                return Results.BadRequest(new { mensaje = "El número de maleta es obligatorio." });
 
-            var maleta = new Maleta { NumMaleta = datos.NumMaleta, Peso = datos.Peso, Color = datos.Color, IdCheckin = datos.IdCheckin };
+            if (!await db.CheckIns.AnyAsync(x => x.IdCheckin == datos.IdCheckin))
+                return Results.NotFound(new { mensaje = "Check-in no encontrado." });
+
+            var maleta = new Maleta
+            {
+                NumMaleta = datos.NumMaleta,
+                Peso = datos.Peso,
+                Color = datos.Color,
+                IdCheckin = datos.IdCheckin
+            };
+
             db.Maletas.Add(maleta);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/maletas/{maleta.NumMaleta}", new { mensaje = "Maleta asignada.", resumen = await ResumenMaletasAsync(db, datos.IdCheckin) });
+
+            return Results.Created(
+                $"{ApiGlobals.ApiBasePath}/maletas/{maleta.NumMaleta}",
+                new
+                {
+                    mensaje = "Maleta asignada.",
+                    resumen = await ResumenMaletasAsync(db, datos.IdCheckin)
+                }
+            );
         });
 
         return app;
@@ -285,13 +513,15 @@ public static class ApiEndpoints
 
     /*
     Descripción: Lee el identificador de usuario desde el encabezado de la petición.
-    Entradas: Request HTTP con encabezado X-User-Id.
+    Entradas: Request HTTP con encabezado definido en ApiGlobals.UserIdHeaderName.
     Salidas: Id numérico del usuario.
-    Restricciones: Si el encabezado no existe o es inválido, se usa 1 como valor por defecto.
+    Restricciones: Si el encabezado no existe o es inválido, se usa ApiGlobals.DefaultUserId.
     */
     private static int ObtenerIdUsuarioHeader(HttpRequest request)
     {
-        return int.TryParse(request.Headers["X-User-Id"].FirstOrDefault(), out var idUsuario) ? idUsuario : 1;
+        return int.TryParse(request.Headers[ApiGlobals.UserIdHeaderName].FirstOrDefault(), out var idUsuario)
+            ? idUsuario
+            : ApiGlobals.DefaultUserId;
     }
 
     /*
@@ -315,6 +545,7 @@ public static class ApiEndpoints
     {
         var rutas = await db.Rutas.AsNoTracking().OrderBy(x => x.IdRuta).ToListAsync();
         var resultado = new List<object>();
+
         foreach (var ruta in rutas)
         {
             resultado.Add(await ObtenerRutaAsync(db, ruta.IdRuta));
@@ -334,7 +565,10 @@ public static class ApiEndpoints
         var escalas = await db.Escalas.AsNoTracking()
             .Where(x => x.IdRuta == idRuta)
             .OrderBy(x => x.Orden)
-            .Join(db.Aeropuertos.AsNoTracking(), escala => escala.IdAeropuerto, aeropuerto => aeropuerto.IdAeropuerto,
+            .Join(
+                db.Aeropuertos.AsNoTracking(),
+                escala => escala.IdAeropuerto,
+                aeropuerto => aeropuerto.IdAeropuerto,
                 (escala, aeropuerto) => new
                 {
                     escala.IdRuta,
@@ -365,20 +599,33 @@ public static class ApiEndpoints
             .ToListAsync();
 
         var respuestas = new List<VueloResponse>();
+
         foreach (var vuelo in vuelos)
         {
             var escalas = await db.Escalas.AsNoTracking()
                 .Where(x => x.IdRuta == vuelo.IdRuta)
                 .OrderBy(x => x.Orden)
-                .Join(db.Aeropuertos.AsNoTracking(), escala => escala.IdAeropuerto, aeropuerto => aeropuerto.IdAeropuerto,
-                    (escala, aeropuerto) => new EscalaResponse(escala.IdRuta, escala.Orden, escala.Tipo, aeropuerto.IdAeropuerto, aeropuerto.Nombre, aeropuerto.Ubicacion))
+                .Join(
+                    db.Aeropuertos.AsNoTracking(),
+                    escala => escala.IdAeropuerto,
+                    aeropuerto => aeropuerto.IdAeropuerto,
+                    (escala, aeropuerto) => new EscalaResponse(
+                        escala.IdRuta,
+                        escala.Orden,
+                        escala.Tipo,
+                        aeropuerto.IdAeropuerto,
+                        aeropuerto.Nombre,
+                        aeropuerto.Ubicacion))
                 .ToListAsync();
 
             var escalaOrigen = escalas.FirstOrDefault(x => x.Tipo == "origen");
             var escalaDestino = escalas.FirstOrDefault(x => x.Tipo == "destino");
-            if (!CoincideAeropuerto(escalaOrigen, origen) || !CoincideAeropuerto(escalaDestino, destino)) continue;
+
+            if (!CoincideAeropuerto(escalaOrigen, origen) || !CoincideAeropuerto(escalaDestino, destino))
+                continue;
 
             var reservacionesActivas = vuelo.Reservaciones.Count(x => x.Estado != "cancelada");
+
             respuestas.Add(new VueloResponse(
                 vuelo.IdVuelo,
                 vuelo.FechaSalida,
@@ -408,9 +655,14 @@ public static class ApiEndpoints
     */
     private static bool CoincideAeropuerto(EscalaResponse? escala, string? filtro)
     {
-        if (string.IsNullOrWhiteSpace(filtro)) return true;
-        if (escala is null) return false;
-        return escala.IdAeropuerto.ToString() == filtro || escala.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(filtro))
+            return true;
+
+        if (escala is null)
+            return false;
+
+        return escala.IdAeropuerto.ToString() == filtro
+            || escala.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase);
     }
 
     /*
@@ -425,10 +677,24 @@ public static class ApiEndpoints
             .Include(x => x.Usuario)
             .Include(x => x.Pago)
             .FirstOrDefaultAsync(x => x.IdReservacion == idReservacion);
-        if (reservacion is null) return null;
 
-        var vuelo = (await ObtenerVuelosAsync(db, null, null)).FirstOrDefault(x => x.IdVuelo == reservacion.IdVuelo);
-        return new { reservacion.IdReservacion, reservacion.Estado, reservacion.FechaReservacion, reservacion.IdUsuario, reservacion.IdVuelo, reservacion.Usuario, vuelo, reservacion.Pago };
+        if (reservacion is null)
+            return null;
+
+        var vuelo = (await ObtenerVuelosAsync(db, null, null))
+            .FirstOrDefault(x => x.IdVuelo == reservacion.IdVuelo);
+
+        return new
+        {
+            reservacion.IdReservacion,
+            reservacion.Estado,
+            reservacion.FechaReservacion,
+            reservacion.IdUsuario,
+            reservacion.IdVuelo,
+            reservacion.Usuario,
+            vuelo,
+            reservacion.Pago
+        };
     }
 
     /*
@@ -440,11 +706,21 @@ public static class ApiEndpoints
     private static async Task<IResult> CambiarEstadoVueloAsync(int idVuelo, string estado, TecAirDb db)
     {
         var vuelo = await db.Vuelos.FirstOrDefaultAsync(x => x.IdVuelo == idVuelo);
-        if (vuelo is null) return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
+
+        if (vuelo is null)
+            return Results.NotFound(new { mensaje = "Vuelo no encontrado." });
+
         vuelo.Estado = estado;
         await db.SaveChangesAsync();
-        var respuesta = (await ObtenerVuelosAsync(db, null, null)).First(x => x.IdVuelo == idVuelo);
-        return Results.Ok(new { mensaje = $"Vuelo {estado}.", vuelo = respuesta });
+
+        var respuesta = (await ObtenerVuelosAsync(db, null, null))
+            .First(x => x.IdVuelo == idVuelo);
+
+        return Results.Ok(new
+        {
+            mensaje = $"Vuelo {estado}.",
+            vuelo = respuesta
+        });
     }
 
     /*
@@ -455,15 +731,28 @@ public static class ApiEndpoints
     */
     private static async Task<List<object>> ObtenerPromocionesAsync(TecAirDb db)
     {
-        var promociones = await db.Promociones.AsNoTracking().OrderByDescending(x => x.FechaInicio).ToListAsync();
+        var promociones = await db.Promociones
+            .AsNoTracking()
+            .OrderByDescending(x => x.FechaInicio)
+            .ToListAsync();
+
         var resultado = new List<object>();
+
         foreach (var promocion in promociones)
         {
             var escalas = await db.Escalas.AsNoTracking()
                 .Where(x => x.IdRuta == promocion.IdRuta)
-                .Join(db.Aeropuertos.AsNoTracking(), escala => escala.IdAeropuerto, aeropuerto => aeropuerto.IdAeropuerto,
-                    (escala, aeropuerto) => new { escala.Tipo, aeropuerto.Nombre })
+                .Join(
+                    db.Aeropuertos.AsNoTracking(),
+                    escala => escala.IdAeropuerto,
+                    aeropuerto => aeropuerto.IdAeropuerto,
+                    (escala, aeropuerto) => new
+                    {
+                        escala.Tipo,
+                        aeropuerto.Nombre
+                    })
                 .ToListAsync();
+
             resultado.Add(new
             {
                 promocion.IdPromocion,
@@ -492,9 +781,13 @@ public static class ApiEndpoints
             .Include(x => x.Usuario)
             .Include(x => x.Vuelo)
             .FirstOrDefaultAsync(x => x.IdCheckin == idCheckin);
-        if (checkIn?.Usuario is null || checkIn.Vuelo is null) return null;
 
-        var vuelo = (await ObtenerVuelosAsync(db, null, null)).First(x => x.IdVuelo == checkIn.IdVuelo);
+        if (checkIn?.Usuario is null || checkIn.Vuelo is null)
+            return null;
+
+        var vuelo = (await ObtenerVuelosAsync(db, null, null))
+            .First(x => x.IdVuelo == checkIn.IdVuelo);
+
         return new
         {
             checkIn.IdCheckin,
@@ -520,14 +813,31 @@ public static class ApiEndpoints
     */
     private static async Task<object> ResumenMaletasAsync(TecAirDb db, int idCheckin)
     {
-        var maletas = await db.Maletas.AsNoTracking().Where(x => x.IdCheckin == idCheckin).OrderBy(x => x.NumMaleta).ToListAsync();
+        var maletas = await db.Maletas.AsNoTracking()
+            .Where(x => x.IdCheckin == idCheckin)
+            .OrderBy(x => x.NumMaleta)
+            .ToListAsync();
+
         var total = maletas.Count;
         var costoExtra = total <= 1 ? 0 : 50 + Math.Max(total - 2, 0) * 75;
-        return new { total, costo_extra = costoExtra, maletas };
+
+        return new
+        {
+            total,
+            costo_extra = costoExtra,
+            maletas
+        };
     }
 }
 
-public sealed record EscalaResponse(int IdRuta, int Orden, string Tipo, int IdAeropuerto, string Nombre, string Ubicacion);
+public sealed record EscalaResponse(
+    int IdRuta,
+    int Orden,
+    string Tipo,
+    int IdAeropuerto,
+    string Nombre,
+    string Ubicacion
+);
 
 public sealed record VueloResponse(
     int IdVuelo,
@@ -544,4 +854,5 @@ public sealed record VueloResponse(
     int IdOrigen,
     int IdDestino,
     int AsientosDisponibles,
-    List<EscalaResponse> Escalas);
+    List<EscalaResponse> Escalas
+);

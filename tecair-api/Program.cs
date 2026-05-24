@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TecAir.Api;
 using TecAir.Api.Data;
+using TecAir.Api.Config;
 using TecAir.Api.Interfaces;
 using TecAir.Api.Repositories;
 using TecAir.Api.Services;
@@ -18,9 +19,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("TecAirCors", policy =>
+    options.AddPolicy(ApiGlobals.CorsPolicyName, policy =>
     {
-        if (tecAirOptions.CorsOrigin == "*")
+        if (tecAirOptions.CorsOrigin == ApiGlobals.DefaultCorsOrigin)
         {
             policy.AllowAnyOrigin();
         }
@@ -45,9 +46,9 @@ builder.Services.AddDbContext<TecAirDb>(options =>
 
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Redirect("/api"));
+app.MapGet("/", () => Results.Redirect(ApiGlobals.ApiBasePath));
 
-app.UseCors("TecAirCors");
+app.UseCors(ApiGlobals.CorsPolicyName);
 
 using (var scope = app.Services.CreateScope())
 {
