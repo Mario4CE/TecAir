@@ -56,3 +56,13 @@ Evaluado para check-in, no aplicado para evitar sobrecomplejidad en esta versió
 - Carpeta creada: `tests/TecAir.Api.Tests/`.
 - Cobertura inicial: estrategia de maletas y pruebas smoke de servicios (aeropuertos, aviones, reservaciones/pagos).
 - Pendiente: ampliar pruebas de integración con `WebApplicationFactory` cuando SDK y dependencias estén disponibles.
+
+
+## InMemory vs PostgreSQL (riesgos detectados)
+- Los tests actuales usan EF Core InMemory y **no validan** traducción SQL real de PostgreSQL.
+- Diferencia detectada entre modelo EF y SQL:
+  - EF usa `Vuelo.FechaSalida` (`DateOnly`) + `HoraSalida` (`TimeOnly`).
+  - SQL define `Vuelo.fecha_salida` como `TIMESTAMP`.
+  - Se requiere una decisión de mapeo para mantener consistencia al activar PostgreSQL.
+- El script SQL incluye campos como `Usuario.contrasena` y `Usuario.es_admin` que no están reflejados en el modelo API actual, por lo que se debe alinear antes de migración productiva.
+- Pendiente ejecutar pruebas reales PostgreSQL para validar PK/FK, UNIQUE, NOT NULL y consultas LINQ traducidas.

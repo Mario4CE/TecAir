@@ -102,3 +102,10 @@ Comandos de ejecución:
 - `dotnet test tests/TecAir.Api.Tests/TecAir.Api.Tests.csproj`
 
 Nota: en este entorno no se pudieron ejecutar por ausencia de SDK .NET.
+
+
+## Limitaciones de pruebas actuales
+
+- Las pruebas iniciales usan `EF Core InMemory`; validan lógica de capas, pero **no reemplazan** pruebas reales contra PostgreSQL.
+- Antes de habilitar PostgreSQL en runtime se debe alinear modelo EF con scripts SQL (`database/01_create.sql`, `database/02_populate.sql`), especialmente en tipos y columnas faltantes.
+- Para validación completa se debe ejecutar una batería de integración PostgreSQL (PK, FK, UNIQUE, NOT NULL, tipos y consultas LINQ->SQL).
