@@ -52,10 +52,30 @@ public static class DatabaseSeeder
             );
 
             db.Aeropuertos.AddRange(
-                new Aeropuerto { IdAeropuerto = 1, Nombre = "SJO - Juan Santamaría", Ubicacion = "Alajuela, Costa Rica" },
-                new Aeropuerto { IdAeropuerto = 2, Nombre = "LIR - Guanacaste", Ubicacion = "Liberia, Costa Rica" },
-                new Aeropuerto { IdAeropuerto = 3, Nombre = "XQP - Quepos", Ubicacion = "Puntarenas, Costa Rica" },
-                new Aeropuerto { IdAeropuerto = 4, Nombre = "GLF - Golfito", Ubicacion = "Puntarenas, Costa Rica" }
+                new Aeropuerto
+                {
+                    IdAeropuerto = 1,
+                    Nombre = "SJO - Juan Santamaría",
+                    Ubicacion = "Alajuela, Costa Rica"
+                },
+                new Aeropuerto
+                {
+                    IdAeropuerto = 2,
+                    Nombre = "LIR - Guanacaste",
+                    Ubicacion = "Liberia, Costa Rica"
+                },
+                new Aeropuerto
+                {
+                    IdAeropuerto = 3,
+                    Nombre = "XQP - Quepos",
+                    Ubicacion = "Puntarenas, Costa Rica"
+                },
+                new Aeropuerto
+                {
+                    IdAeropuerto = 4,
+                    Nombre = "GLF - Golfito",
+                    Ubicacion = "Puntarenas, Costa Rica"
+                }
             );
 
             db.Rutas.AddRange(
@@ -66,11 +86,41 @@ public static class DatabaseSeeder
             await db.SaveChangesAsync();
 
             db.Escalas.AddRange(
-                new Escala { IdRuta = 1, Orden = 1, IdAeropuerto = 1, Tipo = "origen" },
-                new Escala { IdRuta = 1, Orden = 2, IdAeropuerto = 2, Tipo = "destino" },
-                new Escala { IdRuta = 2, Orden = 1, IdAeropuerto = 1, Tipo = "origen" },
-                new Escala { IdRuta = 2, Orden = 2, IdAeropuerto = 3, Tipo = "escala" },
-                new Escala { IdRuta = 2, Orden = 3, IdAeropuerto = 4, Tipo = "destino" }
+                new Escala
+                {
+                    IdRuta = 1,
+                    Orden = 1,
+                    IdAeropuerto = 1,
+                    Tipo = "origen"
+                },
+                new Escala
+                {
+                    IdRuta = 1,
+                    Orden = 2,
+                    IdAeropuerto = 2,
+                    Tipo = "destino"
+                },
+                new Escala
+                {
+                    IdRuta = 2,
+                    Orden = 1,
+                    IdAeropuerto = 1,
+                    Tipo = "origen"
+                },
+                new Escala
+                {
+                    IdRuta = 2,
+                    Orden = 2,
+                    IdAeropuerto = 3,
+                    Tipo = "escala"
+                },
+                new Escala
+                {
+                    IdRuta = 2,
+                    Orden = 3,
+                    IdAeropuerto = 4,
+                    Tipo = "destino"
+                }
             );
 
             db.Vuelos.AddRange(
