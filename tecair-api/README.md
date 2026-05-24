@@ -83,9 +83,9 @@ Por compatibilidad, durante esta refactorización no se cambian rutas HTTP, mét
 
 ## Recomendaciones pendientes
 
-- Completar refactor por capas para los módulos pendientes (`reservaciones`, `pagos`, `promociones`, `checkins`, `maletas`).
+- Ejecutar compilación y pruebas automáticas en entorno con SDK .NET disponible.
 - Incorporar pruebas automáticas de integración por endpoint.
-- Activar y validar conexión PostgreSQL en ambiente de integración.
+- Activar y validar conexión PostgreSQL en ambiente de integración (actualmente runtime en InMemory).
 
 ## Estado de app móvil y SQLite
 

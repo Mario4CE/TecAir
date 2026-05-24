@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using TecAir.Api.Config;
-using TecAir.Api.Data;
 using TecAir.Api.Dtos;
 using TecAir.Api.Interfaces;
-using TecAir.Api.Models;
 
 namespace TecAir.Api;
 
@@ -315,67 +312,6 @@ public static class ApiEndpoints
     private static int? ObtenerEnteroQuery(HttpRequest request, string nombre)
     {
         return int.TryParse(request.Query[nombre].FirstOrDefault(), out var valor) ? valor : null;
-    }
-
-
-    /*
-    Descripción: Construye el listado de vuelos para procesos internos dependientes.
-    Entradas: Contexto de base de datos y filtros opcionales de origen/destino.
-    Salidas: Lista de vuelos en DTO de respuesta.
-    Restricciones: No presenta restricciones adicionales.
-    */
-    private static async Task<List<VueloResponse>> ObtenerVuelosAsync(TecAirDb db, string? origen, string? destino)
-    {
-        var vuelos = await db.Vuelos.AsNoTracking()
-            .Include(x => x.Avion)
-            .Include(x => x.Reservaciones)
-            .OrderBy(x => x.FechaSalida)
-            .ThenBy(x => x.HoraSalida)
-            .ToListAsync();
-
-        var respuestas = new List<VueloResponse>();
-
-        foreach (var vuelo in vuelos)
-        {
-            var escalas = await db.Escalas.AsNoTracking()
-                .Where(x => x.IdRuta == vuelo.IdRuta)
-                .OrderBy(x => x.Orden)
-                .Join(db.Aeropuertos.AsNoTracking(),
-                    escala => escala.IdAeropuerto,
-                    aeropuerto => aeropuerto.IdAeropuerto,
-                    (escala, aeropuerto) => new EscalaResponse(
-                        escala.IdRuta,
-                        escala.Orden,
-                        escala.Tipo,
-                        aeropuerto.IdAeropuerto,
-                        aeropuerto.Nombre,
-                        aeropuerto.Ubicacion))
-                .ToListAsync();
-
-            var escalaOrigen = escalas.FirstOrDefault(x => x.Tipo == "origen");
-            var escalaDestino = escalas.FirstOrDefault(x => x.Tipo == "destino");
-
-            if (!CoincideAeropuerto(escalaOrigen, origen) || !CoincideAeropuerto(escalaDestino, destino))
-                continue;
-
-            var reservacionesActivas = vuelo.Reservaciones.Count(x => x.Estado != "cancelada");
-
-            respuestas.Add(new VueloResponse(
-                vuelo.IdVuelo, vuelo.FechaSalida, vuelo.HoraSalida, vuelo.Puerta, vuelo.Estado,
-                vuelo.Matricula, vuelo.IdRuta, vuelo.Precio, vuelo.Avion?.Capacidad ?? 0,
-                escalaOrigen?.Nombre ?? string.Empty, escalaDestino?.Nombre ?? string.Empty,
-                escalaOrigen?.IdAeropuerto ?? 0, escalaDestino?.IdAeropuerto ?? 0,
-                (vuelo.Avion?.Capacidad ?? 0) - reservacionesActivas, escalas));
-        }
-
-        return respuestas;
-    }
-
-    private static bool CoincideAeropuerto(EscalaResponse? escala, string? filtro)
-    {
-        if (string.IsNullOrWhiteSpace(filtro)) return true;
-        if (escala is null) return false;
-        return escala.IdAeropuerto.ToString() == filtro || escala.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase);
     }
 }
 

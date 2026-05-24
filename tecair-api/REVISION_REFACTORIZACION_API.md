@@ -1,53 +1,52 @@
 # REVISION_REFACTORIZACION_API
 
-## Módulos refactorizados
-- Usuarios
-- Aeropuertos
-- Aviones
-- Rutas
-- Vuelos
-- Reservaciones (iteración actual)
-- Pagos
-- Promociones (iteración actual)
-- Check-ins (iteración actual)
-- Maletas (iteración actual)
+## Checklist por módulo
+- [x] Usuarios
+- [x] Aeropuertos
+- [x] Aviones
+- [x] Rutas
+- [x] Vuelos
+- [x] Reservaciones
+- [x] Pagos
+- [x] Promociones
+- [x] Check-ins
+- [x] Maletas
 
-## Módulos pendientes
-- Promociones
-- Check-ins
-- Maletas
-- Apertura/Cierre de vuelos (actualmente en endpoints de vuelos)
+## Estado de Services y Repositories
+Todos los módulos funcionales principales ya cuentan con interfaces, servicios y repositorios registrados en DI.
 
-## Patrones aplicados
-- Repository Pattern: usuarios, aeropuertos, aviones, rutas.
-- Service Layer: usuarios, aeropuertos, aviones, rutas.
-- DTO Pattern: requests existentes y response de rutas (`RutaResponse`).
-- Dependency Injection: servicios y repositorios registrados en `Program.cs` para módulos refactorizados.
+## Estado de DTOs
+- Requests centralizados en `Dtos/Requests.cs`.
+- Responses centralizados en `Dtos/Responses.cs`.
+- Sin DTOs definidos dentro de `ApiEndpoints.cs`.
 
 ## Estado de DI
-DI activo para:
-- Usuario
-- Aeropuerto
-- Avion
-- Ruta
+`Program.cs` registra repositories, services y la estrategia `ICalculoCobroMaletaStrategy`.
 
 ## Estado de ApiEndpoints.cs
-- Se redujo responsabilidad en usuarios, aeropuertos, aviones y rutas.
-- Siguen pendientes de extraer a servicios/repositorios: vuelos, reservaciones, pagos, promociones, check-ins y maletas.
+- Endpoints delegan en servicios por módulo.
+- Sin acceso directo a `TecAirDb` en endpoints públicos.
+- Se removieron helpers legacy no usados en esta iteración final.
+
+## Patrones aplicados
+- Repository Pattern
+- Service Layer
+- DTO Pattern
+- Dependency Injection
+- Strategy Pattern (maletas)
+
+## Facade Pattern
+Evaluado para check-in, no aplicado para evitar sobrecomplejidad en esta versión.
 
 ## Estado PostgreSQL/InMemory
 - Runtime actual: `UseInMemoryDatabase("TecAirDb")`.
-- PostgreSQL aún no activado en runtime de `Program.cs`.
+- PostgreSQL pendiente de activación real en entorno objetivo.
 
-## Riesgos
-- La lógica de negocio de módulos pendientes sigue en `ApiEndpoints.cs`.
-- No se puede validar compilación en este entorno por falta de CLI `dotnet`.
+## Riesgos restantes
+- Falta validar compilación/ejecución en este entorno por ausencia de SDK .NET.
+- Falta activación operativa de PostgreSQL y validación integral con frontend real.
 
-## Archivos eliminados
-- Ninguno en esta iteración.
-
-## Recomendaciones
-1. Migrar módulo Vuelos a capas en la próxima iteración.
-2. Implementar Strategy Pattern para cobro de maletas.
-3. Evaluar Facade en check-in luego de extraer servicios base.
-4. Activar PostgreSQL con configuración segura y fallback controlado.
+## Recomendaciones finales
+1. Ejecutar `dotnet build` y pruebas en entorno con SDK .NET.
+2. Activar PostgreSQL con Npgsql en ambiente de integración, manteniendo fallback documentado.
+3. Agregar pruebas de integración por endpoint crítico.
