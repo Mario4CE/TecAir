@@ -258,13 +258,13 @@
                     if (usuarioEncontrado) {
                         // Usuario encontrado en la API
                         const usuario = {
-                            idUsuario: usuarioEncontrado.idUsuario,
+                            idUsuario: usuarioEncontrado.id_usuario,
                             nombreCompleto: [usuarioEncontrado.nombre1, usuarioEncontrado.nombre2,
                                              usuarioEncontrado.apellido1, usuarioEncontrado.apellido2]
                                             .filter(Boolean).join(' '),
                             email: usuarioEncontrado.correo,
                             telefono: usuarioEncontrado.telefono,
-                            esEstudiante: usuarioEncontrado.esEstudiante,
+                            esEstudiante: usuarioEncontrado.es_estudiante,
                             universidad: usuarioEncontrado.universidad,
                             carnet: usuarioEncontrado.carnet,
                             millas: usuarioEncontrado.millas
@@ -328,11 +328,13 @@
                         millas: 0
                     });
 
-                    const usuarioCreado = respuesta.usuario || respuesta;
+                    const usuarioCreado = respuesta.usuario || respuesta.usuarios?.[0] || respuesta;
+                    console.log('Usuario creado:', usuarioCreado);
+                    console.log('Keys del usuario:', Object.keys(usuarioCreado));
 
                     // Guardar en localStorage con el ID de la API para las demás páginas
                     const usuario = {
-                        idUsuario: usuarioCreado.idUsuario,
+                        idUsuario: usuarioCreado.id_usuario || usuarioCreado.idUsuario || usuarioCreado.id,
                         nombreCompleto: nombre,
                         email: email,
                         telefono: telefono,

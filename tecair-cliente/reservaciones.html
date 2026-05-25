@@ -303,8 +303,8 @@
 
                 select.innerHTML = '<option value="">-- Selecciona un vuelo --</option>';
                 vuelos.forEach(vuelo => {
-                    select.innerHTML += `<option value="${vuelo.idVuelo}">
-                        Vuelo #${vuelo.idVuelo} - ${vuelo.origen} → ${vuelo.destino} ($${vuelo.precio})
+                    select.innerHTML += `<option value="${vuelo.id_vuelo}">
+                        Vuelo #${vuelo.id_vuelo} - ${vuelo.origen} → ${vuelo.destino} ($${vuelo.precio})
                     </option>`;
                 });
             } catch (error) {

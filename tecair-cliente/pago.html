@@ -287,11 +287,10 @@
                 const metodo = document.querySelector('input[name="metodo"]:checked').value;
 
                 // Paso 1: Crear la reservación en la API
-                const respReservacion = await crearReservacion({
-                    idUsuario: idUsuario,
-                    idVuelo: parseInt(reservacionTemporal.idVuelo)
-                });
-
+             const respReservacion = await crearReservacion({
+                id_usuario: idUsuario,
+                id_vuelo: parseInt(reservacionTemporal.idVuelo)
+});
                 const idReservacion = respReservacion.reservacion?.idReservacion;
 
                 // Paso 2: Registrar el pago en la API
