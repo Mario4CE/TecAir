@@ -30,6 +30,14 @@ namespace TecAir
             builder.Services.AddSingleton<ReservationViewModel>();
             builder.Services.AddSingleton<PromotionViewModel>();
 
+            // Registrar Pages
+            builder.Services.AddSingleton<Views.LoginPage>();
+            builder.Services.AddSingleton<Views.RegisterPage>();
+            builder.Services.AddSingleton<Views.HomePage>();
+            builder.Services.AddSingleton<Views.FlightsSearchPage>();
+            builder.Services.AddSingleton<Views.ReservationsPage>();
+            builder.Services.AddSingleton<Views.PromotionsPage>();
+
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif

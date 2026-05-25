@@ -43,9 +43,8 @@ namespace TecAir.Services
                     return (false, "Usuario no encontrado", null);
                 }
 
-                // TODO: En una aplicación real, comparar con contraseña hasheada
-                // Por ahora, para demostración, aceptamos "1234" como contraseña maestra
-                if (password != "1234")
+                // Validar contraseña
+                if (user.Password != password)
                 {
                     return (false, "Contraseña incorrecta", null);
                 }

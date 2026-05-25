@@ -3,36 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\flightssearchpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\flightssearchpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\flightssearchpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\flightssearchpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\reservationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\reservationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\reservationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\reservationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\promotionspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\promotionspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\registerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\registerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\homepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\homepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -46,123 +26,59 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "FlightsSearchPage.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\FlightsSearchPage.xaml.cs",
-              "RelativeDocumentMoniker": "TecAir\\Views\\FlightsSearchPage.xaml.cs",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\FlightsSearchPage.xaml.cs",
-              "RelativeToolTip": "TecAir\\Views\\FlightsSearchPage.xaml.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAiwE4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-25T00:01:05.782Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "FlightsSearchPage.xaml",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\FlightsSearchPage.xaml",
-              "RelativeDocumentMoniker": "TecAir\\Views\\FlightsSearchPage.xaml",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\FlightsSearchPage.xaml*",
-              "RelativeToolTip": "TecAir\\Views\\FlightsSearchPage.xaml*",
-              "ViewState": "AgIAAGYAAAAAAAAAAAAwwKAAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-24T23:54:20.277Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ReservationsPage.xaml",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml",
-              "RelativeDocumentMoniker": "TecAir\\Views\\ReservationsPage.xaml",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml",
-              "RelativeToolTip": "TecAir\\Views\\ReservationsPage.xaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-24T23:53:11.577Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "PromotionsPage.xaml",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\PromotionsPage.xaml",
-              "RelativeDocumentMoniker": "TecAir\\Views\\PromotionsPage.xaml",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\PromotionsPage.xaml",
-              "RelativeToolTip": "TecAir\\Views\\PromotionsPage.xaml",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAwwA0AAAALAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-24T23:45:45.523Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ReservationsPage.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml.cs",
-              "RelativeDocumentMoniker": "TecAir\\Views\\ReservationsPage.xaml.cs",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml.cs",
-              "RelativeToolTip": "TecAir\\Views\\ReservationsPage.xaml.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAowAMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T23:41:43.807Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
               "Title": "AppShell.xaml.cs",
               "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\AppShell.xaml.cs",
               "RelativeDocumentMoniker": "TecAir\\AppShell.xaml.cs",
               "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\AppShell.xaml.cs",
               "RelativeToolTip": "TecAir\\AppShell.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T23:41:24.228Z",
+              "WhenOpened": "2026-05-25T00:40:23.52Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "LoginPage.xaml.cs",
               "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml.cs",
               "RelativeDocumentMoniker": "TecAir\\Views\\LoginPage.xaml.cs",
               "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml.cs",
               "RelativeToolTip": "TecAir\\Views\\LoginPage.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAAQAAAAAAAAAAAA1wAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T19:09:54.9Z",
+              "WhenOpened": "2026-05-25T00:40:14.049Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "HomePage.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\HomePage.xaml.cs",
-              "RelativeDocumentMoniker": "TecAir\\Views\\HomePage.xaml.cs",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\HomePage.xaml.cs",
-              "RelativeToolTip": "TecAir\\Views\\HomePage.xaml.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAwwA8AAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T19:05:41.799Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 3,
               "Title": "LoginPage.xaml",
               "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml",
               "RelativeDocumentMoniker": "TecAir\\Views\\LoginPage.xaml",
               "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml",
               "RelativeToolTip": "TecAir\\Views\\LoginPage.xaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAOAAAAAAAAAA==",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-24T19:09:54.168Z"
+              "WhenOpened": "2026-05-25T00:39:35.886Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RegisterPage.xaml",
+              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\RegisterPage.xaml",
+              "RelativeDocumentMoniker": "TecAir\\Views\\RegisterPage.xaml",
+              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\RegisterPage.xaml",
+              "RelativeToolTip": "TecAir\\Views\\RegisterPage.xaml",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAgwIAAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-05-25T00:38:01.668Z",
+              "EditorCaption": ""
             }
           ]
         }

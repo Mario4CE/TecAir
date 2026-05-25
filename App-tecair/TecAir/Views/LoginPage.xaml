@@ -62,7 +62,11 @@
                 x:Name="RegisterLabel"
                 Text="Regístrate"
                 FontSize="12"
-                TextColor="#007AFF"/>
+                TextColor="#007AFF">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnRegisterTapped"/>
+                </Label.GestureRecognizers>
+            </Label>
         </StackLayout>
 
     </VerticalStackLayout>

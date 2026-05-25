@@ -13,6 +13,7 @@ namespace TecAir
             Routing.RegisterRoute(nameof(FlightsSearchPage), typeof(FlightsSearchPage));
             Routing.RegisterRoute(nameof(ReservationsPage), typeof(ReservationsPage));
             Routing.RegisterRoute(nameof(PromotionsPage), typeof(PromotionsPage));
+            Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
         }
     }
 }

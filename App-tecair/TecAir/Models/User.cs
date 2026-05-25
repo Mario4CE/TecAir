@@ -18,6 +18,9 @@ namespace TecAir.Models
         public string Email { get; set; }
 
         [NotNull]
+        public string Password { get; set; }
+
+        [NotNull]
         public string Phone { get; set; }
 
         public bool IsStudent { get; set; }

@@ -38,4 +38,10 @@ public partial class LoginPage : ContentPage
 			await DisplayAlert("Error de autenticación", message, "OK");
 		}
 	}
+
+	private async void OnRegisterTapped(object sender, TappedEventArgs e)
+	{
+		// Navegar a la página de registro
+		await Shell.Current.GoToAsync(nameof(RegisterPage));
+	}
 }

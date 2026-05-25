@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TecAir.Views.RegisterPage"
+             Title="Crear Cuenta - TECAir"
+             BackgroundColor="#F5F5F5">
+    
+    <VerticalStackLayout Padding="20" Spacing="10">
+        
+        <!-- Header -->
+        <VerticalStackLayout 
+            HorizontalOptions="Center" 
+            Spacing="5"
+            Margin="0,0,0,20">
+            <Label 
+                Text="✈️"
+                FontSize="36"
+                HorizontalOptions="Center"/>
+            <Label 
+                Text="Crear Cuenta"
+                FontSize="22"
+                FontAttributes="Bold"
+                TextColor="#1F4788"
+                HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Scroll para acomodar todo en pantallas pequeñas -->
+        <ScrollView>
+            <VerticalStackLayout Spacing="12">
+                
+                <!-- Full Name -->
+                <Label Text="Nombre Completo:" FontAttributes="Bold" FontSize="12" TextColor="Black" Margin="0,5,0,0"/>
+                <Entry 
+                    x:Name="FullNameEntry"
+                    Placeholder="Ej: Juan Pérez"
+                    TextColor="Black"
+                    PlaceholderColor="#CCCCCC"/>
+
+                <!-- Email -->
+                <Label Text="Email:" FontAttributes="Bold" FontSize="12" TextColor="Black" Margin="0,5,0,0"/>
+                <Entry 
+                    x:Name="EmailEntry"
+                    Placeholder="usuario@ejemplo.com"
+                    Keyboard="Email"
+                    TextColor="Black"
+                    PlaceholderColor="#CCCCCC"/>
+
+                <!-- Phone -->
+                <Label Text="Teléfono:" FontAttributes="Bold" FontSize="12" TextColor="Black" Margin="0,5,0,0"/>
+                <Entry 
+                    x:Name="PhoneEntry"
+                    Placeholder="+506 8765-4321"
+                    Keyboard="Telephone"
+                    TextColor="Black"
+                    PlaceholderColor="#CCCCCC"/>
+
+                <!-- Password -->
+                <Label Text="Contraseña:" FontAttributes="Bold" FontSize="12" TextColor="Black" Margin="0,5,0,0"/>
+                <Entry 
+                    x:Name="PasswordEntry"
+                    Placeholder="Mínimo 6 caracteres"
+                    IsPassword="True"
+                    TextColor="Black"
+                    PlaceholderColor="#CCCCCC"/>
+
+                <!-- Confirm Password -->
+                <Label Text="Confirmar Contraseña:" FontAttributes="Bold" FontSize="12" TextColor="Black" Margin="0,5,0,0"/>
+                <Entry 
+                    x:Name="ConfirmPasswordEntry"
+                    Placeholder="Repite tu contraseña"
+                    IsPassword="True"
+                    TextColor="Black"
+                    PlaceholderColor="#CCCCCC"/>
+
+                <!-- Is Student CheckBox -->
+                <StackLayout Orientation="Horizontal" Margin="0,10,0,0">
+                    <CheckBox 
+                        x:Name="IsStudentCheckBox"
+                        CheckedChanged="OnIsStudentCheckBoxChanged"/>
+                    <Label 
+                        Text="Soy estudiante"
+                        VerticalOptions="Center"
+                        FontSize="12"
+                        TextColor="Black"/>
+                </StackLayout>
+
+                <!-- Student Details (visible only if IsStudent) -->
+                <Frame x:Name="StudentDetailsFrame" 
+                       IsVisible="False" 
+                       BorderColor="#E0E0E0" 
+                       CornerRadius="8" 
+                       HasShadow="False" 
+                       Padding="12"
+                       Margin="0,10,0,0">
+                    <VerticalStackLayout Spacing="10">
+                        
+                        <Label Text="Universidad:" FontAttributes="Bold" FontSize="12" TextColor="Black"/>
+                        <Entry 
+                            x:Name="UniversityEntry"
+                            Placeholder="Ej: Instituto Tecnológico de Costa Rica"
+                            TextColor="Black"
+                            PlaceholderColor="#CCCCCC"/>
+
+                        <Label Text="Carnet Estudiantil:" FontAttributes="Bold" FontSize="12" TextColor="Black"/>
+                        <Entry 
+                            x:Name="StudentIDEntry"
+                            Placeholder="Ej: 2020001234"
+                            TextColor="Black"
+                            PlaceholderColor="#CCCCCC"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Register Button -->
+                <Button 
+                    x:Name="RegisterBtn"
+                    Text="Crear Cuenta"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    Padding="15"
+                    CornerRadius="10"
+                    BackgroundColor="#34C759"
+                    TextColor="White"
+                    Margin="0,20,0,0"
+                    Clicked="OnRegisterClicked"/>
+
+                <!-- Back to Login -->
+                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="5" Margin="0,10,0,0">
+                    <Label Text="¿Ya tienes cuenta?" FontSize="12" TextColor="Black"/>
+                    <Label 
+                        x:Name="LoginLabel"
+                        Text="Inicia sesión"
+                        FontSize="12"
+                        TextColor="#007AFF">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLoginTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </VerticalStackLayout>
+
+</ContentPage>

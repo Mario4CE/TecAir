@@ -73,6 +73,7 @@ namespace TecAir.Services
             {
                 FullName = "Usuario Demo",
                 Email = "demorera@estudiantec.cr",
+                Password = "1234",  // ← Contraseña demo
                 Phone = "+506 8765-4321",
                 IsStudent = true,
                 University = "Instituto Tecnológico de Costa Rica",
