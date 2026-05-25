@@ -4,6 +4,7 @@ using TecAir.Api.Data;
 using TecAir.Api.Dtos;
 using TecAir.Api.Repositories;
 using TecAir.Api.Services;
+using Xunit;
 
 namespace TecAir.Api.Tests;
 

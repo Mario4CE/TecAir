@@ -58,9 +58,11 @@ builder.Services.AddScoped<ICalculoCobroMaletaStrategy, CalculoCobroMaletaStrate
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
+
+    builder.Services.AddCors(); // Agrega servicios de CORS para permitir solicitudes desde el frontend
     //var connectionString = builder.Configuration.GetConnectionString("TecAirDb") ?? "Data Source=data/tecair.sqlite";
     //options.UseSqlite(connectionString);
-     options.UseInMemoryDatabase("TecAirDb");
+    options.UseInMemoryDatabase("TecAirDb");
 });
 
 var app = builder.Build();
@@ -76,6 +78,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapTecAirApiEndpoints();
+
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); // Para permitir CORS en todas las rutas, aunque ya se configuró una política específica
 
 await app.RunAsync();
 
