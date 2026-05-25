@@ -202,7 +202,7 @@
 
                 // Agregar cada aeropuerto de la API
                 aeropuertos.forEach(aeropuerto => {
-                    const opcion = `<option value="${aeropuerto.idAeropuerto}">${aeropuerto.nombre} - ${aeropuerto.ubicacion}</option>`;
+                    const opcion = `<option value="${aeropuerto.id_aeropuerto}">${aeropuerto.nombre} - ${aeropuerto.ubicacion}</option>`;
                     selectOrigen.innerHTML += opcion;
                     selectDestino.innerHTML += opcion;
                 });
@@ -239,6 +239,7 @@
                 // Llamada real a la API con filtros de origen y destino
                 const respuesta = await obtenerVuelos({ origen, destino });
                 const vuelos = respuesta.vuelos || [];
+                console.log(vuelos)
 
                 if (vuelos.length === 0) {
                     mostrarAlerta('No se encontraron vuelos para esa ruta', 'error');
