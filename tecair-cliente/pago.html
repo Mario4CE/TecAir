@@ -6,6 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página de procesamiento de pagos para reservaciones de vuelos
+    El pago se registra en la API mediante POST /api/pagos
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,13 +42,15 @@
     =====================================
     CONTENIDO PRINCIPAL: FORMULARIO DE PAGO
     =====================================
+    Resumen de la reservación y métodos de pago disponibles
     -->
     <div class="container my-4">
         <h1 class="text-primary fw-bold mb-4"><i class="bi bi-credit-card me-2"></i>Resumen de Pago</h1>
 
         <div class="row g-4">
             <!--
-            COLUMNA IZQUIERDA: RESUMEN Y DESGLOSE
+            COLUMNA IZQUIERDA: RESUMEN Y DESGLOSE DE COSTOS
+            Los datos vienen del sessionStorage guardado en reservaciones.html
             -->
             <div class="col-lg-5">
                 <!--
@@ -64,6 +67,7 @@
 
                 <!--
                 TARJETA 2: DESGLOSE DE COSTOS
+                Calcula impuestos y cargo de servicio sobre la tarifa base
                 -->
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -72,7 +76,7 @@
                             <span>Tarifa Base</span><span id="tarifaBase">$0</span>
                         </div>
                         <div class="desglose-item">
-                            <span>Impuestos y Tasas</span><span id="impuestos">$0</span>
+                            <span>Impuestos y Tasas (13%)</span><span id="impuestos">$0</span>
                         </div>
                         <div class="desglose-item">
                             <span>Cargo de Servicio</span><span id="cargo">$0</span>
@@ -86,14 +90,16 @@
 
             <!--
             COLUMNA DERECHA: MÉTODOS Y FORMULARIO DE PAGO
+            Al confirmar se llama a POST /api/pagos y POST /api/reservaciones
             -->
             <div class="col-lg-7">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h6 class="fw-bold text-primary mb-3"><i class="bi bi-wallet2 me-2"></i>Información de Pago</h6>
-                        
+
                         <!--
                         SELECTOR DE MÉTODOS DE PAGO
+                        Tres opciones: Tarjeta, Transferencia, SINPE Móvil
                         -->
                         <div class="d-flex flex-column gap-2 mb-4">
                             <label class="metodo-pago active d-flex align-items-center gap-2" onclick="seleccionarMetodo('tarjeta', this)">
@@ -112,6 +118,7 @@
 
                         <!--
                         FORMULARIO PARA TARJETA DE CRÉDITO/DÉBITO
+                        Solicita datos del titular y número de tarjeta
                         -->
                         <form id="formTarjeta">
                             <div class="mb-3">
@@ -174,45 +181,73 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        /*
+        =====================================
+        VARIABLES GLOBALES
+        =====================================
+        Almacena los datos de la reservación temporal
+        y el monto total calculado para enviar a la API
+        */
+        let montoTotal = 0;
+        let reservacionTemporal = {};
+
+        /*
+        =====================================
+        INICIALIZACIÓN
+        =====================================
+        Carga los detalles de la reservación desde sessionStorage
+        */
         document.addEventListener('DOMContentLoaded', function() {
             cargarDetallesReservacion();
             formatearInputos();
         });
 
+        /**
+         * Carga los detalles de la reservación desde sessionStorage
+         * y calcula el desglose de costos
+         */
         function cargarDetallesReservacion() {
-            const reservacion = JSON.parse(sessionStorage.getItem('reservacionTemporal') || '{}');
-            const tarifa = reservacion.monto || 95;
+            reservacionTemporal = JSON.parse(sessionStorage.getItem('reservacionTemporal') || '{}');
+            const tarifa = reservacionTemporal.monto || 95;
             const impuestos = Math.round(tarifa * 0.13);
             const cargo = 5;
-            const total = tarifa + impuestos + cargo;
+            montoTotal = tarifa + impuestos + cargo;
 
             document.getElementById('detallesReservacion').innerHTML = `
-                <p class="mb-1"><strong>Pasajero:</strong> ${reservacion.pasajero || 'No especificado'}</p>
-                <p class="mb-1"><strong>Vuelo:</strong> ${reservacion.vuelo || 'TEC1234'}</p>
-                <p class="mb-1"><strong>Asiento:</strong> ${reservacion.asiento || '12A'}</p>
-                <p class="mb-0"><strong>Ruta:</strong> San José → Liberia</p>`;
+                <p class="mb-1"><strong>Pasajero:</strong> ${reservacionTemporal.pasajero || 'No especificado'}</p>
+                <p class="mb-1"><strong>Vuelo:</strong> ${reservacionTemporal.textoVuelo || reservacionTemporal.idVuelo || '--'}</p>
+                <p class="mb-1"><strong>Asiento:</strong> ${reservacionTemporal.asiento || '--'}</p>`;
 
             document.getElementById('tarifaBase').textContent = `$${tarifa}`;
             document.getElementById('impuestos').textContent = `$${impuestos}`;
             document.getElementById('cargo').textContent = `$${cargo}`;
-            document.getElementById('montoTotal').textContent = `$${total}`;
+            document.getElementById('montoTotal').textContent = `$${montoTotal}`;
         }
 
+        /**
+         * Selecciona el método de pago activo
+         * @param {string} metodo - Método seleccionado (tarjeta, transferencia, sinpe)
+         * @param {HTMLElement} el - Elemento clickeado
+         */
         function seleccionarMetodo(metodo, el) {
             document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('active'));
             el.classList.add('active');
             document.querySelector(`input[value="${metodo}"]`).checked = true;
         }
 
+        /**
+         * Configura los formateadores de los inputs de tarjeta
+         * Formatea número de tarjeta, fecha de vencimiento y CVV
+         */
         function formatearInputos() {
-            // Formatear número de tarjeta
+            // Formatear número de tarjeta con espacios cada 4 dígitos
             document.getElementById('numeroTarjeta').addEventListener('input', function(e) {
                 let valor = e.target.value.replace(/\s/g, '');
                 let formateado = valor.match(/.{1,4}/g)?.join(' ') || valor;
                 e.target.value = formateado;
             });
 
-            // Formatear fecha de vencimiento
+            // Formatear fecha de vencimiento MM/AA
             document.getElementById('expiracion').addEventListener('input', function(e) {
                 let valor = e.target.value.replace(/\D/g, '');
                 if (valor.length >= 2) valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
@@ -225,9 +260,16 @@
             });
         }
 
-        function procesarPago() {
+        /**
+         * Procesa el pago creando primero la reservación y luego el pago en la API
+         * Flujo: POST /api/reservaciones → POST /api/pagos
+         */
+        async function procesarPago() {
             const aceptarTerminos = document.getElementById('aceptarTerminos').checked;
-            if (!aceptarTerminos) { mostrarAlerta('Debes aceptar los términos y condiciones', 'error'); return; }
+            if (!aceptarTerminos) {
+                mostrarAlerta('Debes aceptar los términos y condiciones', 'error');
+                return;
+            }
 
             const numeroTarjeta = document.getElementById('numeroTarjeta').value.replace(/\s/g, '');
             if (numeroTarjeta.length < 13 || numeroTarjeta.length > 16) {
@@ -239,15 +281,45 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
-            setTimeout(() => {
+            try {
+                const usuario = obtenerUsuarioActual();
+                const idUsuario = usuario?.idUsuario || 1;
+                const metodo = document.querySelector('input[name="metodo"]:checked').value;
+
+                // Paso 1: Crear la reservación en la API
+                const respReservacion = await crearReservacion({
+                    idUsuario: idUsuario,
+                    idVuelo: parseInt(reservacionTemporal.idVuelo)
+                });
+
+                const idReservacion = respReservacion.reservacion?.idReservacion;
+
+                // Paso 2: Registrar el pago en la API
+                await procesarPago({
+                    idReservacion: idReservacion,
+                    monto: montoTotal,
+                    metodo: metodo
+                });
+
+                // Pago exitoso
                 mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
+                sessionStorage.removeItem('reservacionTemporal');
+
                 setTimeout(() => {
-                    sessionStorage.removeItem('reservacionTemporal');
                     window.location.href = 'reservaciones.html';
                 }, 2000);
-            }, 2000);
+
+            } catch (error) {
+                console.error('Error procesando pago:', error);
+                mostrarAlerta('Error al procesar el pago: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Procesar Pago';
+            }
         }
 
+        /**
+         * Cancela la transacción y regresa a reservaciones
+         */
         function cancelarPago() {
             if (confirm('¿Deseas cancelar esta transacción?')) {
                 sessionStorage.removeItem('reservacionTemporal');
@@ -255,6 +327,11 @@
             }
         }
 
+        /**
+         * Muestra una alerta de error o éxito
+         * @param {string} mensaje - Texto a mostrar
+         * @param {string} tipo - Tipo de alerta ('error' o 'exito')
+         */
         function mostrarAlerta(mensaje, tipo) {
             const alertaError = document.getElementById('alertaError');
             const alertaExito = document.getElementById('alertaExito');

@@ -6,6 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página de gestión del perfil del usuario
+    Los datos se cargan y guardan desde la API real
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,9 +56,17 @@
     =====================================
     CONTENIDO PRINCIPAL: GESTIÓN DE PERFIL
     =====================================
+    Tres tabs: Datos Personales, Seguridad y Preferencias
     -->
     <div class="container my-4">
         <h1 class="text-primary fw-bold mb-4"><i class="bi bi-person-circle me-2"></i>Mi Perfil</h1>
+
+        <!--
+        ALERTAS DE FEEDBACK
+        Muestran mensajes de éxito o error al guardar
+        -->
+        <div id="alertaExito" class="alert alert-success d-none mb-3"></div>
+        <div id="alertaError" class="alert alert-danger d-none mb-3"></div>
 
         <!--
         NAVEGACIÓN POR TABS
@@ -76,6 +85,8 @@
 
         <!--
         TAB 1: DATOS PERSONALES
+        Se cargan desde GET /api/usuarios/perfil
+        Se guardan con PUT /api/usuarios/perfil
         -->
         <div id="datosTab" class="tab-panel active">
             <div class="row g-4">
@@ -87,6 +98,7 @@
                                 <div class="row g-3">
                                     <!--
                                     DATOS BÁSICOS
+                                    Nombre, correo y teléfono del usuario
                                     -->
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="nombre">Nombre Completo</label>
@@ -103,6 +115,7 @@
 
                                     <!--
                                     ESTADO ESTUDIANTE
+                                    Checkbox que muestra/oculta datos estudiantiles
                                     -->
                                     <div class="col-12">
                                         <div class="form-check">
@@ -115,6 +128,7 @@
 
                                     <!--
                                     DATOS ESTUDIANTILES
+                                    Aparecen solo cuando se marca "Soy estudiante"
                                     -->
                                     <div id="datosEstudiantePerfil" class="col-12 d-none">
                                         <div class="row g-3 p-3 rounded" style="background:#f0f7ff; border-left: 4px solid #0066cc;">
@@ -148,13 +162,14 @@
 
                 <!--
                 PROGRAMA DE LEALTAD
+                Las millas se cargan desde la API
                 -->
                 <div class="col-lg-4">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="fw-bold text-primary mb-3"><i class="bi bi-award me-2"></i>Programa de Lealtad</h5>
                             <div class="millas-badge mb-3">
-                                <div class="numero">2,450</div>
+                                <div class="numero" id="millasUsuario">0</div>
                                 <div class="small">Millas Disponibles</div>
                             </div>
                             <p class="small text-muted mb-2">Acumula millas y canjéalas por:</p>
@@ -257,49 +272,134 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        /*
+        =====================================
+        INICIALIZACIÓN
+        =====================================
+        Carga el perfil del usuario desde la API al abrir la página
+        */
+        document.addEventListener('DOMContentLoaded', async function() {
             // protegerRuta(); // Desactivado para fase de prueba
 
-            const usuario = obtenerUsuarioActual();
-            if (usuario) {
-                document.getElementById('nombre').value = usuario.nombreCompleto || '';
-                document.getElementById('email').value = usuario.email || '';
-                document.getElementById('telefono').value = usuario.telefono || '';
-                
-                if (usuario.esEstudiante) {
-                    document.getElementById('esEstudiante').checked = true;
-                    document.getElementById('datosEstudiantePerfil').classList.remove('d-none');
-                    document.getElementById('universidad').value = usuario.universidad || '';
-                    document.getElementById('carnet').value = usuario.carnet || '';
-                }
-            }
+            // Cargar perfil desde la API
+            await cargarPerfil();
 
             // Mostrar/ocultar datos de estudiante
             document.getElementById('esEstudiante').addEventListener('change', function() {
                 document.getElementById('datosEstudiantePerfil').classList.toggle('d-none', !this.checked);
             });
 
-            // Manejar formularios
-            document.getElementById('formDatos').addEventListener('submit', (e) => {
+            // Guardar datos personales con la API
+            document.getElementById('formDatos').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                alert('Cambios guardados exitosamente');
+                await guardarDatos();
             });
 
+            // Cambiar contraseña (pendiente de endpoint en API)
             document.getElementById('formPassword').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const nueva = document.getElementById('passwordNueva').value;
                 const confirmar = document.getElementById('passwordConfirmar').value;
-                if (nueva !== confirmar) { alert('Las contraseñas no coinciden'); return; }
-                alert('Contraseña actualizada exitosamente');
+                if (nueva !== confirmar) {
+                    mostrarAlerta('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+                mostrarAlerta('Contraseña actualizada exitosamente', 'exito');
                 document.getElementById('formPassword').reset();
             });
 
+            // Guardar preferencias (local por ahora)
             document.getElementById('formNotificaciones').addEventListener('submit', (e) => {
                 e.preventDefault();
-                alert('Preferencias guardadas exitosamente');
+                mostrarAlerta('Preferencias guardadas exitosamente', 'exito');
             });
         });
 
+        /**
+         * Carga el perfil del usuario desde la API
+         * Usa GET /api/usuarios/perfil con el header X-User-Id
+         * Si falla la API, usa los datos del localStorage
+         */
+        async function cargarPerfil() {
+            try {
+                const respuesta = await obtenerPerfil();
+                const usuario = respuesta.usuario;
+
+                if (usuario) {
+                    // Construir nombre completo desde los campos separados de la API
+                    const nombreCompleto = [usuario.nombre1, usuario.nombre2, usuario.apellido1, usuario.apellido2]
+                        .filter(Boolean).join(' ');
+
+                    document.getElementById('nombre').value = nombreCompleto;
+                    document.getElementById('email').value = usuario.correo || '';
+                    document.getElementById('telefono').value = usuario.telefono || '';
+                    document.getElementById('millasUsuario').textContent = usuario.millas || 0;
+
+                    if (usuario.esEstudiante) {
+                        document.getElementById('esEstudiante').checked = true;
+                        document.getElementById('datosEstudiantePerfil').classList.remove('d-none');
+                        document.getElementById('universidad').value = usuario.universidad || '';
+                        document.getElementById('carnet').value = usuario.carnet || '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando perfil desde API:', error);
+
+                // Si falla la API, usar datos del localStorage
+                const usuario = obtenerUsuarioActual();
+                if (usuario) {
+                    document.getElementById('nombre').value = usuario.nombreCompleto || '';
+                    document.getElementById('email').value = usuario.email || '';
+                    document.getElementById('telefono').value = usuario.telefono || '';
+                    document.getElementById('millasUsuario').textContent = usuario.millas || 0;
+
+                    if (usuario.esEstudiante) {
+                        document.getElementById('esEstudiante').checked = true;
+                        document.getElementById('datosEstudiantePerfil').classList.remove('d-none');
+                        document.getElementById('universidad').value = usuario.universidad || '';
+                        document.getElementById('carnet').value = usuario.carnet || '';
+                    }
+                }
+            }
+        }
+
+        /**
+         * Guarda los datos del perfil en la API
+         * Usa PUT /api/usuarios/perfil con el header X-User-Id
+         */
+        async function guardarDatos() {
+            try {
+                const datos = {
+                    nombreCompleto: document.getElementById('nombre').value.trim(),
+                    correo: document.getElementById('email').value.trim(),
+                    telefono: document.getElementById('telefono').value.trim(),
+                    esEstudiante: document.getElementById('esEstudiante').checked,
+                    universidad: document.getElementById('universidad').value.trim(),
+                    carnet: document.getElementById('carnet').value.trim()
+                };
+
+                await actualizarPerfil(datos);
+
+                // Actualizar también el localStorage
+                const usuarioActual = obtenerUsuarioActual();
+                if (usuarioActual) {
+                    usuarioActual.nombreCompleto = datos.nombreCompleto;
+                    usuarioActual.email = datos.correo;
+                    usuarioActual.telefono = datos.telefono;
+                    guardarUsuarioActual(usuarioActual);
+                }
+
+                mostrarAlerta('Cambios guardados exitosamente', 'exito');
+            } catch (error) {
+                console.error('Error guardando perfil:', error);
+                mostrarAlerta('Error al guardar los cambios', 'error');
+            }
+        }
+
+        /**
+         * Cambia entre los tabs del perfil
+         * @param {string} tab - Tab a mostrar ('datos', 'seguridad' o 'preferencias')
+         */
         function cambiarTabPerfil(tab) {
             document.querySelectorAll('.tab-btn-custom').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -308,6 +408,31 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
+        /**
+         * Muestra una alerta de éxito o error
+         * @param {string} mensaje - Texto a mostrar
+         * @param {string} tipo - Tipo de alerta ('exito' o 'error')
+         */
+        function mostrarAlerta(mensaje, tipo) {
+            const alertaExito = document.getElementById('alertaExito');
+            const alertaError = document.getElementById('alertaError');
+            alertaExito.classList.add('d-none');
+            alertaError.classList.add('d-none');
+
+            if (tipo === 'exito') {
+                alertaExito.textContent = mensaje;
+                alertaExito.classList.remove('d-none');
+                setTimeout(() => alertaExito.classList.add('d-none'), 3000);
+            } else {
+                alertaError.textContent = mensaje;
+                alertaError.classList.remove('d-none');
+                setTimeout(() => alertaError.classList.add('d-none'), 3000);
+            }
+        }
+
+        /**
+         * Cancela la edición y recarga los datos originales
+         */
         function cancelarEdicion() { window.location.reload(); }
     </script>
 </body>

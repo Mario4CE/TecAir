@@ -6,6 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página de inicio de sesión y registro de usuarios
+    El registro crea el usuario en la API real
     Importa Bootstrap, íconos y estilos propios
     -->
     <meta charset="UTF-8">
@@ -64,7 +65,8 @@
 
                 <!--
                 PESTAÑA 1: FORMULARIO DE LOGIN
-                Permite iniciar sesión con solo nombre (sistema en fase de prueba)
+                Busca el usuario en la API por nombre
+                Si no existe, redirige al registro
                 -->
                 <div id="loginTab" class="tab-content active">
                     <form id="loginForm" class="auth-form">
@@ -85,14 +87,14 @@
                         </button>
                     </form>
                     <p style="text-align: center; margin-top: 1rem; color: #7f8c8d; font-size: 12px;">
-                        <i class="bi bi-info-circle me-1"></i>Sistema en fase de prueba - No se requiere contraseña
+                        <i class="bi bi-info-circle me-1"></i>¿No tenés cuenta? Registrate arriba
                     </p>
                 </div>
 
                 <!--
                 PESTAÑA 2: FORMULARIO DE REGISTRO
-                Recopila información completa del nuevo usuario
-                (nombre, email, teléfono, estado estudiante)
+                Crea el usuario en la API mediante POST /api/usuarios
+                Campos: nombre, email, teléfono y datos estudiantiles opcionales
                 -->
                 <div id="registroTab" class="tab-content">
                     <form id="registroForm" class="auth-form">
@@ -212,6 +214,7 @@
     Gestiona:
     - Cambio de tabs (login/registro)
     - Validación de formularios
+    - Registro de usuario en la API real
     - Guardado de usuario en localStorage
     - Redirección después de autenticación
     - Mostrar/ocultar alertas y datos de estudiante
@@ -230,7 +233,7 @@
             });
 
             // Manejar login
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const nombre = document.getElementById('loginNombre').value.trim();
 
@@ -239,26 +242,60 @@
                     return;
                 }
 
-                // Guardar usuario en localStorage de forma simple
-                const usuario = {
-                    nombreCompleto: nombre,
-                    email: `${nombre.toLowerCase().replace(/\s+/g, '.')}@tecair.cr`,
-                    telefono: '',
-                    esEstudiante: false,
-                    universidad: '',
-                    carnet: '',
-                    millas: 0
-                };
+                try {
+                    // Buscar el usuario en la API por nombre
+                    const respuesta = await apiGet('usuarios');
+                    const usuarios = respuesta.usuarios || [];
+                    const nombreLower = nombre.toLowerCase();
 
-                guardarUsuarioActual(usuario);
-                mostrarAlerta('¡Bienvenido a TECAir!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'menu.html';
-                }, 1000);
+                    // Buscar coincidencia por nombre
+                    const usuarioEncontrado = usuarios.find(u => {
+                        const nombreCompleto = [u.nombre1, u.nombre2, u.apellido1, u.apellido2]
+                            .filter(Boolean).join(' ').toLowerCase();
+                        return nombreCompleto.includes(nombreLower);
+                    });
+
+                    if (usuarioEncontrado) {
+                        // Usuario encontrado en la API
+                        const usuario = {
+                            idUsuario: usuarioEncontrado.idUsuario,
+                            nombreCompleto: [usuarioEncontrado.nombre1, usuarioEncontrado.nombre2,
+                                             usuarioEncontrado.apellido1, usuarioEncontrado.apellido2]
+                                            .filter(Boolean).join(' '),
+                            email: usuarioEncontrado.correo,
+                            telefono: usuarioEncontrado.telefono,
+                            esEstudiante: usuarioEncontrado.esEstudiante,
+                            universidad: usuarioEncontrado.universidad,
+                            carnet: usuarioEncontrado.carnet,
+                            millas: usuarioEncontrado.millas
+                        };
+
+                        guardarUsuarioActual(usuario);
+                        mostrarAlerta('¡Bienvenido a TECAir!', 'success');
+                        setTimeout(() => { window.location.href = 'menu.html'; }, 1000);
+                    } else {
+                        mostrarAlerta('Usuario no encontrado. ¿Ya te registraste?', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error en login:', error);
+                    // Si falla la API, login simple con localStorage
+                    const usuario = {
+                        nombreCompleto: nombre,
+                        email: nombre.toLowerCase().replace(/\s+/g, '.') + '@tecair.cr',
+                        telefono: '',
+                        esEstudiante: false,
+                        universidad: '',
+                        carnet: '',
+                        millas: 0
+                    };
+                    guardarUsuarioActual(usuario);
+                    mostrarAlerta('¡Bienvenido a TECAir!', 'success');
+                    setTimeout(() => { window.location.href = 'menu.html'; }, 1000);
+                }
             });
 
             // Manejar registro
-            document.getElementById('registroForm').addEventListener('submit', (e) => {
+            document.getElementById('registroForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const nombre   = document.getElementById('regNombre').value.trim();
                 const email    = document.getElementById('regEmail').value.trim();
@@ -279,22 +316,40 @@
                     }
                 }
 
-                // Guardar usuario en localStorage
-                const usuario = {
-                    nombreCompleto: nombre,
-                    email: email,
-                    telefono: telefono,
-                    esEstudiante: esEst,
-                    universidad: esEst ? document.getElementById('universidad').value.trim() : '',
-                    carnet: esEst ? document.getElementById('carnet').value.trim() : '',
-                    millas: 0
-                };
+                try {
+                    // Registrar usuario en la API real mediante POST /api/usuarios
+                    const respuesta = await registrarUsuario({
+                        nombreCompleto: nombre,
+                        email: email,
+                        telefono: telefono,
+                        esEstudiante: esEst,
+                        universidad: esEst ? document.getElementById('universidad').value.trim() : '',
+                        carnet: esEst ? document.getElementById('carnet').value.trim() : '',
+                        millas: 0
+                    });
 
-                guardarUsuarioActual(usuario);
-                mostrarAlerta('¡Registro exitoso! Bienvenido a TECAir', 'success');
-                setTimeout(() => {
-                    window.location.href = 'menu.html';
-                }, 1200);
+                    const usuarioCreado = respuesta.usuario;
+
+                    // Guardar en localStorage con el ID de la API para las demás páginas
+                    const usuario = {
+                        idUsuario: usuarioCreado.idUsuario,
+                        nombreCompleto: nombre,
+                        email: email,
+                        telefono: telefono,
+                        esEstudiante: esEst,
+                        universidad: esEst ? document.getElementById('universidad').value.trim() : '',
+                        carnet: esEst ? document.getElementById('carnet').value.trim() : '',
+                        millas: 0
+                    };
+
+                    guardarUsuarioActual(usuario);
+                    mostrarAlerta('¡Registro exitoso! Bienvenido a TECAir', 'success');
+                    setTimeout(() => { window.location.href = 'menu.html'; }, 1200);
+
+                } catch (error) {
+                    console.error('Error en registro:', error);
+                    mostrarAlerta('Error al crear la cuenta. Intentá de nuevo.', 'error');
+                }
             });
         });
 

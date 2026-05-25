@@ -6,7 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página principal después de autenticarse
-    Importa estilos generales de la aplicación
+    Las promociones y millas se cargan desde la API real
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -137,8 +137,8 @@
 
             <!--
             CARD 2: PROMOCIONES RECIENTES
-            Muestra últimas promociones disponibles
-            Se cargan dinámicamente desde la API
+            Muestra últimas 2 promociones desde la API
+            Se cargan dinámicamente desde GET /api/promociones
             -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100 info-card">
@@ -153,8 +153,7 @@
 
             <!--
             CARD 3: PROGRAMA DE LEALTAD
-            Información sobre millas y beneficios
-            Muestra millas acumuladas del usuario actual
+            Las millas se cargan desde la API real del usuario
             -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100 info-card">
@@ -163,7 +162,7 @@
                         <p class="small text-muted mb-3">Acumula millas en cada reservación y canjéalas por vuelos gratis.</p>
                         <div id="milasUsuario">
                             <div class="millas-badge-mini">
-                                <div class="numero">0</div>
+                                <div class="numero" id="numeroMillas">0</div>
                                 <div class="small">Millas Disponibles</div>
                             </div>
                         </div>
@@ -192,10 +191,17 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        /*
+        =====================================
+        INICIALIZACIÓN
+        =====================================
+        Carga el nombre del usuario, promociones y millas al abrir la página
+        */
+        document.addEventListener('DOMContentLoaded', async function() {
             // protegerRuta(); // Desactivado para fase de prueba
+
             const usuario = obtenerUsuarioActual();
-            
+
             // Si no hay usuario, crear uno por defecto
             if (!usuario) {
                 const usuarioDefecto = {
@@ -207,48 +213,84 @@
                 };
                 guardarUsuarioActual(usuarioDefecto);
             }
-            
+
+            // Mostrar saludo personalizado
             const usuarioActual = obtenerUsuarioActual();
             if (usuarioActual && usuarioActual.nombreCompleto) {
-                document.getElementById('bienvenidaUsuario').innerHTML = 
+                document.getElementById('bienvenidaUsuario').innerHTML =
                     `¡Bienvenido, <strong>${usuarioActual.nombreCompleto}</strong>! Busca tu próximo destino`;
             }
 
-            // Simular carga de promociones
-            cargarPromociones();
-            cargarMillas();
+            // Cargar datos desde la API
+            await cargarPromociones();
+            await cargarMillas();
         });
 
-        function cargarPromociones() {
+        /**
+         * Carga las últimas 2 promociones desde la API
+         * Si falla, muestra un mensaje de error
+         */
+        async function cargarPromociones() {
             const promocionesDiv = document.getElementById('promocionesRecientes');
-            // Datos simulados
-            const promociones = [
-                { origen: 'San José', destino: 'Liberia', precio: '$45', descuento: '30%' },
-                { origen: 'San José', destino: 'Limón', precio: '$35', descuento: '25%' }
-            ];
 
-            let html = '';
-            promociones.forEach(promo => {
-                html += `<div class="promo-item">
-                    <strong>${promo.origen} → ${promo.destino}</strong><br>
-                    Desde ${promo.precio} <span class="descuento">${promo.descuento} desc.</span>
-                </div>`;
-            });
+            try {
+                const respuesta = await obtenerPromociones();
+                const promociones = respuesta.promociones || [];
 
-            promocionesDiv.innerHTML = html;
-        }
+                if (promociones.length === 0) {
+                    promocionesDiv.innerHTML = '<p class="text-muted small">No hay promociones disponibles</p>';
+                    return;
+                }
 
-        function cargarMillas() {
-            const usuario = obtenerUsuarioActual();
-            if (usuario && usuario.millas !== undefined) {
-                document.getElementById('milasUsuario').innerHTML = 
-                    `<div class="millas-badge-mini">
-                        <div class="numero">${usuario.millas}</div>
-                        <div class="small">Millas Disponibles</div>
+                // Mostrar solo las primeras 2 promociones
+                let html = '';
+                promociones.slice(0, 2).forEach(promo => {
+                    html += `<div class="promo-item">
+                        <strong>${promo.origen} → ${promo.destino}</strong><br>
+                        Desde <span class="descuento">$${promo.precio}</span>
                     </div>`;
+                });
+
+                promocionesDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando promociones:', error);
+                promocionesDiv.innerHTML = '<p class="text-muted small">No se pudieron cargar las promociones</p>';
             }
         }
 
+        /**
+         * Carga las millas del usuario desde la API
+         * Si falla, usa el valor guardado en localStorage
+         */
+        async function cargarMillas() {
+            try {
+                const respuesta = await obtenerPerfil();
+                const usuario = respuesta.usuario;
+
+                if (usuario) {
+                    document.getElementById('numeroMillas').textContent = usuario.millas || 0;
+
+                    // Actualizar también el localStorage
+                    const usuarioLocal = obtenerUsuarioActual();
+                    if (usuarioLocal) {
+                        usuarioLocal.millas = usuario.millas || 0;
+                        guardarUsuarioActual(usuarioLocal);
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando millas:', error);
+                // Si falla la API, usar el valor del localStorage
+                const usuario = obtenerUsuarioActual();
+                if (usuario) {
+                    document.getElementById('numeroMillas').textContent = usuario.millas || 0;
+                }
+            }
+        }
+
+        /**
+         * Redirige a la página indicada
+         * @param {string} ruta - URL de la página destino
+         */
         function redirigir(ruta) {
             window.location.href = ruta;
         }

@@ -6,6 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página para buscar vuelos disponibles
+    Los aeropuertos y vuelos se cargan desde la API real
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,40 +54,34 @@
     =====================================
     CONTENIDO PRINCIPAL
     =====================================
+    Formulario de búsqueda y resultados de vuelos
     -->
     <div class="container my-4">
         <h1 class="text-primary fw-bold mb-4"><i class="bi bi-search me-2"></i>Buscar Vuelos</h1>
 
         <!--
         FORMULARIO DE BÚSQUEDA
+        Los selects de origen y destino se cargan dinámicamente
+        desde la API de aeropuertos
         -->
         <div class="card shadow-sm mb-4" style="background: linear-gradient(135deg, #f5f7fa, #ecf0f1);">
             <div class="card-body">
                 <form id="busquedaForm">
-                    <!--
-                    PRIMERA FILA: Origen, Destino y Fecha Salida
-                    -->
                     <div class="row g-3">
+                        <!--
+                        ORIGEN Y DESTINO
+                        Se cargan desde GET /api/aeropuertos
+                        -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold" for="origen"><i class="bi bi-geo-alt me-1"></i>Aeropuerto de Origen</label>
                             <select class="form-select" id="origen" name="origen" required>
-                                <option value="">-- Selecciona origen --</option>
-                                <option value="SJO">San José (SJO)</option>
-                                <option value="LIR">Liberia (LIR)</option>
-                                <option value="LIM">Limón (LIM)</option>
-                                <option value="QST">Quepos (QST)</option>
-                                <option value="PJM">Palmar (PJM)</option>
+                                <option value="">Cargando aeropuertos...</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold" for="destino"><i class="bi bi-geo-alt-fill me-1"></i>Aeropuerto de Destino</label>
                             <select class="form-select" id="destino" name="destino" required>
-                                <option value="">-- Selecciona destino --</option>
-                                <option value="SJO">San José (SJO)</option>
-                                <option value="LIR">Liberia (LIR)</option>
-                                <option value="LIM">Limón (LIM)</option>
-                                <option value="QST">Quepos (QST)</option>
-                                <option value="PJM">Palmar (PJM)</option>
+                                <option value="">Cargando aeropuertos...</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -95,7 +90,7 @@
                         </div>
 
                         <!--
-                        SEGUNDA FILA: Fecha Regreso, Pasajeros y Botón Buscar
+                        FECHA REGRESO, PASAJEROS Y BOTÓN BUSCAR
                         -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold" for="fechaRegreso"><i class="bi bi-calendar-check me-1"></i>Fecha de Regreso <span class="text-muted">(opcional)</span></label>
@@ -124,19 +119,24 @@
 
         <!--
         ALERTAS DE FEEDBACK
+        Muestran mensajes de error o éxito
         -->
         <div id="alertError" class="alert alert-danger d-none"><i class="bi bi-exclamation-circle me-2"></i><span></span></div>
         <div id="alertSuccess" class="alert alert-success d-none"><i class="bi bi-check-circle me-2"></i><span></span></div>
 
         <!--
         INDICADOR DE CARGA
+        Se muestra mientras se buscan los vuelos en la API
         -->
         <div id="loading" class="text-center py-4 d-none">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2 text-muted">Buscando vuelos...</p>
         </div>
 
-        <!-- Resultados de Búsqueda -->
+        <!--
+        RESULTADOS DE BÚSQUEDA
+        Se muestran los vuelos retornados por la API
+        -->
         <div id="resultados" class="d-none">
             <h4 class="fw-bold mb-3">Vuelos Disponibles</h4>
             <div id="listaVuelos" class="row g-3">
@@ -155,7 +155,13 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        /*
+        =====================================
+        INICIALIZACIÓN
+        =====================================
+        Carga los aeropuertos desde la API y configura el formulario
+        */
+        document.addEventListener('DOMContentLoaded', async function() {
             // protegerRuta(); // Desactivado para fase de prueba
 
             // Establecer fecha mínima en hoy
@@ -168,6 +174,9 @@
                 document.getElementById('fechaRegreso').min = this.value;
             });
 
+            // Cargar aeropuertos desde la API
+            await cargarAeropuertos();
+
             // Manejar búsqueda
             document.getElementById('busquedaForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -175,6 +184,40 @@
             });
         });
 
+        /**
+         * Carga los aeropuertos disponibles desde la API
+         * y los agrega a los selects de origen y destino
+         */
+        async function cargarAeropuertos() {
+            try {
+                const respuesta = await obtenerAeropuertos();
+                const aeropuertos = respuesta.aeropuertos || [];
+
+                const selectOrigen = document.getElementById('origen');
+                const selectDestino = document.getElementById('destino');
+
+                // Limpiar opciones y agregar placeholder
+                selectOrigen.innerHTML = '<option value="">-- Selecciona origen --</option>';
+                selectDestino.innerHTML = '<option value="">-- Selecciona destino --</option>';
+
+                // Agregar cada aeropuerto de la API
+                aeropuertos.forEach(aeropuerto => {
+                    const opcion = `<option value="${aeropuerto.idAeropuerto}">${aeropuerto.nombre} - ${aeropuerto.ubicacion}</option>`;
+                    selectOrigen.innerHTML += opcion;
+                    selectDestino.innerHTML += opcion;
+                });
+            } catch (error) {
+                console.error('Error cargando aeropuertos:', error);
+                // Si falla la API, dejar opciones por defecto
+                document.getElementById('origen').innerHTML = '<option value="">Error al cargar aeropuertos</option>';
+                document.getElementById('destino').innerHTML = '<option value="">Error al cargar aeropuertos</option>';
+            }
+        }
+
+        /**
+         * Busca vuelos disponibles según los filtros del formulario
+         * Llama a GET /api/vuelos con los parámetros de origen y destino
+         */
         async function buscarVuelos() {
             const origen = document.getElementById('origen').value;
             const destino = document.getElementById('destino').value;
@@ -193,8 +236,9 @@
                 document.getElementById('loading').classList.remove('d-none');
                 document.getElementById('resultados').classList.add('d-none');
 
-                // Simular búsqueda de vuelos
-                const vuelos = generarVuelosSimulados(origen, destino);
+                // Llamada real a la API con filtros de origen y destino
+                const respuesta = await obtenerVuelos({ origen, destino });
+                const vuelos = respuesta.vuelos || [];
 
                 if (vuelos.length === 0) {
                     mostrarAlerta('No se encontraron vuelos para esa ruta', 'error');
@@ -203,64 +247,48 @@
                     document.getElementById('resultados').classList.remove('d-none');
                 }
             } catch (error) {
-                mostrarAlerta('Error al buscar vuelos', 'error');
+                console.error('Error buscando vuelos:', error);
+                mostrarAlerta('Error al buscar vuelos. Verificá que la API esté corriendo.', 'error');
             } finally {
                 document.getElementById('loading').classList.add('d-none');
             }
         }
 
-        function generarVuelosSimulados(origen, destino) {
-            const aeropuertos = {
-                'SJO': 'San José', 'LIR': 'Liberia',
-                'LIM': 'Limón', 'QST': 'Quepos', 'PJM': 'Palmar'
-            };
-
-            const vuelos = [];
-            for (let i = 0; i < 4; i++) {
-                const hora = String(8 + i * 2).padStart(2, '0');
-                vuelos.push({
-                    id: i + 1,
-                    numero: `TEC${Math.floor(Math.random() * 9000) + 1000}`,
-                    origen, destino,
-                    originNombre: aeropuertos[origen],
-                    destinoNombre: aeropuertos[destino],
-                    salida: `${hora}:00`,
-                    llegada: `${String(parseInt(hora) + 2).padStart(2, '0')}:15`,
-                    duracion: '2h 15m',
-                    precio: Math.floor(Math.random() * 150) + 45,
-                    asientosDisponibles: Math.floor(Math.random() * 50) + 10,
-                    escala: i % 2 === 0 ? 'Directo' : '1 escala'
-                });
-            }
-            return vuelos;
-        }
-
+        /**
+         * Muestra los vuelos en el grid de resultados
+         * @param {Array} vuelos - Lista de vuelos retornada por la API
+         */
         function mostrarResultados(vuelos) {
             const listaVuelos = document.getElementById('listaVuelos');
             let html = '';
 
             vuelos.forEach(vuelo => {
+                // Formatear hora de salida
+                const horaSalida = vuelo.horaSalida ? vuelo.horaSalida.substring(0, 5) : '--:--';
+                const escalas = vuelo.escalas ? vuelo.escalas.length - 2 : 0;
+                const tipoEscala = escalas <= 0 ? 'Directo' : `${escalas} escala(s)`;
+
                 html += `
                 <div class="col-md-6">
                     <div class="vuelo-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold mb-0">${vuelo.numero}</h6>
-                            <span class="escala-badge">${vuelo.escala}</span>
+                            <h6 class="fw-bold mb-0">Vuelo #${vuelo.idVuelo}</h6>
+                            <span class="escala-badge">${tipoEscala}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center p-3 rounded mb-3" style="background:#f8f9fa;">
                             <div class="text-center">
-                                <div class="hora">${vuelo.salida}</div>
+                                <div class="hora">${horaSalida}</div>
                                 <div class="codigo">${vuelo.origen}</div>
-                                <small class="text-muted">${vuelo.originNombre}</small>
+                                <small class="text-muted">${vuelo.fechaSalida || ''}</small>
                             </div>
                             <div class="text-center linea-ruta">
                                 <div>✈️</div>
-                                <small class="text-muted">${vuelo.duracion}</small>
+                                <small class="text-muted">${vuelo.matricula}</small>
                             </div>
                             <div class="text-center">
-                                <div class="hora">${vuelo.llegada}</div>
+                                <div class="hora">--:--</div>
                                 <div class="codigo">${vuelo.destino}</div>
-                                <small class="text-muted">${vuelo.destinoNombre}</small>
+                                <small class="text-muted">Destino</small>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
@@ -269,7 +297,7 @@
                                 &nbsp;|&nbsp;
                                 <strong class="text-success">$${vuelo.precio}</strong> p/p
                             </div>
-                            <button class="btn btn-success btn-sm px-3" onclick="seleccionarVuelo(${vuelo.id})">
+                            <button class="btn btn-success btn-sm px-3" onclick="seleccionarVuelo(${vuelo.idVuelo})">
                                 <i class="bi bi-check-lg me-1"></i>Seleccionar
                             </button>
                         </div>
@@ -280,12 +308,21 @@
             listaVuelos.innerHTML = html;
         }
 
+        /**
+         * Guarda el vuelo seleccionado en sessionStorage y redirige a reservaciones
+         * @param {number} vueloId - ID del vuelo seleccionado
+         */
         function seleccionarVuelo(vueloId) {
             sessionStorage.setItem('vueloSeleccionado', vueloId);
             mostrarAlerta('Vuelo seleccionado. Redirigiendo...', 'success');
             setTimeout(() => { window.location.href = 'reservaciones.html'; }, 1500);
         }
 
+        /**
+         * Muestra una alerta de error o éxito
+         * @param {string} mensaje - Texto a mostrar
+         * @param {string} tipo - Tipo de alerta ('error' o 'success')
+         */
         function mostrarAlerta(mensaje, tipo) {
             const alertError = document.getElementById('alertError');
             const alertSuccess = document.getElementById('alertSuccess');

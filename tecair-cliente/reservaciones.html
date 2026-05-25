@@ -6,6 +6,7 @@
     CONFIGURACIÓN DEL DOCUMENTO
     =====================================
     Página para gestionar reservaciones de vuelos
+    Las reservaciones se cargan desde la API real
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,9 +23,6 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
         .reservacion-card { border-left: 4px solid #0066cc; border-radius: 0 8px 8px 0; }
-        .estado-confirmada { background: #27ae60; }
-        .estado-pendiente { background: #f39c12; }
-        .estado-cancelada { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -56,6 +54,7 @@
     =====================================
     CONTENIDO PRINCIPAL: RESERVACIONES
     =====================================
+    Tres tabs: Activas, Historial y Nueva Reservación
     -->
     <div class="container my-4">
         <h1 class="text-primary fw-bold mb-4"><i class="bi bi-journal-check me-2"></i>Mis Reservaciones</h1>
@@ -77,36 +76,32 @@
 
         <!--
         TAB 1: RESERVACIONES ACTIVAS
+        Se cargan desde GET /api/reservaciones?idUsuario=X
         -->
         <div id="activasTab" class="tab-panel active">
-            <div id="listadoActivas" class="row g-3">
-                <div class="col-12 text-center py-5 text-muted">
-                    <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
-                    No tienes reservaciones activas
-                    <div class="mt-3">
-                        <button class="btn btn-primary" onclick="cambiarTabReservaciones('nueva')">
-                            <i class="bi bi-plus me-1"></i>Hacer nueva reservación
-                        </button>
-                    </div>
-                </div>
+            <div id="loadingActivas" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Cargando reservaciones...</p>
             </div>
+            <div id="listadoActivas" class="row g-3"></div>
         </div>
 
         <!--
         TAB 2: HISTORIAL
+        Muestra reservaciones canceladas o completadas
         -->
         <div id="historialTab" class="tab-panel">
-            <div id="listadoHistorial" class="row g-3">
-                <div class="col-12 text-center py-5 text-muted">
-                    <i class="bi bi-archive fs-1 d-block mb-2"></i>
-                    No tienes historial de reservaciones
-                </div>
+            <div id="loadingHistorial" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Cargando historial...</p>
             </div>
+            <div id="listadoHistorial" class="row g-3"></div>
         </div>
 
         <!--
         TAB 3: NUEVA RESERVACIÓN
         Formulario para crear una nueva reservación
+        El select de vuelos se carga desde la API
         -->
         <div id="nuevaTab" class="tab-panel">
             <div class="card shadow-sm">
@@ -116,6 +111,7 @@
                         <div class="row g-3">
                             <!--
                             DATOS DEL PASAJERO
+                            Se pre-llenan con los datos del usuario actual
                             -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" for="pasajeroNombre"><i class="bi bi-person me-1"></i>Nombre del Pasajero</label>
@@ -127,12 +123,13 @@
                             </div>
 
                             <!--
-                            SELECCIÓN DE VUELO Y ASIENTO
+                            SELECCIÓN DE VUELO
+                            Se carga desde GET /api/vuelos
                             -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" for="vueloSeleccionado"><i class="bi bi-airplane me-1"></i>Seleccionar Vuelo</label>
                                 <select class="form-select" id="vueloSeleccionado" name="vueloSeleccionado" required>
-                                    <option value="">-- Selecciona un vuelo --</option>
+                                    <option value="">Cargando vuelos...</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -181,15 +178,14 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        /*
+        =====================================
+        INICIALIZACIÓN
+        =====================================
+        Carga reservaciones y vuelos desde la API al abrir la página
+        */
+        document.addEventListener('DOMContentLoaded', async function() {
             // protegerRuta(); // Desactivado para fase de prueba
-
-            cargarReservacionesSimuladas();
-
-            // Mostrar/ocultar datos de pasaporte
-            document.getElementById('requerirPasaporte').addEventListener('change', function() {
-                document.getElementById('datoPasaporte').classList.toggle('d-none', !this.checked);
-            });
 
             // Pre-llenar datos del usuario
             const usuario = obtenerUsuarioActual();
@@ -197,81 +193,183 @@
                 document.getElementById('pasajeroNombre').value = usuario.nombreCompleto || '';
                 document.getElementById('pasajeroEmail').value = usuario.email || '';
             }
+
+            // Mostrar/ocultar datos de pasaporte
+            document.getElementById('requerirPasaporte').addEventListener('change', function() {
+                document.getElementById('datoPasaporte').classList.toggle('d-none', !this.checked);
+            });
+
+            // Cargar datos desde la API
+            await cargarReservaciones();
+            await cargarVuelosDisponibles();
         });
 
+        /**
+         * Carga las reservaciones del usuario desde la API
+         * Separa las activas de las del historial según el estado
+         */
+        async function cargarReservaciones() {
+            try {
+                const usuario = obtenerUsuarioActual();
+                const idUsuario = usuario?.idUsuario || 1;
+
+                const respuesta = await obtenerReservaciones(idUsuario);
+                const reservaciones = respuesta.reservaciones || [];
+
+                // Separar activas e historial según estado
+                const activas = reservaciones.filter(r =>
+                    r.estado === 'pendiente_pago' || r.estado === 'pagada'
+                );
+                const historial = reservaciones.filter(r =>
+                    r.estado === 'cancelada'
+                );
+
+                mostrarReservaciones(activas, 'listadoActivas', 'loadingActivas', true);
+                mostrarReservaciones(historial, 'listadoHistorial', 'loadingHistorial', false);
+
+            } catch (error) {
+                console.error('Error cargando reservaciones:', error);
+                document.getElementById('loadingActivas').innerHTML =
+                    '<p class="text-danger text-center">Error al cargar reservaciones. Verificá que la API esté corriendo.</p>';
+                document.getElementById('loadingHistorial').innerHTML = '';
+            }
+        }
+
+        /**
+         * Muestra una lista de reservaciones en el contenedor indicado
+         * @param {Array} lista - Lista de reservaciones
+         * @param {string} contenedorId - ID del div donde mostrar
+         * @param {string} loadingId - ID del spinner a ocultar
+         * @param {boolean} mostrarAcciones - Si mostrar botones de acción
+         */
+        function mostrarReservaciones(lista, contenedorId, loadingId, mostrarAcciones) {
+            document.getElementById(loadingId).style.display = 'none';
+            const contenedor = document.getElementById(contenedorId);
+
+            if (lista.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                        No hay reservaciones para mostrar
+                        ${mostrarAcciones ? '<div class="mt-3"><button class="btn btn-primary" onclick="cambiarTabReservaciones(\'nueva\')"><i class="bi bi-plus me-1"></i>Hacer nueva reservación</button></div>' : ''}
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            lista.forEach(res => {
+                const estadoClass = res.estado === 'pagada' ? 'success' :
+                                    res.estado === 'pendiente_pago' ? 'warning' : 'danger';
+                const estadoTexto = res.estado === 'pagada' ? 'Pagada' :
+                                    res.estado === 'pendiente_pago' ? 'Pendiente' : 'Cancelada';
+                const origen = res.vuelo?.origen || '--';
+                const destino = res.vuelo?.destino || '--';
+                const fecha = res.fechaReservacion ? new Date(res.fechaReservacion).toLocaleDateString('es-CR') : '--';
+
+                html += `
+                <div class="col-md-6">
+                    <div class="card shadow-sm reservacion-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">Reservación #${res.idReservacion}</h6>
+                                <span class="badge bg-${estadoClass}">${estadoTexto}</span>
+                            </div>
+                            <p class="small mb-1"><strong>Ruta:</strong> ${origen} → ${destino}</p>
+                            <p class="small mb-1"><strong>Fecha:</strong> ${fecha}</p>
+                            <p class="small mb-3"><strong>Vuelo ID:</strong> ${res.idVuelo}</p>
+                            ${mostrarAcciones ? `
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-danger btn-sm" onclick="cancelarReservacionAPI(${res.idReservacion})">
+                                    <i class="bi bi-x me-1"></i>Cancelar
+                                </button>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            contenedor.innerHTML = html;
+        }
+
+        /**
+         * Carga los vuelos disponibles desde la API
+         * y los agrega al select del formulario de nueva reservación
+         */
+        async function cargarVuelosDisponibles() {
+            try {
+                const respuesta = await obtenerVuelos({});
+                const vuelos = respuesta.vuelos || [];
+                const select = document.getElementById('vueloSeleccionado');
+
+                select.innerHTML = '<option value="">-- Selecciona un vuelo --</option>';
+                vuelos.forEach(vuelo => {
+                    select.innerHTML += `<option value="${vuelo.idVuelo}">
+                        Vuelo #${vuelo.idVuelo} - ${vuelo.origen} → ${vuelo.destino} ($${vuelo.precio})
+                    </option>`;
+                });
+            } catch (error) {
+                console.error('Error cargando vuelos:', error);
+                document.getElementById('vueloSeleccionado').innerHTML =
+                    '<option value="">Error al cargar vuelos</option>';
+            }
+        }
+
+        /**
+         * Cancela una reservación llamando a la API
+         * @param {number} idReservacion - ID de la reservación a cancelar
+         */
+        async function cancelarReservacionAPI(idReservacion) {
+            if (!confirm('¿Estás seguro que deseas cancelar esta reservación?')) return;
+
+            try {
+                await cancelarReservacion(idReservacion);
+                alert('Reservación cancelada exitosamente');
+                await cargarReservaciones();
+            } catch (error) {
+                console.error('Error cancelando reservación:', error);
+                alert('Error al cancelar la reservación');
+            }
+        }
+
+        /**
+         * Guarda los datos del formulario y redirige a la página de pago
+         */
+        function procederPago() {
+            const pasajero = document.getElementById('pasajeroNombre').value;
+            const idVuelo = document.getElementById('vueloSeleccionado').value;
+            const asiento = document.getElementById('asiento').value;
+
+            if (!pasajero || !idVuelo || !asiento) {
+                alert('Por favor completa todos los campos requeridos');
+                return;
+            }
+
+            // Obtener el texto del vuelo seleccionado
+            const selectVuelo = document.getElementById('vueloSeleccionado');
+            const textoVuelo = selectVuelo.options[selectVuelo.selectedIndex].text;
+
+            // Guardar datos para la página de pago
+            sessionStorage.setItem('reservacionTemporal', JSON.stringify({
+                pasajero,
+                idVuelo,
+                textoVuelo,
+                asiento,
+                usuario: obtenerUsuarioActual()
+            }));
+
+            window.location.href = 'pago.html';
+        }
+
+        /**
+         * Cambia entre los tabs de reservaciones
+         * @param {string} tab - Tab a mostrar ('activas', 'historial' o 'nueva')
+         */
         function cambiarTabReservaciones(tab) {
             document.querySelectorAll('.tab-btn-custom').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
 
             document.querySelectorAll('.tab-btn-custom')[['activas', 'historial', 'nueva'].indexOf(tab)].classList.add('active');
             document.getElementById(tab + 'Tab').classList.add('active');
-        }
-
-        function cargarReservacionesSimuladas() {
-            // Simular reservaciones activas
-            const reservacionesActivas = [
-                {
-                    id: 'RES001', numero: 'TEC4521',
-                    origen: 'SJO', destino: 'LIR',
-                    salida: '2026-05-15 08:00',
-                    asiento: '12A', estado: 'Confirmada'
-                }
-            ];
-
-            const activasDiv = document.getElementById('listadoActivas');
-            if (reservacionesActivas.length > 0) {
-                let html = '';
-                reservacionesActivas.forEach(res => {
-                    const estadoClass = res.estado === 'Confirmada' ? 'success' : res.estado === 'Pendiente' ? 'warning' : 'danger';
-                    html += `
-                    <div class="col-md-6">
-                        <div class="card shadow-sm reservacion-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-bold mb-0">${res.numero}</h6>
-                                    <span class="badge bg-${estadoClass}">${res.estado}</span>
-                                </div>
-                                <p class="small mb-1"><strong>ID:</strong> ${res.id}</p>
-                                <p class="small mb-1"><strong>Ruta:</strong> ${res.origen} → ${res.destino}</p>
-                                <p class="small mb-1"><strong>Salida:</strong> ${res.salida}</p>
-                                <p class="small mb-3"><strong>Asiento:</strong> ${res.asiento}</p>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-info btn-sm" onclick="verDetalles('${res.id}')"><i class="bi bi-eye me-1"></i>Ver</button>
-                                    <button class="btn btn-warning btn-sm" onclick="modificarReservacion('${res.id}')"><i class="bi bi-pencil me-1"></i>Modificar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="cancelarReservacion('${res.id}')"><i class="bi bi-x me-1"></i>Cancelar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-                activasDiv.innerHTML = html;
-            }
-        }
-
-        function procederPago() {
-            const pasajero = document.getElementById('pasajeroNombre').value;
-            const vuelo = document.getElementById('vueloSeleccionado').value;
-            const asiento = document.getElementById('asiento').value;
-
-            if (!pasajero || !vuelo || !asiento) {
-                alert('Por favor completa todos los campos requeridos');
-                return;
-            }
-
-            sessionStorage.setItem('reservacionTemporal', JSON.stringify({
-                pasajero, vuelo, asiento,
-                monto: Math.floor(Math.random() * 150) + 45
-            }));
-
-            window.location.href = 'pago.html';
-        }
-
-        function verDetalles(id) { alert(`Ver detalles de ${id}`); }
-        function modificarReservacion(id) { alert(`Modificar reservación ${id}`); }
-        function cancelarReservacion(id) {
-            if (confirm('¿Estás seguro que deseas cancelar esta reservación?')) {
-                alert(`Reservación ${id} cancelada`);
-            }
         }
     </script>
 </body>
