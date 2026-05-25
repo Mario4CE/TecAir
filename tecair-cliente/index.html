@@ -328,7 +328,7 @@
                         millas: 0
                     });
 
-                    const usuarioCreado = respuesta.usuario;
+                    const usuarioCreado = respuesta.usuario || respuesta;
 
                     // Guardar en localStorage con el ID de la API para las demás páginas
                     const usuario = {
@@ -384,6 +384,7 @@
 
             if (tipo === 'error') {
                 alertError.textContent = mensaje;
+                
                 alertError.classList.add('show');
                 setTimeout(() => alertError.classList.remove('show'), 5000);
             } else {
