@@ -11,6 +11,7 @@
         
         <CollectionView 
             x:Name="PromotionsCollectionView"
+           
             EmptyView="No hay promociones disponibles">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>

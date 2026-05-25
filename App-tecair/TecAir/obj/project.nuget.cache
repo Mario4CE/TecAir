@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "0BqRok/6Iag=",
+  "dgSpecHash": "1n0Pv+3hO5g=",
   "success": true,
-  "projectFilePath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\TecAir.csproj",
+  "projectFilePath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\morer\\.nuget\\packages\\googlegson\\2.13.1.1\\googlegson.2.13.1.1.nupkg.sha512",
     "C:\\Users\\morer\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.0\\microsoft.extensions.configuration.10.0.0.nupkg.sha512",

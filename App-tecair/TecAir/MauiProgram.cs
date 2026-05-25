@@ -43,6 +43,13 @@ namespace TecAir
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 await DatabaseService.InitializeAsync();
+                
+                // Autenticar usuario demo automáticamente para demostración
+                var demoUser = await DatabaseService.GetUserByEmailAsync("demorera@estudiantec.cr");
+                if (demoUser != null)
+                {
+                    AuthenticationService.CurrentUser = demoUser;
+                }
             });
 
             return app;

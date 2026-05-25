@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TecAir")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+05375937e2496cc7fe3a420c64f32b0940711e5b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+85482b2d9f859d3ad9dbe488d3cea2c1b1a54bcc")]
 [assembly: System.Reflection.AssemblyProductAttribute("TecAir")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TecAir")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

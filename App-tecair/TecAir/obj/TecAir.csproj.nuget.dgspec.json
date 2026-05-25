@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\TecAir.csproj": {}
+    "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir.csproj": {}
   },
   "projects": {
-    "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\TecAir.csproj": {
+    "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\TecAir.csproj",
+        "projectUniqueName": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir.csproj",
         "projectName": "TecAir",
-        "projectPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\TecAir.csproj",
+        "projectPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir.csproj",
         "packagesPath": "C:\\Users\\morer\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\TecAir\\obj\\",
+        "outputPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

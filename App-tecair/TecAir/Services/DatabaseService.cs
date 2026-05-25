@@ -174,6 +174,30 @@ namespace TecAir.Services
                 }
             };
             await _connection.InsertAllAsync(promotions);
+
+            // Crear reservaciones de demostración
+            var reservations = new List<Reservation>
+            {
+                new()
+                {
+                    UserId = 1,
+                    FlightId = 1,
+                    SeatNumber = "12A",
+                    ReservationDate = DateTime.Now,
+                    Status = 0, // Pending
+                    TotalPrice = 450
+                },
+                new()
+                {
+                    UserId = 1,
+                    FlightId = 2,
+                    SeatNumber = "5B",
+                    ReservationDate = DateTime.Now.AddDays(-2),
+                    Status = 1, // Confirmed
+                    TotalPrice = 420
+                }
+            };
+            await _connection.InsertAllAsync(reservations);
         }
 
         // ==================== USUARIOS ====================

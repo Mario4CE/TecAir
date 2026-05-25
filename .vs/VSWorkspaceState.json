@@ -1,10 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\App-tecair",
-    "\\App-tecair\\TecAir",
-    "\\App-tecair\\TecAir\\TecAir"
+    "\\App-tecair"
   ],
-  "SelectedNode": "\\App-tecair\\TecAir\\TecAir.slnx",
+  "SelectedNode": "\\App-tecair\\TecAir.slnx",
   "PreviewInSolutionExplorer": false
 }

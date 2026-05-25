@@ -1,42 +1,91 @@
+using TecAir.ViewModels;
+
 namespace TecAir.Views;
 
 public partial class FlightsSearchPage : ContentPage
 {
+	private FlightViewModel _viewModel;
+
 	public FlightsSearchPage()
 	{
 		InitializeComponent();
-		LoadAirports();
 	}
 
-	private void LoadAirports()
+	protected override async void OnAppearing()
 	{
-		// TODO: Cargar aeropuertos desde ViewModel
-		// Por ahora mostramos ejemplos
-		OriginPicker.Items.Add("San José (SJO)");
-		OriginPicker.Items.Add("Los Angeles (LAX)");
-		OriginPicker.Items.Add("Miami (MIA)");
+		base.OnAppearing();
 
-		DestinationPicker.Items.Add("Los Angeles (LAX)");
-		DestinationPicker.Items.Add("Miami (MIA)");
-		DestinationPicker.Items.Add("Madrid (MAD)");
-		DestinationPicker.Items.Add("Caracas (CCS)");
+		// Inicializar ViewModel si no está ya establecido
+		if (BindingContext == null)
+		{
+			_viewModel = new FlightViewModel();
+			BindingContext = _viewModel;
+			await _viewModel.InitializeAsync();
+		}
+
+		// Cargar aeropuertos en los pickers
+		await LoadAirportsInPickers();
+	}
+
+	private async Task LoadAirportsInPickers()
+	{
+		try
+		{
+			_viewModel ??= (FlightViewModel)BindingContext;
+			
+			OriginPicker.Items.Clear();
+			DestinationPicker.Items.Clear();
+
+			foreach (var airport in _viewModel.Airports)
+			{
+				string displayText = $"{airport.Name} ({airport.Code})";
+				OriginPicker.Items.Add(displayText);
+				DestinationPicker.Items.Add(displayText);
+			}
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Error", $"Error al cargar aeropuertos: {ex.Message}", "OK");
+		}
 	}
 
 	private async void OnSearchClicked(object sender, EventArgs e)
 	{
-		if (OriginPicker.SelectedIndex < 0 || DestinationPicker.SelectedIndex < 0)
+		try
 		{
-			await DisplayAlert("Error", "Selecciona origen y destino", "OK");
-			return;
-		}
+			if (OriginPicker.SelectedIndex < 0 || DestinationPicker.SelectedIndex < 0)
+			{
+				await DisplayAlert("Error", "Selecciona origen y destino", "OK");
+				return;
+			}
 
-		// TODO: Ejecutar búsqueda de vuelos
-		await DisplayAlert("Búsqueda", "Buscando vuelos...", "OK");
+			// Obtener el aeropuerto seleccionado del ViewModel
+			_viewModel ??= (FlightViewModel)BindingContext;
+			_viewModel.SelectedOrigin = _viewModel.Airports[OriginPicker.SelectedIndex];
+			_viewModel.SelectedDestination = _viewModel.Airports[DestinationPicker.SelectedIndex];
+
+			// Ejecutar búsqueda
+			await _viewModel.SearchFlightsAsync();
+
+			// Mostrar resultado
+			if (_viewModel.Flights.Count == 0)
+			{
+				await DisplayAlert("Sin resultados", "No hay vuelos disponibles para esta ruta", "OK");
+			}
+			else
+			{
+				await DisplayAlert("Éxito", $"Se encontraron {_viewModel.Flights.Count} vuelo(s)", "OK");
+			}
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Error", $"Error en búsqueda: {ex.Message}", "OK");
+		}
 	}
 
 	private async void OnReserveClicked(object sender, EventArgs e)
 	{
-		await DisplayAlert("Información", "Proceso de reserva iniciado", "OK");
-		// TODO: Navegar a página de reserva
+		await DisplayAlert("Información", "Función de reserva en desarrollo", "OK");
+		// TODO: Navegar a página de reserva con el vuelo seleccionado
 	}
 }

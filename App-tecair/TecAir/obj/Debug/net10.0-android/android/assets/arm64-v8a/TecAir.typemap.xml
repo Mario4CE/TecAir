@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="TecAir" mvid="f456989ac28e455f92f0a75d4636dec5">
+<api type="debug" assembly-name="TecAir" mvid="1066e9eef0a74c839c4d84a3f187116b">
   <java-to-managed>
     <entry java-name="crc6470c9fb74e4e18653/MainActivity" managed-name="TecAir.MainActivity, TecAir" managed-type-token-id="33554442" />
     <entry java-name="crc6470c9fb74e4e18653/MainApplication" managed-name="TecAir.MainApplication, TecAir" managed-type-token-id="33554443" />
