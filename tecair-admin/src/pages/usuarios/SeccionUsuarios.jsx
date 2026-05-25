@@ -1,46 +1,27 @@
-// SeccionUsuarios.jsx — Gestión de usuarios
+// SeccionUsuarios.jsx — Gestión de usuarios conectada al API
 //
 // Funcionalidad:
 //   - Ver lista de usuarios con búsqueda y filtro
-//   - Crear nuevo administrador
+//   - Crear nuevo usuario
 //   - Editar usuario existente
 //   - Eliminar usuario
-//   - El admin principal no se puede editar ni eliminar
+//   - El admin principal (id 1) no se puede editar ni eliminar
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ENDPOINTS, apiFetch } from "../../config/api";
 
 const COLOR_PRINCIPAL = "#6d4fc2";
 
-// Usuarios de prueba
-// Cuando el API esté lista, estos vendrán del backend
-const MOCK_USUARIOS = [
-  {
-    id_usuario: 1, nombre1: "Admin", nombre2: "", apellido1: "TECAir",
-    apellido2: "", telefono: "2222-0000", correo: "admin@tecair.com",
-    es_estudiante: false, es_admin: true, universidad: "", carnet: "",
-  },
-  {
-    id_usuario: 2, nombre1: "María", nombre2: "José", apellido1: "González",
-    apellido2: "Pérez", telefono: "8888-1111", correo: "maria@correo.com",
-    es_estudiante: true, es_admin: false, universidad: "Instituto Tecnológico de Costa Rica", carnet: "2024001",
-  },
-  {
-    id_usuario: 3, nombre1: "Luis", nombre2: "", apellido1: "Pérez",
-    apellido2: "Mora", telefono: "8888-2222", correo: "luis@correo.com",
-    es_estudiante: false, es_admin: false, universidad: "", carnet: "",
-  },
-];
-
 // Devuelve la configuración visual según el tipo de usuario
 function getTipoConfig(usuario) {
-  if (usuario.es_admin)       return { label: "Admin",      bg: "#ede9fa", color: "#6d4fc2" };
-  if (usuario.es_estudiante)  return { label: "Estudiante", bg: "#cfe2ff", color: "#0d6efd" };
-  return                             { label: "Cliente",    bg: "#e2e3e5", color: "#495057" };
+  if (usuario.es_admin)      return { label: "Admin",      bg: "#ede9fa", color: "#6d4fc2" };
+  if (usuario.es_estudiante) return { label: "Estudiante", bg: "#cfe2ff", color: "#0d6efd" };
+  return                            { label: "Cliente",    bg: "#e2e3e5", color: "#495057" };
 }
 
 export default function SeccionUsuarios() {
-  // Lista de usuarios
-  const [usuarios, setUsuarios] = useState(MOCK_USUARIOS);
+  // Lista de usuarios del API
+  const [usuarios, setUsuarios] = useState([]);
 
   // Texto de búsqueda por nombre o correo
   const [busqueda, setBusqueda] = useState("");
@@ -54,12 +35,33 @@ export default function SeccionUsuarios() {
   // Usuario seleccionado para editar — null = modo creación
   const [usuarioEditando, setUsuarioEditando] = useState(null);
 
+  // Controla el spinner de carga
+  const [cargando, setCargando] = useState(true);
+
   // Mensaje temporal de éxito o error
   const [mensaje, setMensaje] = useState(null);
 
   const mostrarMensaje = (texto, tipo = "success") => {
     setMensaje({ texto, tipo });
     setTimeout(() => setMensaje(null), 3000);
+  };
+
+  // Se ejecuta una vez al cargar el componente
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const cargarUsuarios = async () => {
+    setCargando(true);
+    try {
+      const data = await apiFetch(ENDPOINTS.usuarios.list);
+      setUsuarios(data.usuarios ?? []);
+    } catch (err) {
+      console.log("Error:", err);
+      mostrarMensaje("Error al cargar usuarios.", "danger");
+    } finally {
+      setCargando(false);
+    }
   };
 
   // Filtra usuarios según búsqueda y tipo seleccionado
@@ -79,52 +81,61 @@ export default function SeccionUsuarios() {
     return coincideBusqueda && coincideTipo;
   });
 
-  // Abrir modal en modo creación
-  const handleNuevoAdmin = () => {
+  // Abre el modal en modo creación
+  const handleNuevo = () => {
     setUsuarioEditando(null);
     setModalAbierto(true);
   };
 
-  // Abrir modal en modo edición
+  // Abre el modal en modo edición con los datos del usuario
   const handleEditar = (usuario) => {
     setUsuarioEditando(usuario);
     setModalAbierto(true);
   };
 
-  // Eliminar usuario
-  const handleEliminar = (id_usuario) => {
+  // Elimina un usuario — pide confirmación primero
+  const handleEliminar = async (id_usuario) => {
     if (!window.confirm("¿Está seguro que desea eliminar este usuario?")) return;
-    setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id_usuario));
-    mostrarMensaje("Usuario eliminado correctamente.");
+    try {
+      await apiFetch(ENDPOINTS.usuarios.delete(id_usuario), "DELETE");
+      mostrarMensaje("Usuario eliminado correctamente.");
+      cargarUsuarios();
+    } catch (err) {
+      mostrarMensaje(err.message || "Error al eliminar usuario.", "danger");
+    }
   };
 
-  // Guardar usuario (nuevo o editado)
-  const handleGuardar = (datos) => {
-    if (usuarioEditando) {
-      // Modo edición: actualiza el usuario existente
-      setUsuarios((prev) =>
-        prev.map((u) =>
-          u.id_usuario === usuarioEditando.id_usuario ? { ...u, ...datos } : u
-        )
-      );
-      mostrarMensaje("Usuario actualizado correctamente.");
-    } else {
-      // Modo creación: agrega nuevo admin
-      const nuevo = {
-        id_usuario: usuarios.length + 1,
-        ...datos,
-        es_admin: true, // siempre es admin al crearse desde aquí
-      };
-      setUsuarios((prev) => [...prev, nuevo]);
-      mostrarMensaje("Administrador creado correctamente.");
+  // Guarda un usuario nuevo o editado
+  const handleGuardar = async (datos) => {
+    try {
+      if (usuarioEditando) {
+        // Modo edición: llama al endpoint PUT /usuarios/{id}
+        await apiFetch(ENDPOINTS.usuarios.update(usuarioEditando.id_usuario), "PUT", datos);
+        mostrarMensaje("Usuario actualizado correctamente.");
+      } else {
+        // Modo creación: llama al endpoint POST /usuarios
+        await apiFetch(ENDPOINTS.usuarios.create, "POST", datos);
+        mostrarMensaje("Usuario creado correctamente.");
+      }
+      setModalAbierto(false);
+      setUsuarioEditando(null);
+      cargarUsuarios();
+    } catch (err) {
+      mostrarMensaje(err.message || "Error al guardar usuario.", "danger");
     }
-    setModalAbierto(false);
-    setUsuarioEditando(null);
   };
+
+  if (cargando) {
+    return (
+      <div className="d-flex align-items-center justify-content-center py-5">
+        <div className="spinner-border text-primary me-2"></div>
+        <span className="text-muted">Cargando usuarios...</span>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Encabezado */}
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
           Usuarios
@@ -132,24 +143,21 @@ export default function SeccionUsuarios() {
         <button
           className="btn fw-semibold text-white rounded-3"
           style={{ background: COLOR_PRINCIPAL }}
-          onClick={handleNuevoAdmin}
+          onClick={handleNuevo}
         >
-          + Nuevo admin
+          + Nuevo usuario
         </button>
       </div>
 
-      {/* Mensaje de éxito o error */}
       {mensaje && (
         <div className={`alert alert-${mensaje.tipo} py-2 small rounded-3 mb-3`}>
           {mensaje.texto}
         </div>
       )}
 
-      {/* Tabla de usuarios */}
       <div className="card border-0 shadow-sm rounded-4">
         <div className="card-body">
-
-          {/* Búsqueda y filtro */}
+          {/* Búsqueda y filtro por tipo */}
           <div className="d-flex align-items-center gap-2 mb-3">
             <input
               type="text"
@@ -197,33 +205,25 @@ export default function SeccionUsuarios() {
                 ) : (
                   usuariosFiltrados.map((u) => {
                     const tipo = getTipoConfig(u);
-                    // El admin principal (id 1) no se puede tocar
+                    // El primer usuario no se puede eliminar para evitar accidentes
                     const esAdminPrincipal = u.id_usuario === 1;
 
                     return (
                       <tr key={u.id_usuario}>
                         <td>
-                          {/* Avatar con inicial del nombre */}
+                          {/* Avatar con la inicial del nombre */}
                           <span
                             className="d-inline-flex align-items-center justify-content-center rounded-circle me-2"
-                            style={{
-                              width: 28, height: 28,
-                              background: tipo.bg,
-                              color: tipo.color,
-                              fontSize: 11, fontWeight: 700,
-                            }}
-                          >
-                            {u.nombre1[0]}
+                            style={{ width: 28, height: 28, background: tipo.bg, color: tipo.color, fontSize: 11, fontWeight: 700 }}>
+                            {u.nombre1?.[0] ?? "?"}
                           </span>
                           {u.nombre1} {u.apellido1}
                         </td>
                         <td>{u.correo}</td>
                         <td>{u.telefono}</td>
                         <td>
-                          <span
-                            className="badge rounded-pill px-2 py-1"
-                            style={{ background: tipo.bg, color: tipo.color, fontSize: 11 }}
-                          >
+                          <span className="badge rounded-pill px-2 py-1"
+                            style={{ background: tipo.bg, color: tipo.color, fontSize: 11 }}>
                             {tipo.label}
                           </span>
                         </td>
@@ -259,7 +259,6 @@ export default function SeccionUsuarios() {
         </div>
       </div>
 
-      {/* Modal crear/editar */}
       {modalAbierto && (
         <ModalUsuario
           usuario={usuarioEditando}
@@ -274,43 +273,35 @@ export default function SeccionUsuarios() {
   );
 }
 
-// ModalUsuario — formulario para crear admin o editar usuario
-//
+// ModalUsuario — formulario para crear o editar un usuario
 // Si recibe usuario → modo edición (precarga los datos)
-// Si usuario es null → modo creación de admin (formulario vacío)
+// Si usuario es null → modo creación (formulario vacío)
 function ModalUsuario({ usuario, onGuardar, onCancelar }) {
   const [form, setForm] = useState({
-    nombre1:    usuario?.nombre1    ?? "",
-    nombre2:    usuario?.nombre2    ?? "",
-    apellido1:  usuario?.apellido1  ?? "",
-    apellido2:  usuario?.apellido2  ?? "",
-    telefono:   usuario?.telefono   ?? "",
-    correo:     usuario?.correo     ?? "",
-    contrasena: "",
+    nombre1:       usuario?.nombre1       ?? "",
+    nombre2:       usuario?.nombre2       ?? "",
+    apellido1:     usuario?.apellido1     ?? "",
+    apellido2:     usuario?.apellido2     ?? "",
+    telefono:      usuario?.telefono      ?? "",
+    correo:        usuario?.correo        ?? "",
+    es_estudiante: usuario?.es_estudiante ?? false,
+    universidad:   usuario?.universidad   ?? "",
+    carnet:        usuario?.carnet        ?? "",
   });
   const [error, setError] = useState("");
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-
     if (!form.nombre1 || !form.apellido1 || !form.correo || !form.telefono) {
       setError("Los campos marcados con * son obligatorios.");
       return;
     }
-    // Solo exige contraseña al crear, no al editar
-    if (!usuario && !form.contrasena) {
-      setError("La contraseña es obligatoria al crear un admin.");
-      return;
-    }
-    if (!usuario && form.contrasena.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres.");
-      return;
-    }
-
     onGuardar(form);
   };
 
@@ -322,14 +313,11 @@ function ModalUsuario({ usuario, onGuardar, onCancelar }) {
       <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 460 }}>
         <div className="card-body p-4">
           <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>
-            {usuario ? "Editar usuario" : "Nuevo administrador"}
+            {usuario ? "Editar usuario" : "Nuevo usuario"}
           </h5>
           <p className="text-muted small mb-4"
-            style={{ borderBottom: "0.5px solid #e8e4f8", paddingBottom: 12 }}
-          >
-            {usuario
-              ? "Modifique los datos del usuario"
-              : "Este usuario tendrá acceso al portal de administración"}
+            style={{ borderBottom: "0.5px solid #e8e4f8", paddingBottom: 12 }}>
+            {usuario ? "Modifique los datos del usuario" : "Complete los datos del nuevo usuario"}
           </p>
 
           {error && (
@@ -371,52 +359,70 @@ function ModalUsuario({ usuario, onGuardar, onCancelar }) {
               </div>
             </div>
 
-            <div className="mb-3">
-              <label className="form-label fw-semibold small text-secondary">
-                Correo electrónico <span className="text-danger">*</span>
-              </label>
-              <input type="email" name="correo" className="form-control rounded-3"
-                placeholder="funcionario@tecair.com" value={form.correo}
-                onChange={handleChange} required />
-            </div>
-
             <div className="row g-2 mb-3">
+              <div className="col-6">
+                <label className="form-label fw-semibold small text-secondary">
+                  Correo <span className="text-danger">*</span>
+                </label>
+                <input type="email" name="correo" className="form-control rounded-3"
+                  placeholder="usuario@correo.com" value={form.correo}
+                  onChange={handleChange} required />
+              </div>
               <div className="col-6">
                 <label className="form-label fw-semibold small text-secondary">
                   Teléfono <span className="text-danger">*</span>
                 </label>
                 <input type="tel" name="telefono" className="form-control rounded-3"
-                  placeholder="8888-8888" value={form.telefono} onChange={handleChange} required />
-              </div>
-              <div className="col-6">
-                <label className="form-label fw-semibold small text-secondary">
-                  Contraseña {!usuario && <span className="text-danger">*</span>}
-                </label>
-                <input type="password" name="contrasena" className="form-control rounded-3"
-                  placeholder={usuario ? "Dejar vacío para no cambiar" : "Mínimo 8 caracteres"}
-                  value={form.contrasena} onChange={handleChange}
-                  minLength={!usuario ? 8 : undefined} />
+                  placeholder="8888-8888" value={form.telefono}
+                  onChange={handleChange} required />
               </div>
             </div>
 
-            <div
-              className="d-flex justify-content-end gap-2 pt-3"
-              style={{ borderTop: "0.5px solid #e8e4f8" }}
-            >
-              <button
-                type="button"
-                className="btn rounded-3 fw-semibold"
+            {/* Checkbox de estudiante */}
+            <div className="mb-3">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox"
+                  name="es_estudiante" id="esEstudiante"
+                  checked={form.es_estudiante} onChange={handleChange} />
+                <label className="form-check-label small fw-semibold" htmlFor="esEstudiante">
+                  Es estudiante universitario
+                </label>
+              </div>
+            </div>
+
+            {/* Campos de estudiante — solo aparecen si es_estudiante es true */}
+            {form.es_estudiante && (
+              <div className="row g-2 mb-3 p-3 bg-light rounded-3">
+                <div className="col-12">
+                  <label className="form-label fw-semibold small text-secondary">
+                    Universidad <span className="text-danger">*</span>
+                  </label>
+                  <input type="text" name="universidad" className="form-control rounded-3"
+                    placeholder="ej. Instituto Tecnológico de Costa Rica"
+                    value={form.universidad} onChange={handleChange}
+                    required={form.es_estudiante} />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-semibold small text-secondary">
+                    Carnet <span className="text-danger">*</span>
+                  </label>
+                  <input type="text" name="carnet" className="form-control rounded-3"
+                    placeholder="ej. 2024123456" value={form.carnet}
+                    onChange={handleChange} required={form.es_estudiante} />
+                </div>
+              </div>
+            )}
+
+            <div className="d-flex justify-content-end gap-2 pt-3"
+              style={{ borderTop: "0.5px solid #e8e4f8" }}>
+              <button type="button" className="btn rounded-3 fw-semibold"
                 style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL }}
-                onClick={onCancelar}
-              >
+                onClick={onCancelar}>
                 Cancelar
               </button>
-              <button
-                type="submit"
-                className="btn rounded-3 fw-semibold text-white"
-                style={{ background: COLOR_PRINCIPAL }}
-              >
-                {usuario ? "Guardar cambios" : "Crear admin"}
+              <button type="submit" className="btn rounded-3 fw-semibold text-white"
+                style={{ background: COLOR_PRINCIPAL }}>
+                {usuario ? "Guardar cambios" : "Crear usuario"}
               </button>
             </div>
           </form>

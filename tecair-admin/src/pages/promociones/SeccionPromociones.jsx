@@ -1,29 +1,31 @@
-// SeccionPromociones.jsx — Gestión de promociones
+// SeccionPromociones.jsx — Gestión de promociones conectada al API
 //
 // Funcionalidad:
 //   - Ver promociones como tarjetas
 //   - Crear una promoción nueva
-//   - Editar una promoción existente
 //   - Eliminar una promoción
 //   - Subir imagen opcional
 //   - Muestra si la promoción está vigente o vencida
 
-import { useState } from "react";
-import { MOCK_PROMOCIONES, MOCK_RUTAS } from "../../config/mockData";
+import { useState, useEffect } from "react";
+import { ENDPOINTS, apiFetch } from "../../config/api";
 
 const COLOR_PRINCIPAL = "#6d4fc2";
 
 export default function SeccionPromociones() {
-  // Lista de promociones — inicia con los datos mockeados
-  const [promociones, setPromociones] = useState(MOCK_PROMOCIONES);
+  // Lista de promociones del API
+  const [promociones, setPromociones] = useState([]);
+
+  // Lista de rutas para el selector del formulario
+  const [rutas, setRutas] = useState([]);
 
   // Controla si el modal está abierto
   const [modalAbierto, setModalAbierto] = useState(false);
 
-  // Promoción seleccionada para editar — null = modo creación
-  const [promoEditando, setPromoEditando] = useState(null);
+  // Controla el spinner de carga
+  const [cargando, setCargando] = useState(true);
 
-  // Mensaje de éxito o error temporal
+  // Mensaje temporal de éxito o error
   const [mensaje, setMensaje] = useState(null);
 
   const mostrarMensaje = (texto, tipo = "success") => {
@@ -31,55 +33,64 @@ export default function SeccionPromociones() {
     setTimeout(() => setMensaje(null), 3000);
   };
 
-  // Abrir modal en modo creación
-  const handleNueva = () => {
-    setPromoEditando(null);
-    setModalAbierto(true);
-  };
+  // Se ejecuta una vez al cargar el componente
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
-  // Abrir modal en modo edición
-  const handleEditar = (promo) => {
-    setPromoEditando(promo);
-    setModalAbierto(true);
-  };
-
-  // Eliminar promoción
-  const handleEliminar = (id_promocion) => {
-    if (!window.confirm("¿Está seguro que desea eliminar esta promoción?")) return;
-    setPromociones((prev) =>
-      prev.filter((p) => p.id_promocion !== id_promocion)
-    );
-    mostrarMensaje("Promoción eliminada correctamente.");
-  };
-
-  // Guardar promoción (nueva o editada)
-  const handleGuardar = (datos) => {
-    if (promoEditando) {
-      // Modo edición: reemplaza la promoción existente
-      setPromociones((prev) =>
-        prev.map((p) =>
-          p.id_promocion === promoEditando.id_promocion
-            ? { ...p, ...datos }
-            : p
-        )
-      );
-      mostrarMensaje("Promoción actualizada correctamente.");
-    } else {
-      // Modo creación: agrega una nueva promoción
-      const nueva = {
-        id_promocion: promociones.length + 1,
-        ...datos,
-      };
-      setPromociones((prev) => [...prev, nueva]);
-      mostrarMensaje("Promoción creada correctamente.");
+  // Carga promociones y rutas en paralelo
+  const cargarDatos = async () => {
+    setCargando(true);
+    try {
+      const [dataPromociones, dataRutas] = await Promise.all([
+        apiFetch(ENDPOINTS.promociones.list),
+        apiFetch(ENDPOINTS.rutas.list),
+      ]);
+      setPromociones(dataPromociones.promociones ?? []);
+      setRutas(dataRutas.rutas ?? []);
+    } catch (err) {
+      console.log("Error:", err);
+      mostrarMensaje("Error al cargar los datos.", "danger");
+    } finally {
+      setCargando(false);
     }
-    setModalAbierto(false);
-    setPromoEditando(null);
   };
+
+  // Elimina una promoción — pide confirmación primero
+  const handleEliminar = async (id_promocion) => {
+    if (!window.confirm("¿Está seguro que desea eliminar esta promoción?")) return;
+    try {
+      await apiFetch(ENDPOINTS.promociones.delete(id_promocion), "DELETE");
+      mostrarMensaje("Promoción eliminada correctamente.");
+      cargarDatos();
+    } catch (err) {
+      mostrarMensaje(err.message || "Error al eliminar promoción.", "danger");
+    }
+  };
+
+  // Crea una nueva promoción y recarga la lista
+  const handleGuardar = async (datos) => {
+    try {
+      await apiFetch(ENDPOINTS.promociones.create, "POST", datos);
+      mostrarMensaje("Promoción creada correctamente.");
+      setModalAbierto(false);
+      cargarDatos();
+    } catch (err) {
+      mostrarMensaje(err.message || "Error al crear promoción.", "danger");
+    }
+  };
+
+  if (cargando) {
+    return (
+      <div className="d-flex align-items-center justify-content-center py-5">
+        <div className="spinner-border text-primary me-2"></div>
+        <span className="text-muted">Cargando promociones...</span>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Encabezado */}
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
           Promociones
@@ -87,13 +98,12 @@ export default function SeccionPromociones() {
         <button
           className="btn fw-semibold text-white rounded-3"
           style={{ background: COLOR_PRINCIPAL }}
-          onClick={handleNueva}
+          onClick={() => setModalAbierto(true)}
         >
           + Nueva promoción
         </button>
       </div>
 
-      {/* Mensaje de éxito o error */}
       {mensaje && (
         <div className={`alert alert-${mensaje.tipo} py-2 small rounded-3 mb-3`}>
           {mensaje.texto}
@@ -111,7 +121,6 @@ export default function SeccionPromociones() {
             <div key={p.id_promocion} className="col-12 col-md-6 col-lg-4">
               <TarjetaPromocion
                 promo={p}
-                onEditar={() => handleEditar(p)}
                 onEliminar={() => handleEliminar(p.id_promocion)}
               />
             </div>
@@ -119,15 +128,11 @@ export default function SeccionPromociones() {
         </div>
       )}
 
-      {/* Modal de crear/editar */}
       {modalAbierto && (
         <ModalPromocion
-          promo={promoEditando}
+          rutas={rutas}
           onGuardar={handleGuardar}
-          onCancelar={() => {
-            setModalAbierto(false);
-            setPromoEditando(null);
-          }}
+          onCancelar={() => setModalAbierto(false)}
         />
       )}
     </div>
@@ -135,17 +140,12 @@ export default function SeccionPromociones() {
 }
 
 // TarjetaPromocion — muestra una promoción como tarjeta
-//
-// Determina automáticamente si está vigente o vencida
-// comparando las fechas con la fecha actual
-function TarjetaPromocion({ promo, onEditar, onEliminar }) {
+// Determina si está vigente o vencida comparando con la fecha actual
+function TarjetaPromocion({ promo, onEliminar }) {
   const hoy = new Date();
   const fechaFin = new Date(promo.fecha_fin);
-
-  // La promoción está vigente si la fecha de fin es futura
   const vigente = fechaFin >= hoy;
 
-  // Formatea una fecha para mostrarla como DD/MM/YYYY
   const formatFecha = (fecha) =>
     new Date(fecha).toLocaleDateString("es-CR", {
       day: "2-digit", month: "2-digit", year: "numeric",
@@ -153,23 +153,13 @@ function TarjetaPromocion({ promo, onEditar, onEliminar }) {
 
   return (
     <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-      {/* Imagen o placeholder */}
+      {/* Imagen o placeholder con gradiente */}
       {promo.imagen ? (
-        <img
-          src={promo.imagen}
-          alt={promo.ruta}
-          style={{ height: 120, objectFit: "cover", width: "100%" }}
-        />
+        <img src={promo.imagen} alt={promo.id_ruta}
+          style={{ height: 120, objectFit: "cover", width: "100%" }} />
       ) : (
-        <div
-          className="d-flex align-items-center justify-content-center"
-          style={{
-            height: 120,
-            background: "linear-gradient(135deg, #6d4fc2, #9b7fe8)",
-            color: "rgba(255,255,255,0.5)",
-            fontSize: 12,
-          }}
-        >
+        <div className="d-flex align-items-center justify-content-center"
+          style={{ height: 120, background: "linear-gradient(135deg, #6d4fc2, #9b7fe8)", color: "rgba(255,255,255,0.5)", fontSize: 12 }}>
           Sin imagen
         </div>
       )}
@@ -178,16 +168,14 @@ function TarjetaPromocion({ promo, onEditar, onEliminar }) {
         {/* Ruta y badge de vigencia */}
         <div className="d-flex align-items-start justify-content-between mb-1">
           <h5 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
-            {promo.ruta}
+            Ruta #{promo.id_ruta}
           </h5>
-          <span
-            className="badge rounded-pill px-2 py-1"
+          <span className="badge rounded-pill px-2 py-1"
             style={{
               background: vigente ? "#d1e7dd" : "#e2e3e5",
               color:      vigente ? "#198754" : "#495057",
               fontSize: 11,
-            }}
-          >
+            }}>
             {vigente ? "Vigente" : "Vencida"}
           </span>
         </div>
@@ -197,59 +185,41 @@ function TarjetaPromocion({ promo, onEditar, onEliminar }) {
           ${parseFloat(promo.precio).toFixed(2)}
         </p>
 
-        {/* Período */}
+        {/* Período de la promoción */}
         <p className="text-muted small mb-3">
           {formatFecha(promo.fecha_inicio)} — {formatFecha(promo.fecha_fin)}
         </p>
 
-        {/* Botones de acción */}
-        <div className="d-flex gap-2">
-          <button
-            className="btn btn-sm flex-fill rounded-3 fw-semibold"
-            style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL, fontSize: 12 }}
-            onClick={onEditar}
-          >
-            Editar
-          </button>
-          <button
-            className="btn btn-sm flex-fill rounded-3 fw-semibold"
-            style={{ background: "#f8d7da", color: "#842029", fontSize: 12 }}
-            onClick={onEliminar}
-          >
-            Eliminar
-          </button>
-        </div>
+        <button
+          className="btn btn-sm w-100 rounded-3 fw-semibold"
+          style={{ background: "#f8d7da", color: "#842029", fontSize: 12 }}
+          onClick={onEliminar}
+        >
+          Eliminar
+        </button>
       </div>
     </div>
   );
 }
 
-// ModalPromocion — formulario para crear o editar
-//
-// Si recibe promo → modo edición (precarga los datos)
-// Si promo es null → modo creación (formulario vacío)
-function ModalPromocion({ promo, onGuardar, onCancelar }) {
-  // Si estamos editando, precarga los datos de la promoción
+// ModalPromocion — formulario para crear una nueva promoción
+function ModalPromocion({ rutas, onGuardar, onCancelar }) {
   const [form, setForm] = useState({
-    id_ruta:      promo?.id_ruta      ?? "",
-    ruta:         promo?.ruta         ?? "",
-    precio:       promo?.precio       ?? "",
-    fecha_inicio: promo?.fecha_inicio ?? "",
-    fecha_fin:    promo?.fecha_fin    ?? "",
-    imagen:       promo?.imagen       ?? null,
+    id_ruta:      "",
+    precio:       "",
+    fecha_inicio: "",
+    fecha_fin:    "",
+    imagen:       null,
   });
-
   const [error, setError] = useState("");
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Maneja la selección de imagen
-  // Convierte el archivo a base64 para mostrarlo como preview
+  // Convierte la imagen a base64 para enviarla al API
   const handleImagen = (e) => {
     const archivo = e.target.files[0];
     if (!archivo) return;
-
     const reader = new FileReader();
     reader.onload = () => setForm((prev) => ({ ...prev, imagen: reader.result }));
     reader.readAsDataURL(archivo);
@@ -258,7 +228,6 @@ function ModalPromocion({ promo, onGuardar, onCancelar }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-
     if (!form.id_ruta || !form.precio || !form.fecha_inicio || !form.fecha_fin) {
       setError("Todos los campos obligatorios deben completarse.");
       return;
@@ -267,17 +236,12 @@ function ModalPromocion({ promo, onGuardar, onCancelar }) {
       setError("La fecha de fin no puede ser anterior a la fecha de inicio.");
       return;
     }
-
-    // Busca la descripción de la ruta seleccionada
-    const rutaSeleccionada = MOCK_RUTAS.find(
-      (r) => r.id_ruta === parseInt(form.id_ruta)
-    );
-
     onGuardar({
-      ...form,
-      id_ruta: parseInt(form.id_ruta),
-      precio:  parseFloat(form.precio),
-      ruta:    rutaSeleccionada?.descripcion ?? form.ruta,
+      id_ruta:      parseInt(form.id_ruta),
+      precio:       parseFloat(form.precio),
+      fecha_inicio: form.fecha_inicio,
+      fecha_fin:    form.fecha_fin,
+      imagen:       form.imagen,
     });
   };
 
@@ -289,138 +253,92 @@ function ModalPromocion({ promo, onGuardar, onCancelar }) {
       <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 440 }}>
         <div className="card-body p-4">
           <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>
-            {promo ? "Editar promoción" : "Nueva promoción"}
+            Nueva promoción
           </h5>
-          <p className="text-muted small mb-4">
-            {promo ? "Modifique los datos de la promoción" : "Complete los datos de la nueva promoción"}
-          </p>
+          <p className="text-muted small mb-4">Complete los datos de la promoción</p>
 
           {error && (
             <div className="alert alert-danger py-2 small rounded-3">{error}</div>
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Selector de ruta */}
             <div className="mb-3">
               <label className="form-label fw-semibold small text-secondary">
                 Ruta <span className="text-danger">*</span>
               </label>
-              <select
-                name="id_ruta"
-                className="form-select rounded-3"
-                value={form.id_ruta}
-                onChange={handleChange}
-                required
-              >
+              <select name="id_ruta" className="form-select rounded-3"
+                value={form.id_ruta} onChange={handleChange} required>
                 <option value="">Seleccionar ruta</option>
-                {MOCK_RUTAS.map((r) => (
-                  <option key={r.id_ruta} value={r.id_ruta}>
-                    {r.descripcion}
-                  </option>
-                ))}
+                {/* Rutas que vienen del API */}
+                {rutas.map((r) => {
+                  // Busca la escala de origen y destino dentro del arreglo de escalas
+                  const origen  = r.escalas?.find((e) => e.tipo === "origen");
+                  const destino = r.escalas?.find((e) => e.tipo === "destino");
+                  return (
+                    <option key={r.id_ruta} value={r.id_ruta}>
+                      {origen?.nombre ?? "?"} → {destino?.nombre ?? "?"}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
-            {/* Precio */}
             <div className="mb-3">
               <label className="form-label fw-semibold small text-secondary">
                 Precio en promoción ($) <span className="text-danger">*</span>
               </label>
-              <input
-                type="number"
-                name="precio"
-                className="form-control rounded-3"
-                placeholder="ej. 199.99"
-                value={form.precio}
-                onChange={handleChange}
-                step="0.01"
-                min="0.01"
-                required
-              />
+              <input type="number" name="precio" className="form-control rounded-3"
+                placeholder="ej. 199.99" value={form.precio}
+                onChange={handleChange} step="0.01" min="0.01" required />
             </div>
 
-            {/* Fechas */}
             <div className="row g-2 mb-3">
               <div className="col-6">
                 <label className="form-label fw-semibold small text-secondary">
                   Fecha inicio <span className="text-danger">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="fecha_inicio"
-                  className="form-control rounded-3"
-                  value={form.fecha_inicio}
-                  onChange={handleChange}
-                  required
-                />
+                <input type="date" name="fecha_inicio" className="form-control rounded-3"
+                  value={form.fecha_inicio} onChange={handleChange} required />
               </div>
               <div className="col-6">
                 <label className="form-label fw-semibold small text-secondary">
                   Fecha fin <span className="text-danger">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="fecha_fin"
-                  className="form-control rounded-3"
-                  value={form.fecha_fin}
-                  onChange={handleChange}
-                  required
-                />
+                <input type="date" name="fecha_fin" className="form-control rounded-3"
+                  value={form.fecha_fin} onChange={handleChange} required />
               </div>
             </div>
 
-            {/* Imagen opcional */}
             <div className="mb-4">
               <label className="form-label fw-semibold small text-secondary">
                 Imagen (opcional)
               </label>
               {/* Preview de imagen si ya hay una seleccionada */}
               {form.imagen && (
-                <img
-                  src={form.imagen}
-                  alt="Preview"
-                  className="w-100 rounded-3 mb-2"
-                  style={{ height: 100, objectFit: "cover" }}
-                />
+                <img src={form.imagen} alt="Preview" className="w-100 rounded-3 mb-2"
+                  style={{ height: 100, objectFit: "cover" }} />
               )}
               <div
                 className="rounded-3 p-3 text-center small text-muted"
-                style={{
-                  border: "1.5px dashed #c4b5f5",
-                  background: "#faf8ff",
-                  cursor: "pointer",
-                }}
+                style={{ border: "1.5px dashed #c4b5f5", background: "#faf8ff", cursor: "pointer" }}
                 onClick={() => document.getElementById("inputImagen").click()}
               >
                 {form.imagen ? "Cambiar imagen" : "Clic para subir imagen"}
               </div>
-              <input
-                id="inputImagen"
-                type="file"
-                accept="image/*"
-                className="d-none"
-                onChange={handleImagen}
-              />
+              <input id="inputImagen" type="file" accept="image/*"
+                className="d-none" onChange={handleImagen} />
             </div>
 
-            <div
-              className="d-flex justify-content-end gap-2 pt-3"
-              style={{ borderTop: "0.5px solid #e8e4f8" }}
-            >
-              <button
-                type="button"
-                className="btn rounded-3 fw-semibold"
+            <div className="d-flex justify-content-end gap-2 pt-3"
+              style={{ borderTop: "0.5px solid #e8e4f8" }}>
+              <button type="button" className="btn rounded-3 fw-semibold"
                 style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL }}
-                onClick={onCancelar}
-              >
+                onClick={onCancelar}>
                 Cancelar
               </button>
-              <button
-                type="submit"
-                className="btn rounded-3 fw-semibold text-white"
-                style={{ background: COLOR_PRINCIPAL }}
-              >
-                {promo ? "Guardar cambios" : "Crear promoción"}
+              <button type="submit" className="btn rounded-3 fw-semibold text-white"
+                style={{ background: COLOR_PRINCIPAL }}>
+                Crear promoción
               </button>
             </div>
           </form>

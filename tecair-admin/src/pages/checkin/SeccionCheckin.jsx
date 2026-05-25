@@ -6,71 +6,94 @@
 //   - Ver e imprimir el pase de abordar
 //   - Enviar pase de abordar por correo
 
-import { useState } from "react";
-import { MOCK_CHECKINS, MOCK_VUELOS } from "../../config/mockData";
+import { useState, useEffect } from "react";
+import { ENDPOINTS, apiFetch } from "../../config/api";
 
 const COLOR_PRINCIPAL = "#6d4fc2";
 
-// Pasajeros de prueba con reservación confirmada
-// Cuando el API esté lista, estos vendrán filtrados por vuelo
-const MOCK_PASAJEROS = [
-  { id_usuario: 2, nombre: "María González" },
-  { id_usuario: 3, nombre: "Luis Pérez"     },
-];
-
 export default function SeccionCheckin() {
-  // Lista de check-ins registrados
-  const [checkins, setCheckins] = useState(MOCK_CHECKINS);
-
-  // Vuelo seleccionado en el filtro — "todos" muestra todos
+  const [checkins, setCheckins]     = useState([]);
+  const [vuelos, setVuelos]         = useState([]);
+  const [usuarios, setUsuarios]     = useState([]);
   const [filtroVuelo, setFiltroVuelo] = useState("todos");
-
-  // Controla si el modal de nuevo check-in está abierto
   const [modalAbierto, setModalAbierto] = useState(false);
-
-  // Check-in seleccionado para mostrar el pase de abordar
-  // null = no se muestra el pase
   const [checkinSeleccionado, setCheckinSeleccionado] = useState(null);
-
-  // Mensaje de éxito o error temporal
-  const [mensaje, setMensaje] = useState(null);
+  const [cargando, setCargando]     = useState(true);
+  const [mensaje, setMensaje]       = useState(null);
 
   const mostrarMensaje = (texto, tipo = "success") => {
     setMensaje({ texto, tipo });
     setTimeout(() => setMensaje(null), 3000);
   };
 
-  // Filtra los check-ins según el vuelo seleccionado
-  const checkinsFiltrados =
-    filtroVuelo === "todos"
-      ? checkins
-      : checkins.filter((c) => c.id_vuelo === parseInt(filtroVuelo));
+  // Carga inicial de datos
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
-  // Busca los datos del vuelo de un check-in para mostrarlos en la tabla
-  const getVuelo = (id_vuelo) =>
-    MOCK_VUELOS.find((v) => v.id_vuelo === id_vuelo);
-
-  // Registrar nuevo check-in 
-  const handleNuevoCheckin = (datos) => {
-    const nuevoCheckin = {
-      id_checkin: checkins.length + 1,
-      ...datos,
-      maletas: 0, // inicia sin maletas
-    };
-    setCheckins((prev) => [...prev, nuevoCheckin]);
-    setModalAbierto(false);
-    mostrarMensaje("Check-in registrado correctamente.");
+  const cargarDatos = async () => {
+    setCargando(true);
+    try {
+      const [dataCheckins, dataVuelos, dataUsuarios] = await Promise.all([
+        apiFetch(ENDPOINTS.checkins.list),
+        apiFetch(ENDPOINTS.vuelos.list),
+        apiFetch(ENDPOINTS.usuarios.list),
+      ]);
+      setCheckins(dataCheckins.checkins ?? []);
+      setVuelos(dataVuelos.vuelos ?? []);
+      setUsuarios(dataUsuarios.usuarios ?? []);
+    } catch (err) {
+      console.log("Error:", err);
+      mostrarMensaje("Error al cargar los datos.", "danger");
+    } finally {
+      setCargando(false);
+    }
   };
 
-  // Simular envío de correo 
+  // Filtra checkins por vuelo seleccionado
+  const checkinsFiltrados = filtroVuelo === "todos"
+    ? checkins
+    : checkins.filter((c) => c.id_vuelo === parseInt(filtroVuelo));
+
+  // Busca los datos del vuelo de un checkin
+  const getVuelo = (id_vuelo) =>
+    vuelos.find((v) => v.id_vuelo === id_vuelo);
+
+  // Busca el nombre del usuario de un checkin
+  const getNombreUsuario = (id_usuario) => {
+    const u = usuarios.find((u) => u.id_usuario === id_usuario);
+    return u ? `${u.nombre1} ${u.apellido1}` : `Usuario #${id_usuario}`;
+  };
+
+  // ── Registrar nuevo check-in ──
+  const handleNuevoCheckin = async (datos) => {
+    try {
+      await apiFetch(ENDPOINTS.checkins.create, "POST", datos);
+      mostrarMensaje("Check-in registrado correctamente.");
+      setModalAbierto(false);
+      cargarDatos();
+    } catch (err) {
+      mostrarMensaje(err.message || "Error al registrar check-in.", "danger");
+    }
+  };
+
+  // ── Enviar pase de abordar por correo ──
   const handleEnviarCorreo = () => {
     mostrarMensaje("Pase de abordar enviado por correo.");
     setCheckinSeleccionado(null);
   };
 
+  if (cargando) {
+    return (
+      <div className="d-flex align-items-center justify-content-center py-5">
+        <div className="spinner-border text-primary me-2"></div>
+        <span className="text-muted">Cargando check-ins...</span>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {/*Encabezado*/}
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
           Check-in de pasajeros
@@ -84,18 +107,14 @@ export default function SeccionCheckin() {
         </button>
       </div>
 
-      {/* Mensaje de éxito o error */}
       {mensaje && (
         <div className={`alert alert-${mensaje.tipo} py-2 small rounded-3 mb-3`}>
           {mensaje.texto}
         </div>
       )}
 
-      {/* Tabla de check-ins*/}
       <div className="card border-0 shadow-sm rounded-4 mb-4">
         <div className="card-body">
-
-          {/* Filtro por vuelo */}
           <div className="d-flex align-items-center gap-3 mb-3">
             <h5 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
               Pasajeros chequeados
@@ -111,9 +130,9 @@ export default function SeccionCheckin() {
                 onChange={(e) => setFiltroVuelo(e.target.value)}
               >
                 <option value="todos">Todos los vuelos</option>
-                {MOCK_VUELOS.map((v) => (
+                {vuelos.map((v) => (
                   <option key={v.id_vuelo} value={v.id_vuelo}>
-                    #{v.id_vuelo} — {v.ruta} — {new Date(v.fecha_salida).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" })}
+                    #{v.id_vuelo} — {v.origen} → {v.destino}
                   </option>
                 ))}
               </select>
@@ -128,15 +147,14 @@ export default function SeccionCheckin() {
                   <th className="fw-semibold small text-muted">Pasajero</th>
                   <th className="fw-semibold small text-muted">Vuelo</th>
                   <th className="fw-semibold small text-muted">Asiento</th>
-                  <th className="fw-semibold small text-muted">Maletas</th>
                   <th className="fw-semibold small text-muted">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {checkinsFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-muted py-4 small">
-                      No hay check-ins registrados para este vuelo.
+                    <td colSpan={5} className="text-center text-muted py-4 small">
+                      No hay check-ins registrados.
                     </td>
                   </tr>
                 ) : (
@@ -145,26 +163,17 @@ export default function SeccionCheckin() {
                     return (
                       <tr key={c.id_checkin}>
                         <td className="fw-semibold">#{c.id_checkin}</td>
-                        <td>{c.nombre_pasajero}</td>
-                        <td>#{c.id_vuelo} — {vuelo?.ruta ?? "Sin ruta"}</td>
+                        <td>{getNombreUsuario(c.id_usuario)}</td>
+                        <td>#{c.id_vuelo} — {vuelo?.origen} → {vuelo?.destino}</td>
                         <td><b>{c.asiento}</b></td>
-                        <td>{c.maletas}</td>
                         <td>
                           <div className="d-flex gap-1">
-                            {/* Ver pase de abordar */}
                             <button
                               className="btn btn-sm rounded-2"
                               style={{ background: "#ede9fa", color: COLOR_PRINCIPAL, fontSize: 12 }}
-                              onClick={() => setCheckinSeleccionado(c)}
+                              onClick={() => setCheckinSeleccionado({ ...c, nombrePasajero: getNombreUsuario(c.id_usuario) })}
                             >
                               Pase de abordar
-                            </button>
-                            {/* Botón de maletas — navega a la sección */}
-                            <button
-                              className="btn btn-sm rounded-2"
-                              style={{ background: "#fff3cd", color: "#856404", fontSize: 12 }}
-                            >
-                              Maletas
                             </button>
                           </div>
                         </td>
@@ -178,15 +187,15 @@ export default function SeccionCheckin() {
         </div>
       </div>
 
-      {/* ── Modal nuevo check-in ── */}
       {modalAbierto && (
         <ModalNuevoCheckin
+          vuelos={vuelos}
+          usuarios={usuarios}
           onGuardar={handleNuevoCheckin}
           onCancelar={() => setModalAbierto(false)}
         />
       )}
 
-      {/* ── Modal pase de abordar ── */}
       {checkinSeleccionado && (
         <ModalPaseAbordar
           checkin={checkinSeleccionado}
@@ -200,8 +209,8 @@ export default function SeccionCheckin() {
   );
 }
 
-// ModalNuevoCheckin — formulario para registrar un check-in
-function ModalNuevoCheckin({ onGuardar, onCancelar }) {
+// ModalNuevoCheckin
+function ModalNuevoCheckin({ vuelos, usuarios, onGuardar, onCancelar }) {
   const [form, setForm] = useState({
     id_vuelo:   "",
     id_usuario: "",
@@ -218,17 +227,10 @@ function ModalNuevoCheckin({ onGuardar, onCancelar }) {
       setError("Todos los campos son obligatorios.");
       return;
     }
-
-    // Busca el nombre del pasajero seleccionado
-    const pasajero = MOCK_PASAJEROS.find(
-      (p) => p.id_usuario === parseInt(form.id_usuario)
-    );
-
     onGuardar({
-      id_vuelo:        parseInt(form.id_vuelo),
-      id_usuario:      parseInt(form.id_usuario),
-      nombre_pasajero: pasajero?.nombre ?? "Sin nombre",
-      asiento:         form.asiento.toUpperCase(),
+      id_vuelo:   parseInt(form.id_vuelo),
+      id_usuario: parseInt(form.id_usuario),
+      asiento:    form.asiento.toUpperCase(),
     });
   };
 
@@ -239,94 +241,61 @@ function ModalNuevoCheckin({ onGuardar, onCancelar }) {
     >
       <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 420 }}>
         <div className="card-body p-4">
-          <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>
-            Nuevo check-in
-          </h5>
-          <p className="text-muted small mb-4">
-            Registre el check-in del pasajero
-          </p>
+          <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>Nuevo check-in</h5>
+          <p className="text-muted small mb-4">Registre el check-in del pasajero</p>
 
-          {error && (
-            <div className="alert alert-danger py-2 small rounded-3">{error}</div>
-          )}
+          {error && <div className="alert alert-danger py-2 small rounded-3">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            {/* Selector de vuelo */}
             <div className="mb-3">
               <label className="form-label fw-semibold small text-secondary">
                 Vuelo <span className="text-danger">*</span>
               </label>
-              <select
-                name="id_vuelo"
-                className="form-select rounded-3"
-                value={form.id_vuelo}
-                onChange={handleChange}
-                required
-              >
+              <select name="id_vuelo" className="form-select rounded-3"
+                value={form.id_vuelo} onChange={handleChange} required>
                 <option value="">Seleccionar vuelo</option>
-                {/* Solo muestra vuelos abiertos para hacer check-in */}
-                {MOCK_VUELOS.filter((v) => v.estado === "abierto").map((v) => (
+                {/* Solo muestra vuelos abiertos */}
+                {vuelos.filter((v) => v.estado === "abierto").map((v) => (
                   <option key={v.id_vuelo} value={v.id_vuelo}>
-                    #{v.id_vuelo} — {v.ruta} — {new Date(v.fecha_salida).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" })}
+                    #{v.id_vuelo} — {v.origen} → {v.destino}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Selector de pasajero */}
             <div className="mb-3">
               <label className="form-label fw-semibold small text-secondary">
                 Pasajero <span className="text-danger">*</span>
               </label>
-              <select
-                name="id_usuario"
-                className="form-select rounded-3"
-                value={form.id_usuario}
-                onChange={handleChange}
-                required
-              >
+              <select name="id_usuario" className="form-select rounded-3"
+                value={form.id_usuario} onChange={handleChange} required>
                 <option value="">Seleccionar pasajero</option>
-                {MOCK_PASAJEROS.map((p) => (
-                  <option key={p.id_usuario} value={p.id_usuario}>
-                    {p.nombre}
+                {usuarios.map((u) => (
+                  <option key={u.id_usuario} value={u.id_usuario}>
+                    {u.nombre1} {u.apellido1} — {u.correo}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Asiento */}
             <div className="mb-4">
               <label className="form-label fw-semibold small text-secondary">
                 Asiento <span className="text-danger">*</span>
               </label>
-              <input
-                type="text"
-                name="asiento"
-                className="form-control rounded-3"
-                placeholder="ej. 12A"
-                value={form.asiento}
-                onChange={handleChange}
-                required
-              />
+              <input type="text" name="asiento" className="form-control rounded-3"
+                placeholder="ej. 12A" value={form.asiento}
+                onChange={handleChange} required />
             </div>
 
-            <div
-              className="d-flex justify-content-end gap-2 pt-3"
-              style={{ borderTop: "0.5px solid #e8e4f8" }}
-            >
-              <button
-                type="button"
-                className="btn rounded-3 fw-semibold"
+            <div className="d-flex justify-content-end gap-2 pt-3"
+              style={{ borderTop: "0.5px solid #e8e4f8" }}>
+              <button type="button" className="btn rounded-3 fw-semibold"
                 style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL }}
-                onClick={onCancelar}
-              >
+                onClick={onCancelar}>
                 Cancelar
               </button>
-              <button
-                type="submit"
-                className="btn rounded-3 fw-semibold text-white"
-                style={{ background: COLOR_PRINCIPAL }}
-              >
+              <button type="submit" className="btn rounded-3 fw-semibold text-white"
+                style={{ background: COLOR_PRINCIPAL }}>
                 Registrar
               </button>
             </div>
@@ -337,16 +306,7 @@ function ModalNuevoCheckin({ onGuardar, onCancelar }) {
   );
 }
 
-
-// ModalPaseAbordar — muestra el pase de abordar
-//
-// Recibe:
-//   checkin        → datos del check-in
-//   vuelo          → datos del vuelo
-//   onImprimir     → función para imprimir
-//   onEnviarCorreo → función para enviar por correo
-//   onCerrar       → función para cerrar el modal
-
+// ModalPaseAbordar
 function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar }) {
   return (
     <div
@@ -355,26 +315,20 @@ function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar
     >
       <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 360 }}>
         <div className="card-body p-4">
-
-          {/* Encabezado del pase */}
-          <div
-            className="rounded-3 p-3 mb-4"
-            style={{ background: COLOR_PRINCIPAL }}
-          >
+          <div className="rounded-3 p-3 mb-4" style={{ background: COLOR_PRINCIPAL }}>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, marginBottom: 4 }}>
               TECAir — Pase de abordar
             </p>
             <h3 className="fw-bold text-white mb-0" style={{ fontSize: 18 }}>
-              {vuelo?.ruta ?? "Sin ruta"}
+              {vuelo?.origen} → {vuelo?.destino}
             </h3>
           </div>
 
-          {/* Datos del pasajero y vuelo */}
           <div className="d-flex justify-content-between mb-3">
             <div>
               <p className="text-muted mb-1" style={{ fontSize: 11 }}>Pasajero</p>
               <p className="fw-bold mb-0" style={{ fontSize: 14, color: "#3c3489" }}>
-                {checkin.nombre_pasajero}
+                {checkin.nombrePasajero}
               </p>
             </div>
             <div className="text-end">
@@ -389,7 +343,7 @@ function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar
             <div>
               <p className="text-muted mb-1" style={{ fontSize: 11 }}>Hora salida</p>
               <p className="fw-bold mb-0" style={{ fontSize: 14, color: "#3c3489" }}>
-                {vuelo ? new Date(vuelo.fecha_salida).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                {vuelo?.hora_salida ?? "--"}
               </p>
             </div>
             <div className="text-end">
@@ -400,39 +354,28 @@ function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar
             </div>
           </div>
 
-          {/* Asiento destacado */}
-          <div
-            className="text-center rounded-3 py-3 mb-4"
-            style={{ background: "#f5f3ff" }}
-          >
+          <div className="text-center rounded-3 py-3 mb-4" style={{ background: "#f5f3ff" }}>
             <p className="text-muted mb-1" style={{ fontSize: 11 }}>Asiento</p>
             <p className="fw-bold mb-0" style={{ fontSize: 36, color: COLOR_PRINCIPAL }}>
               {checkin.asiento}
             </p>
           </div>
 
-          {/* Botones de acción */}
           <div className="d-flex gap-2 mb-2">
-            <button
-              className="btn flex-fill rounded-3 fw-semibold"
+            <button className="btn flex-fill rounded-3 fw-semibold"
               style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL, fontSize: 13 }}
-              onClick={onImprimir}
-            >
+              onClick={onImprimir}>
               Imprimir
             </button>
-            <button
-              className="btn flex-fill rounded-3 fw-semibold text-white"
+            <button className="btn flex-fill rounded-3 fw-semibold text-white"
               style={{ background: COLOR_PRINCIPAL, fontSize: 13 }}
-              onClick={onEnviarCorreo}
-            >
+              onClick={onEnviarCorreo}>
               Enviar correo
             </button>
           </div>
-          <button
-            className="btn w-100 rounded-3 fw-semibold text-muted"
+          <button className="btn w-100 rounded-3 fw-semibold text-muted"
             style={{ background: "#f5f3ff", fontSize: 13 }}
-            onClick={onCerrar}
-          >
+            onClick={onCerrar}>
             Cerrar
           </button>
         </div>

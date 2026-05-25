@@ -296,11 +296,16 @@ function ModalNuevoVuelo({ rutas, aviones, onGuardar, onCancelar }) {
                   value={form.id_ruta} onChange={handleChange} required>
                   <option value="">Seleccionar ruta</option>
                   {/* Rutas que vienen del API */}
-                  {rutas.map((r) => (
-                    <option key={r.id_ruta} value={r.id_ruta}>
-                      {r.origen} → {r.destino}
-                    </option>
-                  ))}
+                  {rutas.map((r) => {
+                    // Busca la escala de origen y destino dentro del arreglo de escalas
+                    const origen  = r.escalas?.find((e) => e.tipo === "origen");
+                    const destino = r.escalas?.find((e) => e.tipo === "destino");
+                    return (
+                      <option key={r.id_ruta} value={r.id_ruta}>
+                        {origen?.nombre ?? "?"} → {destino?.nombre ?? "?"}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

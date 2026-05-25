@@ -27,20 +27,19 @@ export const ENDPOINTS = {
     abrir:  (id) => `${BASE_URL}/vuelos/${id}/abrir`,
     cerrar: (id) => `${BASE_URL}/vuelos/${id}/cerrar`,
   },
-  checkin: {
-    list:   `${BASE_URL}/checkin`,
-    create: `${BASE_URL}/checkin`,
-    byId:   (id) => `${BASE_URL}/checkin/${id}`,
+  checkins: {
+    list:        `${BASE_URL}/checkins`,
+    create:      `${BASE_URL}/checkins`,
+    paseAbordar: (id) => `${BASE_URL}/checkins/${id}/pase-abordar`,
   },
   promociones: {
     list:   `${BASE_URL}/promociones`,
     create: `${BASE_URL}/promociones`,
-    byId:   (id) => `${BASE_URL}/promociones/${id}`,
-    update: (id) => `${BASE_URL}/promociones/${id}`,
     delete: (id) => `${BASE_URL}/promociones/${id}`,
   },
   usuarios: {
     list:   `${BASE_URL}/usuarios`,
+    create: `${BASE_URL}/usuarios`,
     byId:   (id) => `${BASE_URL}/usuarios/${id}`,
     update: (id) => `${BASE_URL}/usuarios/${id}`,
     delete: (id) => `${BASE_URL}/usuarios/${id}`,
@@ -61,9 +60,8 @@ export const ENDPOINTS = {
     byId:   (id) => `${BASE_URL}/aviones/${id}`,
   },
   maletas: {
-    list:       `${BASE_URL}/maletas`,
-    create:     `${BASE_URL}/maletas`,
-    byCheckin:  (checkinId) => `${BASE_URL}/maletas/checkin/${checkinId}`,
+    list:   `${BASE_URL}/maletas`,
+    create: `${BASE_URL}/maletas`,
   },
 };
 
