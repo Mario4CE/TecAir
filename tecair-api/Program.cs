@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TecAir.Api;
-using TecAir.Api.Data;
+using TecAir.Application.Configuration;
+using TecAir.Infrastructure.Persistence;
 using TecAir.Api.Config;
-using TecAir.Api.Interfaces;
-using TecAir.Api.Repositories;
-using TecAir.Api.Services;
+using TecAir.Application.DependencyInjection;
+using TecAir.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,27 +34,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IAeropuertoRepository, AeropuertoRepository>();
-builder.Services.AddScoped<IAeropuertoService, AeropuertoService>();
-builder.Services.AddScoped<IAvionRepository, AvionRepository>();
-builder.Services.AddScoped<IAvionService, AvionService>();
-builder.Services.AddScoped<IRutaRepository, RutaRepository>();
-builder.Services.AddScoped<IRutaService, RutaService>();
-builder.Services.AddScoped<IVueloRepository, VueloRepository>();
-builder.Services.AddScoped<IVueloService, VueloService>();
-builder.Services.AddScoped<IReservacionRepository, ReservacionRepository>();
-builder.Services.AddScoped<IReservacionService, ReservacionService>();
-builder.Services.AddScoped<IPagoRepository, PagoRepository>();
-builder.Services.AddScoped<IPagoService, PagoService>();
-builder.Services.AddScoped<IPromocionRepository, PromocionRepository>();
-builder.Services.AddScoped<IPromocionService, PromocionService>();
-builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
-builder.Services.AddScoped<ICheckInService, CheckInService>();
-builder.Services.AddScoped<IMaletaRepository, MaletaRepository>();
-builder.Services.AddScoped<IMaletaService, MaletaService>();
-builder.Services.AddScoped<ICalculoCobroMaletaStrategy, CalculoCobroMaletaStrategy>();
+builder.Services
+    .AddTecAirApplication()
+    .AddTecAirInfrastructure();
+
 builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
@@ -83,7 +66,6 @@ app.UseCors(ApiGlobals.CorsPolicyName);
 
 app.MapTecAirApiEndpoints();
 
-app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); // Para permitir CORS en todas las rutas, aunque ya se configuró una política específica
 
 await app.RunAsync();
 
