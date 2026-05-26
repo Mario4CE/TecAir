@@ -39,8 +39,7 @@ public partial class HomePage : ContentPage
         if (_syncService.HayConexion())
         {
             var (exito, mensaje) = await _syncService.SincronizarAsync();
-            if (!exito)
-                await DisplayAlert("Sincronización", mensaje, "OK");
+            await DisplayAlert("Sincronización", mensaje, "OK");
         }
     }
 

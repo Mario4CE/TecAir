@@ -498,13 +498,6 @@ namespace TecAir.Services
                 .ToListAsync();
         }
 
-        // Actualiza un vuelo en SQLite
-        public async Task UpdateFlightAsync(Flight flight)
-        {
-            await EnsureConnectionAsync();
-            await _connection.UpdateAsync(flight);
-        }
-
         // Crea un aeropuerto en SQLite
         public async Task<Airport> CreateAirportAsync(Airport airport)
         {

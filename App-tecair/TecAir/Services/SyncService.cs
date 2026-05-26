@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using TecAir.Models;
+using Microsoft.Maui.Networking;
 
 namespace TecAir.Services
 {
@@ -22,7 +23,7 @@ namespace TecAir.Services
         private readonly HttpClient _httpClient;
 
         // URL base del API — cambiar si el servidor está en otra dirección
-        private const string ApiBaseUrl = "http://10.0.2.2:5000/api";
+        private const string ApiBaseUrl = "http://172.18.34.148:5000/api";
         // Nota: en Android el emulador usa 10.0.2.2 para acceder al localhost
         // Si se prueba en dispositivo físico, usar la IP local del servidor
         // Ejemplo: "http://192.168.1.100:5000/api"
@@ -161,8 +162,8 @@ namespace TecAir.Services
                         await _databaseService.CreatePromotionAsync(new Promotion
                         {
                             ApiId = promoApi.IdPromocion,
-                            RouteId = promoApi.IdRuta,
-                            Price = promoApi.Precio,
+                            OriginAirportId = promoApi.IdRuta,
+                            PromotionalPrice = promoApi.Precio,
                             StartDate = promoApi.FechaInicio?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now,
                             EndDate = promoApi.FechaFin?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.Now.AddMonths(1),
                             ImageUrl = promoApi.Imagen ?? "",
@@ -203,7 +204,8 @@ namespace TecAir.Services
                         {
                             ApiId = aeropuertoApi.IdAeropuerto,
                             Name = aeropuertoApi.Nombre,
-                            Location = aeropuertoApi.Ubicacion,
+                            City = aeropuertoApi.Ubicacion ?? "",
+                            Country = "",
                             Code = aeropuertoApi.Nombre.Split(' ')[0], // ej. "SJO" de "SJO - Juan Santamaría"
                         });
                     }
