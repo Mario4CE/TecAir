@@ -12,9 +12,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../src/TecAir.Application/TecAir.Application.csproj" />
-		<ProjectReference Include="../src/TecAir.Contracts/TecAir.Contracts.csproj" />
-		<ProjectReference Include="../src/TecAir.Infrastructure/TecAir.Infrastructure.csproj" />
+		<ProjectReference Include="src/TecAir.Application/TecAir.Application.csproj" />
+		<ProjectReference Include="src/TecAir.Contracts/TecAir.Contracts.csproj" />
+		<ProjectReference Include="src/TecAir.Infrastructure/TecAir.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>
