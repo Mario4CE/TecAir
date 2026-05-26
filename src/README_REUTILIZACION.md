@@ -13,7 +13,7 @@ Este repositorio ya fue separado en capas para compartir contratos, dominio, ló
 - `src/TecAir.Infrastructure`
   - Persistencia (`TecAirDb`, `DatabaseSeeder`) y repositorios.
 - `tecair-api`
-  - Host HTTP/composición: `Program.cs`, endpoints, configuración web.
+  - Host HTTP/composición: `Program.cs`, `Endpoints/`, `Configuration/`, `Properties/` y `Docs/`.
 
 ## Dependencias permitidas
 
