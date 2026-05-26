@@ -27,7 +27,14 @@ public sealed class AvionRepository(TecAirDb db) : IAvionRepository
     Restricciones:
     Ejecuta lectura sin tracking.
     */
-    public async Task<List<Avion>> GetAllAsync() => await db.Aviones.AsNoTracking().OrderBy(x => x.Matricula).ToListAsync();
+    public async Task<List<Avion>> GetAllAsync() => await db.Aviones.AsNoTracking()
+        .Select(x => new Avion
+        {
+            Matricula = x.Matricula ?? string.Empty,
+            Capacidad = x.Capacidad
+        })
+        .OrderBy(x => x.Matricula)
+        .ToListAsync();
 
     /*
     Descripción:

@@ -11,8 +11,20 @@ public sealed class VueloRepository(TecAirDb db) : IVueloRepository
     public async Task<List<VueloResponse>> GetVuelosAsync(string? origen, string? destino)
     {
         var vuelos = await db.Vuelos.AsNoTracking()
-            .Include(x => x.Avion)
-            .Include(x => x.Reservaciones)
+            .Where(x => x.IdRuta > 0 && x.Matricula != null)
+            .Select(x => new
+            {
+                x.IdVuelo,
+                x.IdRuta,
+                x.Matricula,
+                x.Precio,
+                FechaSalida = (DateOnly?)x.FechaSalida,
+                HoraSalida = (TimeOnly?)x.HoraSalida,
+                x.Puerta,
+                x.Estado,
+                Capacidad = x.Avion != null ? (int?)x.Avion.Capacidad : null,
+                ReservacionesActivas = x.Reservaciones.Count(r => r.Estado != "cancelada")
+            })
             .OrderBy(x => x.FechaSalida)
             .ThenBy(x => x.HoraSalida)
             .ToListAsync();
@@ -42,23 +54,24 @@ public sealed class VueloRepository(TecAirDb db) : IVueloRepository
             if (!CoincideAeropuerto(escalaOrigen, origen) || !CoincideAeropuerto(escalaDestino, destino))
                 continue;
 
-            var reservacionesActivas = vuelo.Reservaciones.Count(x => x.Estado != "cancelada");
+            var capacidad = vuelo.Capacidad ?? 0;
+            var reservacionesActivas = vuelo.ReservacionesActivas;
 
             respuestas.Add(new VueloResponse(
                 vuelo.IdVuelo,
-                vuelo.FechaSalida,
-                vuelo.HoraSalida,
-                vuelo.Puerta,
-                vuelo.Estado,
-                vuelo.Matricula,
+                vuelo.FechaSalida ?? DateOnly.MinValue,
+                vuelo.HoraSalida ?? TimeOnly.MinValue,
+                vuelo.Puerta ?? string.Empty,
+                vuelo.Estado ?? "programado",
+                vuelo.Matricula ?? string.Empty,
                 vuelo.IdRuta,
                 vuelo.Precio,
-                vuelo.Avion?.Capacidad ?? 0,
+                capacidad,
                 escalaOrigen?.Nombre ?? string.Empty,
                 escalaDestino?.Nombre ?? string.Empty,
                 escalaOrigen?.IdAeropuerto ?? 0,
                 escalaDestino?.IdAeropuerto ?? 0,
-                (vuelo.Avion?.Capacidad ?? 0) - reservacionesActivas,
+                capacidad - reservacionesActivas,
                 escalas));
         }
 

@@ -20,12 +20,15 @@ public sealed class RutaRepository(TecAirDb db) : IRutaRepository
 {
     public async Task<List<RutaResponse>> GetRutasDetalladasAsync()
     {
-        var rutas = await db.Rutas.AsNoTracking().OrderBy(x => x.IdRuta).ToListAsync();
+        var rutas = await db.Rutas.AsNoTracking()
+            .Select(x => x.IdRuta)
+            .OrderBy(x => x)
+            .ToListAsync();
         var resultado = new List<RutaResponse>();
 
-        foreach (var ruta in rutas)
+        foreach (var idRuta in rutas)
         {
-            resultado.Add(await GetRutaDetalladaAsync(ruta.IdRuta));
+            resultado.Add(await GetRutaDetalladaAsync(idRuta));
         }
 
         return resultado;
@@ -43,8 +46,8 @@ public sealed class RutaRepository(TecAirDb db) : IRutaRepository
                 (e, a) => new
                 {
                     id_aeropuerto = a.IdAeropuerto,
-                    nombre = a.Nombre,
-                    ubicacion = a.Ubicacion,
+                    nombre = a.Nombre ?? string.Empty,
+                    ubicacion = a.Ubicacion ?? string.Empty,
                     orden = e.Orden,
                     tipo = e.Tipo
                 })
