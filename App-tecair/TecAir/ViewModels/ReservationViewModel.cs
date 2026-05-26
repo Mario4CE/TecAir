@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using TecAir.Models;
 using TecAir.Services;
 
@@ -10,17 +11,17 @@ namespace TecAir.ViewModels
     public class ReservationViewModel : BaseViewModel
     {
         private readonly DatabaseService _databaseService;
-        private ObservableCollection<Reservation> _reservations;
-        private Reservation _selectedReservation;
+        private ObservableCollection<ReservationWithFlight> _reservations;
+        private ReservationWithFlight _selectedReservation;
         private User _currentUser;
 
-        public ObservableCollection<Reservation> Reservations
+        public ObservableCollection<ReservationWithFlight> Reservations
         {
             get => _reservations;
             set => SetProperty(ref _reservations, value);
         }
 
-        public Reservation SelectedReservation
+        public ReservationWithFlight SelectedReservation
         {
             get => _selectedReservation;
             set => SetProperty(ref _selectedReservation, value);
@@ -36,7 +37,7 @@ namespace TecAir.ViewModels
         {
             Title = "Mis Reservaciones";
             _databaseService = MauiProgram.DatabaseService;
-            Reservations = new ObservableCollection<Reservation>();
+            Reservations = new ObservableCollection<ReservationWithFlight>();
         }
 
         public async Task InitializeAsync(User user)
@@ -52,9 +53,46 @@ namespace TecAir.ViewModels
                 IsBusy = true;
                 var reservations = await _databaseService.GetReservationsByUserAsync(userId);
                 Reservations.Clear();
+
                 foreach (var reservation in reservations)
                 {
-                    Reservations.Add(reservation);
+                    try
+                    {
+                        // Filtrar reservaciones canceladas (status = 4) y no presentadas (status = 5)
+                        if (reservation.Status == 4 || reservation.Status == 5)
+                            continue;
+
+                        // Obtener vuelo
+                        var flight = await _databaseService.GetFlightByIdAsync(reservation.FlightId);
+                        if (flight == null)
+                            continue;
+
+                        // Obtener ruta
+                        var route = await _databaseService.GetRouteByIdAsync(flight.RouteId);
+                        if (route == null)
+                            continue;
+
+                        // Obtener aeropuertos
+                        var originAirport = await _databaseService.GetAirportByIdAsync(route.OriginAirportId);
+                        var destinationAirport = await _databaseService.GetAirportByIdAsync(route.DestinationAirportId);
+
+                        // Crear objeto con toda la información
+                        var reservationWithFlight = new ReservationWithFlight
+                        {
+                            Reservation = reservation,
+                            Flight = flight,
+                            Route = route,
+                            OriginAirport = originAirport,
+                            DestinationAirport = destinationAirport
+                        };
+
+                        Reservations.Add(reservationWithFlight);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error al cargar detalles de reservación {reservation.Id}: {ex.Message}");
+                        // Continuar con la siguiente reservación
+                    }
                 }
             }
             catch (Exception ex)
@@ -73,7 +111,9 @@ namespace TecAir.ViewModels
             {
                 IsBusy = true;
                 var createdReservation = await _databaseService.CreateReservationAsync(reservation);
-                Reservations.Add(createdReservation);
+                
+                // Recargar para actualizar la lista
+                await LoadUserReservationsAsync(CurrentUser.Id);
                 return true;
             }
             catch (Exception ex)
@@ -92,18 +132,58 @@ namespace TecAir.ViewModels
             try
             {
                 IsBusy = true;
+                Debug.WriteLine($"=== Iniciando cancelación de reservación {reservationId} ===");
+
+                // Obtener la reservación
                 var reservation = await _databaseService.GetReservationByIdAsync(reservationId);
-                if (reservation != null)
+                if (reservation == null)
                 {
-                    reservation.Status = 4; // Cancelled
-                    await _databaseService.UpdateReservationAsync(reservation);
+                    Debug.WriteLine($"ERROR: Reservación {reservationId} no encontrada");
+                    await Application.Current.MainPage.DisplayAlert("Error", "No se encontró la reservación", "OK");
+                    return false;
+                }
+
+                Debug.WriteLine($"Reservación encontrada - FlightId: {reservation.FlightId}, Status actual: {reservation.Status}, SeatNumber: {reservation.SeatNumber}");
+
+                // Obtener el vuelo para liberar los asientos
+                var flight = await _databaseService.GetFlightByIdAsync(reservation.FlightId);
+                if (flight != null)
+                {
+                    Debug.WriteLine($"Vuelo encontrado - AvailableSeats antes: {flight.AvailableSeats}");
+                    // Incrementar asientos disponibles
+                    flight.AvailableSeats += 1;
+                    Debug.WriteLine($"Actualizando vuelo con AvailableSeats: {flight.AvailableSeats}");
+                    var flightResult = await _databaseService.UpdateFlightAsync(flight);
+                    Debug.WriteLine($"Resultado de UpdateFlightAsync: {flightResult}");
+                }
+                else
+                {
+                    Debug.WriteLine($"ERROR: Vuelo {reservation.FlightId} no encontrado");
+                }
+
+                // Cambiar estado a Cancelada (4)
+                Debug.WriteLine($"Cambiando estado de reservación a 4 (Cancelada)");
+                reservation.Status = 4;
+                var result = await _databaseService.UpdateReservationAsync(reservation);
+                Debug.WriteLine($"Resultado de UpdateReservationAsync: {result}");
+
+                if (result > 0)
+                {
+                    Debug.WriteLine($"✓ Cancelación exitosa. Recargando lista de reservaciones...");
+                    // Recargar lista de reservaciones
                     await LoadUserReservationsAsync(CurrentUser.Id);
+                    Debug.WriteLine($"✓ Lista recarguada. Total de reservaciones activas: {Reservations.Count}");
                     return true;
                 }
+
+                Debug.WriteLine($"ERROR: UpdateReservationAsync retornó {result}");
+                await Application.Current.MainPage.DisplayAlert("Error", "No se pudo cancelar la reservación", "OK");
                 return false;
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"EXCEPTION en CancelReservationAsync: {ex.Message}");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 await Application.Current.MainPage.DisplayAlert("Error", $"Error al cancelar: {ex.Message}", "OK");
                 return false;
             }

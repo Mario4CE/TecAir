@@ -67,6 +67,9 @@ public partial class FlightsSearchPage : ContentPage
 			// Ejecutar búsqueda
 			await _viewModel.SearchFlightsAsync();
 
+			// Actualizar visibilidad de la etiqueta
+			AvailableFlightsLabel.IsVisible = _viewModel.Flights.Count > 0;
+
 			// Mostrar resultado
 			if (_viewModel.Flights.Count == 0)
 			{
@@ -85,7 +88,30 @@ public partial class FlightsSearchPage : ContentPage
 
 	private async void OnReserveClicked(object sender, EventArgs e)
 	{
-		await DisplayAlert("Información", "Función de reserva en desarrollo", "OK");
-		// TODO: Navegar a página de reserva con el vuelo seleccionado
+		try
+		{
+			// Obtener el botón que fue clickeado
+			if (sender is Button button && button.BindingContext is Models.FlightWithRoute flightWithRoute)
+			{
+				if (!MauiProgram.AuthenticationService.IsAuthenticated)
+				{
+					await DisplayAlert("Error", "Debes iniciar sesión para reservar", "OK");
+					return;
+				}
+
+				// Navegar a la página de reservación
+				var reservationPage = new Views.ReservationDetailPage();
+				reservationPage.SetFlightId(flightWithRoute.Flight.Id);
+				await Navigation.PushAsync(reservationPage);
+			}
+			else
+			{
+				await DisplayAlert("Error", "No se pudo obtener la información del vuelo", "OK");
+			}
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Error", $"Error al reservar: {ex.Message}", "OK");
+		}
 	}
 }

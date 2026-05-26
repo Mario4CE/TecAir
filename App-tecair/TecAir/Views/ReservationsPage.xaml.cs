@@ -16,25 +16,20 @@ public partial class ReservationsPage : ContentPage
 	{
 		base.OnAppearing();
 
-		// Inicializar ViewModel si no está ya establecido
-		if (BindingContext == null)
+		// Siempre reinicializar para obtener datos frescos
+		var currentUser = MauiProgram.AuthenticationService.CurrentUser;
+
+		if (currentUser != null)
 		{
 			_viewModel = new ReservationViewModel();
 			BindingContext = _viewModel;
-
-			// Obtener usuario actual desde AuthenticationService
-			var currentUser = MauiProgram.AuthenticationService.CurrentUser;
-			
-			if (currentUser != null)
-			{
-				await _viewModel.InitializeAsync(currentUser);
-			}
-			else
-			{
-				// Si no hay usuario autenticado, mostrar mensaje
-				await DisplayAlert("Error", "Usuario no autenticado", "OK");
-				await Shell.Current.GoToAsync("..");
-			}
+			await _viewModel.InitializeAsync(currentUser);
+		}
+		else
+		{
+			// Si no hay usuario autenticado, mostrar mensaje
+			await DisplayAlert("Error", "Usuario no autenticado", "OK");
+			await Shell.Current.GoToAsync("..");
 		}
 	}
 
@@ -43,11 +38,11 @@ public partial class ReservationsPage : ContentPage
 		try
 		{
 			var button = sender as Button;
-			if (button?.CommandParameter is Reservation reservation)
+			if (button?.CommandParameter is ReservationWithFlight reservationWithFlight)
 			{
 				var confirmed = await DisplayAlert(
 					"Confirmar Check-in",
-					$"¿Realizar check-in para el vuelo #{reservation.FlightId}?",
+					$"¿Realizar check-in para el vuelo {reservationWithFlight.FlightNumber} ({reservationWithFlight.RouteDisplay})?",
 					"Sí",
 					"No"
 				);
@@ -55,7 +50,7 @@ public partial class ReservationsPage : ContentPage
 				if (confirmed)
 				{
 					_viewModel ??= (ReservationViewModel)BindingContext;
-					await _viewModel.CheckInAsync(reservation.Id);
+					await _viewModel.CheckInAsync(reservationWithFlight.Id);
 					await DisplayAlert("Éxito", "Check-in realizado exitosamente", "OK");
 				}
 			}
@@ -71,11 +66,11 @@ public partial class ReservationsPage : ContentPage
 		try
 		{
 			var button = sender as Button;
-			if (button?.CommandParameter is Reservation reservation)
+			if (button?.CommandParameter is ReservationWithFlight reservationWithFlight)
 			{
 				var confirmed = await DisplayAlert(
 					"Confirmar cancelación",
-					$"¿Cancelar la reservación del vuelo #{reservation.FlightId}?",
+					$"¿Cancelar la reservación para el vuelo {reservationWithFlight.FlightNumber} ({reservationWithFlight.RouteDisplay})? Se devolverán los asientos disponibles.",
 					"Sí",
 					"No"
 				);
@@ -83,8 +78,8 @@ public partial class ReservationsPage : ContentPage
 				if (confirmed)
 				{
 					_viewModel ??= (ReservationViewModel)BindingContext;
-					await _viewModel.CancelReservationAsync(reservation.Id);
-					await DisplayAlert("Cancelada", "Tu reservación ha sido cancelada", "OK");
+					await _viewModel.CancelReservationAsync(reservationWithFlight.Id);
+					await DisplayAlert("Cancelada", "Tu reservación ha sido cancelada exitosamente", "OK");
 				}
 			}
 		}

@@ -12,40 +12,57 @@ namespace TecAir.Services
         private SQLiteAsyncConnection _connection;
         private static readonly string DbPath = Path.Combine(FileSystem.AppDataDirectory, "tecair.db");
         private bool _isInitialized = false;
+        private readonly object _connectionLock = new object();
 
         public DatabaseService()
         {
         }
 
         /// <summary>
-        /// Asegura que la conexión esté disponible
+        /// Asegura que la conexión esté disponible y sincronizada
         /// </summary>
         private async Task EnsureConnectionAsync()
         {
+            // Verificación rápida sin lock
             if (_connection != null && _isInitialized)
                 return;
 
-            try
+            // Lock para evitar race conditions
+            lock (_connectionLock)
             {
-                _connection = new SQLiteAsyncConnection(DbPath);
-                
-                // Crear tablas si no existen
-                await _connection.CreateTableAsync<User>();
-                await _connection.CreateTableAsync<Airport>();
-                await _connection.CreateTableAsync<Aircraft>();
-                await _connection.CreateTableAsync<Route>();
-                await _connection.CreateTableAsync<Flight>();
-                await _connection.CreateTableAsync<Reservation>();
-                await _connection.CreateTableAsync<Luggage>();
-                await _connection.CreateTableAsync<Promotion>();
-                await _connection.CreateTableAsync<BoardingPass>();
+                // Verificación después de adquirir el lock
+                if (_connection != null && _isInitialized)
+                    return;
 
-                _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error al conectar a la base de datos: {ex.Message}");
-                throw;
+                try
+                {
+                    if (_connection == null)
+                    {
+                        var dbConnection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+                        _connection = dbConnection;
+                    }
+
+                    if (!_isInitialized)
+                    {
+                        // Crear tablas si no existen
+                        _connection.CreateTableAsync<User>().Wait();
+                        _connection.CreateTableAsync<Airport>().Wait();
+                        _connection.CreateTableAsync<Aircraft>().Wait();
+                        _connection.CreateTableAsync<Route>().Wait();
+                        _connection.CreateTableAsync<Flight>().Wait();
+                        _connection.CreateTableAsync<Reservation>().Wait();
+                        _connection.CreateTableAsync<Luggage>().Wait();
+                        _connection.CreateTableAsync<Promotion>().Wait();
+                        _connection.CreateTableAsync<BoardingPass>().Wait();
+
+                        _isInitialized = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error al conectar a la base de datos: {ex.Message}");
+                    throw;
+                }
             }
         }
 
@@ -280,7 +297,17 @@ namespace TecAir.Services
         public async Task<int> UpdateFlightAsync(Flight flight)
         {
             await EnsureConnectionAsync();
-            return await _connection.UpdateAsync(flight);
+            try
+            {
+                var result = await _connection.UpdateAsync(flight);
+                Debug.WriteLine($"Vuelo {flight.Id} actualizado. Asientos disponibles: {flight.AvailableSeats}, Resultado: {result}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error al actualizar vuelo {flight.Id}: {ex.Message}");
+                throw;
+            }
         }
 
         // ==================== RUTAS ====================
@@ -330,10 +357,42 @@ namespace TecAir.Services
             return await _connection.Table<Reservation>().Where(r => r.FlightId == flightId).ToListAsync();
         }
 
+        public async Task<List<string>> GetReservedSeatsForFlightAsync(int flightId)
+        {
+            await EnsureConnectionAsync();
+            // Obtener todos los asientos reservados (status != 4 Cancelada, != 5 NoShow)
+            var reservations = await _connection.Table<Reservation>()
+                .Where(r => r.FlightId == flightId && r.Status != 4 && r.Status != 5)
+                .ToListAsync();
+
+            return reservations.Select(r => r.SeatNumber).ToList();
+        }
+
         public async Task<int> UpdateReservationAsync(Reservation reservation)
         {
             await EnsureConnectionAsync();
-            return await _connection.UpdateAsync(reservation);
+            try
+            {
+                // Asegurar que el registro existe antes de actualizar
+                var existing = await _connection.Table<Reservation>()
+                    .Where(r => r.Id == reservation.Id)
+                    .FirstOrDefaultAsync();
+
+                if (existing == null)
+                {
+                    Debug.WriteLine($"Reservación con ID {reservation.Id} no encontrada");
+                    return 0;
+                }
+
+                var result = await _connection.UpdateAsync(reservation);
+                Debug.WriteLine($"Reservación {reservation.Id} actualizada. Status: {reservation.Status}, Resultado: {result}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error al actualizar reservación {reservation.Id}: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<int> DeleteReservationAsync(int id)

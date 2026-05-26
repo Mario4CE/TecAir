@@ -39,37 +39,59 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame BorderColor="#E0E0E0" CornerRadius="10" HasShadow="False" Padding="15">
-                        <VerticalStackLayout Spacing="8">
+                        <VerticalStackLayout Spacing="10">
+                            <!-- Encabezado: Número de vuelo y estado -->
                             <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Label Text="{Binding FlightNumber, StringFormat='✈️ {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#007AFF" HorizontalOptions="StartAndExpand"/>
+                                <Frame BorderColor="{Binding StatusColor}" CornerRadius="5" HasShadow="False" Padding="8,4" BackgroundColor="Transparent">
+                                    <Label Text="{Binding StatusDisplay}" FontSize="10" FontAttributes="Bold" TextColor="{Binding StatusColor}"/>
+                                </Frame>
+                            </StackLayout>
+
+                            <!-- Información de la ruta y horarios -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding RouteDisplay, StringFormat='Ruta: {0}'}" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                                <Label Text="{Binding CityDisplay}" FontSize="11" TextColor="#666666"/>
+                                <Label Text="{Binding DepartureTime, StringFormat='Salida: {0:dd/MM/yyyy HH:mm}'}" FontSize="11" TextColor="#666666"/>
+                            </VerticalStackLayout>
+
+                            <!-- Detalles de la reservación -->
+                            <StackLayout Orientation="Horizontal" Spacing="20">
                                 <VerticalStackLayout Spacing="2">
-                                    <Label Text="{Binding FlightId, StringFormat='Vuelo #{0}'}" FontAttributes="Bold" FontSize="14"/>
-                                    <Label Text="{Binding ReservationDate, StringFormat='Reservado: {0:dd/MM/yyyy HH:mm}'}" FontSize="11" TextColor="#666666"/>
+                                    <Label Text="Asiento" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding SeatNumber}" FontSize="14" FontAttributes="Bold" TextColor="Black"/>
                                 </VerticalStackLayout>
-                                <Label Text="→" FontSize="20" VerticalOptions="Center" Margin="20,0"/>
-                                <Label Text="{Binding SeatNumber, StringFormat='Asiento: {0}'}" FontAttributes="Bold" FontSize="14" VerticalOptions="Center"/>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Fecha de Reserva" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding ReservationDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" TextColor="Black"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="EndAndExpand">
+                                    <Label Text="Precio Total" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding TotalPrice, StringFormat='${0:F2}'}" FontSize="14" FontAttributes="Bold" TextColor="#34C759"/>
+                                </VerticalStackLayout>
                             </StackLayout>
-                            <StackLayout Orientation="Horizontal" Spacing="10">
-                                <Label Text="Estado:" FontSize="11" TextColor="#666666"/>
-                                <Label Text="{Binding Status, StringFormat='{0}'}" FontSize="11" TextColor="#007AFF" FontAttributes="Bold"/>
-                            </StackLayout>
-                            <StackLayout Orientation="Horizontal" Spacing="5" Margin="0,8,0,0">
+
+                            <!-- Botones de acción -->
+                            <StackLayout Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
                                 <Button 
-                                    Text="Check-in"
+                                    Text="✓ Check-in"
                                     FontSize="11"
-                                    Padding="8"
+                                    Padding="12,8"
                                     CornerRadius="5"
                                     BackgroundColor="#34C759"
-                                    TextColor="Black"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
                                     HorizontalOptions="FillAndExpand"
                                     Clicked="OnCheckInClicked"
                                     CommandParameter="{Binding .}"/>
                                 <Button 
-                                    Text="Cancelar"
+                                    Text="✕ Cancelar"
                                     FontSize="11"
-                                    Padding="8"
+                                    Padding="12,8"
                                     CornerRadius="5"
                                     BackgroundColor="#FF3B30"
-                                    TextColor="Black"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
                                     HorizontalOptions="FillAndExpand"
                                     Clicked="OnCancelClicked"
                                     CommandParameter="{Binding .}"/>

@@ -28,6 +28,7 @@ namespace TecAir
             builder.Services.AddSingleton<UserViewModel>();
             builder.Services.AddSingleton<FlightViewModel>();
             builder.Services.AddSingleton<ReservationViewModel>();
+            builder.Services.AddSingleton<ReservationDetailViewModel>();
             builder.Services.AddSingleton<PromotionViewModel>();
 
             // Registrar Pages
@@ -36,6 +37,7 @@ namespace TecAir
             builder.Services.AddSingleton<Views.HomePage>();
             builder.Services.AddSingleton<Views.FlightsSearchPage>();
             builder.Services.AddSingleton<Views.ReservationsPage>();
+            builder.Services.AddSingleton<Views.ReservationDetailPage>();
             builder.Services.AddSingleton<Views.PromotionsPage>();
 
 #if DEBUG

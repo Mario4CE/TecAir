@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TecAir.Views.ReservationsPage"
+             Title="Mis Reservaciones"
+             BackgroundColor="#F5F5F5">
+
+    <VerticalStackLayout Padding="15" Spacing="15">
+        
+        <!-- Resumen de millas -->
+        <Frame BorderColor="#FFD700" CornerRadius="10" HasShadow="False" Padding="15" BackgroundColor="#FFFACD">
+            <StackLayout Orientation="Horizontal" Spacing="15">
+                <Label Text="⭐" FontSize="24" VerticalOptions="Center"/>
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="Millas de Lealtad" FontAttributes="Bold" FontSize="12" TextColor="Black"/>
+                    <Label Text="{Binding CurrentUser.LoyaltyMiles, StringFormat='{0:N0} millas'}" FontSize="14" TextColor="#FF9500" FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </StackLayout>
+        </Frame>
+
+        <!-- Reservaciones -->
+        <Label Text="Mis Reservaciones:" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
+        
+        <CollectionView 
+            x:Name="ReservationsCollectionView"
+            ItemsSource="{Binding Reservations}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.EmptyViewTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="20" Spacing="10" VerticalOptions="Center">
+                        <Label Text="📋" FontSize="48" HorizontalTextAlignment="Center"/>
+                        <Label Text="No tienes reservaciones" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#666666"/>
+                        <Label Text="Busca y reserva un vuelo para comenzar" FontSize="12" HorizontalTextAlignment="Center" TextColor="#999999"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.EmptyViewTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="#E0E0E0" CornerRadius="10" HasShadow="False" Padding="15">
+                        <VerticalStackLayout Spacing="8">
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding FlightId, StringFormat='Vuelo #{0}'}" FontAttributes="Bold" FontSize="14"/>
+                                    <Label Text="{Binding ReservationDate, StringFormat='Reservado: {0:dd/MM/yyyy HH:mm}'}" FontSize="11" TextColor="#666666"/>
+                                </VerticalStackLayout>
+                                <Label Text="→" FontSize="20" VerticalOptions="Center" Margin="20,0"/>
+                                <Label Text="{Binding SeatNumber, StringFormat='Asiento: {0}'}" FontAttributes="Bold" FontSize="14" VerticalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Label Text="Estado:" FontSize="11" TextColor="#666666"/>
+                                <Label Text="{Binding Status, StringFormat='{0}'}" FontSize="11" TextColor="#007AFF" FontAttributes="Bold"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" Spacing="5" Margin="0,8,0,0">
+                                <Button 
+                                    Text="Check-in"
+                                    FontSize="11"
+                                    Padding="8"
+                                    CornerRadius="5"
+                                    BackgroundColor="#34C759"
+                                    TextColor="Black"
+                                    HorizontalOptions="FillAndExpand"
+                                    Clicked="OnCheckInClicked"
+                                    CommandParameter="{Binding .}"/>
+                                <Button 
+                                    Text="Cancelar"
+                                    FontSize="11"
+                                    Padding="8"
+                                    CornerRadius="5"
+                                    BackgroundColor="#FF3B30"
+                                    TextColor="Black"
+                                    HorizontalOptions="FillAndExpand"
+                                    Clicked="OnCancelClicked"
+                                    CommandParameter="{Binding .}"/>
+                            </StackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+
+</ContentPage>

@@ -1,0 +1,181 @@
+﻿using System.Collections.ObjectModel;
+using TecAir.Models;
+using TecAir.Services;
+
+namespace TecAir.ViewModels
+{
+    /// <summary>
+    /// ViewModel para gestión de reservaciones
+    /// </summary>
+    public class ReservationViewModel : BaseViewModel
+    {
+        private readonly DatabaseService _databaseService;
+        private ObservableCollection<ReservationWithFlight> _reservations;
+        private ReservationWithFlight _selectedReservation;
+        private User _currentUser;
+
+        public ObservableCollection<ReservationWithFlight> Reservations
+        {
+            get => _reservations;
+            set => SetProperty(ref _reservations, value);
+        }
+
+        public ReservationWithFlight SelectedReservation
+        {
+            get => _selectedReservation;
+            set => SetProperty(ref _selectedReservation, value);
+        }
+
+        public User CurrentUser
+        {
+            get => _currentUser;
+            set => SetProperty(ref _currentUser, value);
+        }
+
+        public ReservationViewModel()
+        {
+            Title = "Mis Reservaciones";
+            _databaseService = MauiProgram.DatabaseService;
+            Reservations = new ObservableCollection<ReservationWithFlight>();
+        }
+
+        public async Task InitializeAsync(User user)
+        {
+            CurrentUser = user;
+            await LoadUserReservationsAsync(user.Id);
+        }
+
+        public async Task LoadUserReservationsAsync(int userId)
+        {
+            try
+            {
+                IsBusy = true;
+                var reservations = await _databaseService.GetReservationsByUserAsync(userId);
+                Reservations.Clear();
+
+                foreach (var reservation in reservations)
+                {
+                    try
+                    {
+                        // Obtener vuelo
+                        var flight = await _databaseService.GetFlightByIdAsync(reservation.FlightId);
+                        if (flight == null)
+                            continue;
+
+                        // Obtener ruta
+                        var route = await _databaseService.GetRouteByIdAsync(flight.RouteId);
+                        if (route == null)
+                            continue;
+
+                        // Obtener aeropuertos
+                        var originAirport = await _databaseService.GetAirportByIdAsync(route.OriginAirportId);
+                        var destinationAirport = await _databaseService.GetAirportByIdAsync(route.DestinationAirportId);
+
+                        // Crear objeto con toda la información
+                        var reservationWithFlight = new ReservationWithFlight
+                        {
+                            Reservation = reservation,
+                            Flight = flight,
+                            Route = route,
+                            OriginAirport = originAirport,
+                            DestinationAirport = destinationAirport
+                        };
+
+                        Reservations.Add(reservationWithFlight);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error al cargar detalles de reservación {reservation.Id}: {ex.Message}");
+                        // Continuar con la siguiente reservación
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al cargar reservaciones: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<bool> CreateReservationAsync(Reservation reservation)
+        {
+            try
+            {
+                IsBusy = true;
+                var createdReservation = await _databaseService.CreateReservationAsync(reservation);
+                
+                // Recargar para actualizar la lista
+                await LoadUserReservationsAsync(CurrentUser.Id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al crear reservación: {ex.Message}", "OK");
+                return false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<bool> CancelReservationAsync(int reservationId)
+        {
+            try
+            {
+                IsBusy = true;
+                
+                // Eliminar la reservación de la base de datos
+                var result = await _databaseService.DeleteReservationAsync(reservationId);
+                
+                if (result > 0)
+                {
+                    // Recargar lista de reservaciones
+                    await LoadUserReservationsAsync(CurrentUser.Id);
+                    return true;
+                }
+                
+                await Application.Current.MainPage.DisplayAlert("Error", "No se pudo eliminar la reservación", "OK");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al cancelar: {ex.Message}", "OK");
+                return false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<bool> CheckInAsync(int reservationId)
+        {
+            try
+            {
+                IsBusy = true;
+                var reservation = await _databaseService.GetReservationByIdAsync(reservationId);
+                if (reservation != null)
+                {
+                    reservation.Status = 2; // CheckedIn
+                    await _databaseService.UpdateReservationAsync(reservation);
+                    await LoadUserReservationsAsync(CurrentUser.Id);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error en check-in: {ex.Message}", "OK");
+                return false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+    }
+}

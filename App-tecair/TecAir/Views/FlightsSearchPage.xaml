@@ -71,11 +71,13 @@
         </Frame>
 
         <!-- Título -->
-        <Label Grid.Row="1"
+        <Label x:Name="AvailableFlightsLabel"
+               Grid.Row="1"
                Text="Vuelos Disponibles:"
                FontAttributes="Bold"
                FontSize="14"
-               TextColor="Black"/>
+               TextColor="Black"
+               IsVisible="False"/>
 
         <!-- Lista -->
         <CollectionView Grid.Row="2"
@@ -119,6 +121,36 @@
                                            TextColor="#666666"/>
 
                                 </VerticalStackLayout>
+
+                            </StackLayout>
+
+                            <!-- Ruta -->
+                            <StackLayout Orientation="Horizontal"
+                                         Spacing="10">
+
+                                <Label Text="Ruta:"
+                                       FontSize="11"
+                                       TextColor="#666666"/>
+
+                                <Label Text="{Binding RouteDisplay}"
+                                       FontSize="11"
+                                       TextColor="#007AFF"
+                                       FontAttributes="Bold"/>
+
+                            </StackLayout>
+
+                            <!-- Precio -->
+                            <StackLayout Orientation="Horizontal"
+                                         Spacing="10">
+
+                                <Label Text="Precio:"
+                                       FontSize="11"
+                                       TextColor="#666666"/>
+
+                                <Label Text="{Binding BasePrice, StringFormat='${0:F2}'}"
+                                       FontSize="11"
+                                       TextColor="#34C759"
+                                       FontAttributes="Bold"/>
 
                             </StackLayout>
 

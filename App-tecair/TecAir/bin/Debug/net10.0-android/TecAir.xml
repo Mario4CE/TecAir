@@ -24,6 +24,11 @@
             Modelo de Vuelo para la base de datos local SQLite
             </summary>
         </member>
+        <member name="T:TecAir.Models.FlightWithRoute">
+            <summary>
+            Clase auxiliar para mostrar vuelos con su información de ruta
+            </summary>
+        </member>
         <member name="T:TecAir.Models.Luggage">
             <summary>
             Modelo de Maleta/Equipaje para la base de datos local SQLite
@@ -37,6 +42,11 @@
         <member name="T:TecAir.Models.Reservation">
             <summary>
             Modelo de Reservación para la base de datos local SQLite
+            </summary>
+        </member>
+        <member name="T:TecAir.Models.ReservationWithFlight">
+            <summary>
+            Clase auxiliar para mostrar reservaciones con información completa del vuelo
             </summary>
         </member>
         <member name="T:TecAir.Models.Route">
@@ -76,7 +86,7 @@
         </member>
         <member name="M:TecAir.Services.DatabaseService.EnsureConnectionAsync">
             <summary>
-            Asegura que la conexión esté disponible
+            Asegura que la conexión esté disponible y sincronizada
             </summary>
         </member>
         <member name="M:TecAir.Services.DatabaseService.InitializeAsync">
@@ -102,6 +112,16 @@
         <member name="T:TecAir.ViewModels.PromotionViewModel">
             <summary>
             ViewModel para gestión de promociones
+            </summary>
+        </member>
+        <member name="T:TecAir.ViewModels.ReservationDetailViewModel">
+            <summary>
+            ViewModel para el detalle de una reservación
+            </summary>
+        </member>
+        <member name="M:TecAir.ViewModels.ReservationDetailViewModel.CalculateLuggageCost">
+            <summary>
+            Calcula el costo de maletas según las reglas del proyecto
             </summary>
         </member>
         <member name="T:TecAir.ViewModels.ReservationViewModel">

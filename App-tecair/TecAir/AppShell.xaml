@@ -18,6 +18,12 @@
         ContentTemplate="{DataTemplate views:RegisterPage}"
         Route="register" />
 
+    <!-- Rutas modales -->
+    <ShellContent
+        Title="Detalle de Reservación"
+        ContentTemplate="{DataTemplate views:ReservationDetailPage}"
+        Route="reservationdetail" />
+
     <TabBar>
         <!-- Inicio -->
         <ShellContent

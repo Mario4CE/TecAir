@@ -10,13 +10,13 @@ namespace TecAir.ViewModels
     public class FlightViewModel : BaseViewModel
     {
         private readonly DatabaseService _databaseService;
-        private ObservableCollection<Flight> _flights;
+        private ObservableCollection<FlightWithRoute> _flights;
         private ObservableCollection<Airport> _airports;
         private Flight _selectedFlight;
         private Airport _selectedOrigin;
         private Airport _selectedDestination;
 
-        public ObservableCollection<Flight> Flights
+        public ObservableCollection<FlightWithRoute> Flights
         {
             get => _flights;
             set => SetProperty(ref _flights, value);
@@ -50,14 +50,15 @@ namespace TecAir.ViewModels
         {
             Title = "Búsqueda de Vuelos";
             _databaseService = MauiProgram.DatabaseService;
-            Flights = new ObservableCollection<Flight>();
+            Flights = new ObservableCollection<FlightWithRoute>();
             Airports = new ObservableCollection<Airport>();
         }
 
         public async Task InitializeAsync()
         {
             await LoadAirportsAsync();
-            await LoadFlightsAsync();
+            // No cargar todos los vuelos inicialmente - mostrar lista vacía hasta buscar
+            Flights.Clear();
         }
 
         public async Task LoadAirportsAsync()
@@ -82,28 +83,6 @@ namespace TecAir.ViewModels
             }
         }
 
-        public async Task LoadFlightsAsync()
-        {
-            try
-            {
-                IsBusy = true;
-                var flights = await _databaseService.GetAllFlightsAsync();
-                Flights.Clear();
-                foreach (var flight in flights)
-                {
-                    Flights.Add(flight);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Error al cargar vuelos: {ex.Message}", "OK");
-            }
-            finally
-            {
-                IsBusy = false;
-            }
-        }
-
         public async Task SearchFlightsAsync()
         {
             try
@@ -112,7 +91,15 @@ namespace TecAir.ViewModels
 
                 if (SelectedOrigin == null || SelectedDestination == null)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Error", "Seleccione origen y destino", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Error", "Selecciona origen y destino", "OK");
+                    Flights.Clear();
+                    return;
+                }
+
+                if (SelectedOrigin.Id == SelectedDestination.Id)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "El origen y destino no pueden ser iguales", "OK");
+                    Flights.Clear();
                     return;
                 }
 
@@ -128,14 +115,23 @@ namespace TecAir.ViewModels
                 // Obtener vuelos para la ruta
                 var flights = await _databaseService.GetFlightsByRouteAsync(route.Id);
                 Flights.Clear();
+                
                 foreach (var flight in flights)
                 {
-                    Flights.Add(flight);
+                    var flightWithRoute = new FlightWithRoute
+                    {
+                        Flight = flight,
+                        Route = route,
+                        OriginAirport = SelectedOrigin,
+                        DestinationAirport = SelectedDestination
+                    };
+                    Flights.Add(flightWithRoute);
                 }
             }
             catch (Exception ex)
             {
                 await Application.Current.MainPage.DisplayAlert("Error", $"Error en búsqueda: {ex.Message}", "OK");
+                Flights.Clear();
             }
             finally
             {

@@ -3,20 +3,23 @@
   "WorkspaceRootPath": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\services\\databaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\services\\databaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\registerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\registerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\viewmodels\\reservationviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\viewmodels\\reservationviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\reservationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\reservationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|c:\\users\\morer\\onedrive\\documentos\\github\\tecair\\app-tecair\\tecair\\views\\reservationdetailpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B84415BC-A69C-A145-3559-8315299D4E84}|TecAir\\TecAir.csproj|solutionrelative:tecair\\views\\reservationdetailpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\morer\\.copilot\\plans\\plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,58 +29,70 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AppShell.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\AppShell.xaml.cs",
-              "RelativeDocumentMoniker": "TecAir\\AppShell.xaml.cs",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\AppShell.xaml.cs",
-              "RelativeToolTip": "TecAir\\AppShell.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-25T00:40:23.52Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "LoginPage.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml.cs",
-              "RelativeDocumentMoniker": "TecAir\\Views\\LoginPage.xaml.cs",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml.cs",
-              "RelativeToolTip": "TecAir\\Views\\LoginPage.xaml.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAA1wAAAAAAAAAAAAAAAAA==",
+              "Title": "ReservationsPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml.cs",
+              "RelativeDocumentMoniker": "TecAir\\Views\\ReservationsPage.xaml.cs",
+              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationsPage.xaml.cs",
+              "RelativeToolTip": "TecAir\\Views\\ReservationsPage.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-25T00:40:14.049Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "LoginPage.xaml",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml",
-              "RelativeDocumentMoniker": "TecAir\\Views\\LoginPage.xaml",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\LoginPage.xaml",
-              "RelativeToolTip": "TecAir\\Views\\LoginPage.xaml",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-25T00:39:35.886Z",
+              "WhenOpened": "2026-05-26T05:54:48.859Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "RegisterPage.xaml",
-              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\RegisterPage.xaml",
-              "RelativeDocumentMoniker": "TecAir\\Views\\RegisterPage.xaml",
-              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\RegisterPage.xaml",
-              "RelativeToolTip": "TecAir\\Views\\RegisterPage.xaml",
-              "ViewState": "AgIAAGkAAAAAAAAAAAAgwIAAAAAbAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-25T00:38:01.668Z",
+              "Title": "ReservationViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\ViewModels\\ReservationViewModel.cs",
+              "RelativeDocumentMoniker": "TecAir\\ViewModels\\ReservationViewModel.cs",
+              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\ViewModels\\ReservationViewModel.cs",
+              "RelativeToolTip": "TecAir\\ViewModels\\ReservationViewModel.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-26T05:53:59.968Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DatabaseService.cs",
+              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Services\\DatabaseService.cs",
+              "RelativeDocumentMoniker": "TecAir\\Services\\DatabaseService.cs",
+              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Services\\DatabaseService.cs",
+              "RelativeToolTip": "TecAir\\Services\\DatabaseService.cs",
+              "ViewState": "AgIAAGcBAAAAAAAAAAAhwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-26T05:52:26.584Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md [Versi\u00F3n preliminar]",
+              "DocumentMoniker": "C:\\Users\\morer\\.copilot\\plans\\plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\.copilot\\plans\\plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md",
+              "ToolTip": "C:\\Users\\morer\\.copilot\\plans\\plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md [Versi\u00F3n preliminar]",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\.copilot\\plans\\plan-arreglar-problema-de-cancelacin-de-reservaciones-en-databaseservice.md [Versi\u00F3n preliminar]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-26T05:52:18.499Z",
+              "EditorCaption": " [Versi\u00F3n preliminar]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ReservationDetailPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationDetailPage.xaml.cs",
+              "RelativeDocumentMoniker": "TecAir\\Views\\ReservationDetailPage.xaml.cs",
+              "ToolTip": "C:\\Users\\morer\\OneDrive\\Documentos\\GitHub\\TecAir\\App-tecair\\TecAir\\Views\\ReservationDetailPage.xaml.cs",
+              "RelativeToolTip": "TecAir\\Views\\ReservationDetailPage.xaml.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAowJoAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-25T01:36:49.868Z",
               "EditorCaption": ""
             }
           ]
