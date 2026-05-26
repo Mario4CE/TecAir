@@ -163,7 +163,7 @@
                 const data = await apiGet('reservaciones');
                 // Filtra las reservaciones del usuario actual
                 const reservaciones = (data.reservaciones ?? [])
-                    .filter(r => r.id_usuario === usuario.id_usuario);
+                    .filter(r => Number(r.id_usuario) === Number(usuario.id_usuario));
 
                 const activasDiv = document.getElementById('listadoActivas');
 
