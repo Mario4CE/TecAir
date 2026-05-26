@@ -13,6 +13,8 @@ public sealed class Usuario
     public string Universidad { get; set; } = string.Empty;
     public string Carnet { get; set; } = string.Empty;
     public int Millas { get; set; }
+    public bool EsAdmin { get; set; }
+
 
     public List<Reservacion> Reservaciones { get; set; } = [];
     public List<CheckIn> CheckIns { get; set; } = [];
