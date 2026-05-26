@@ -12,7 +12,7 @@ import { MOCK_USUARIO_ADMIN } from "../config/mockData";
 
 // Modo mock: true mientras el API no esté lista
 // Cuando el backend esté listo, cambiar a false
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Color principal — igual que en Dashboard.jsx
 const COLOR_PRINCIPAL = "#6d4fc2";
@@ -103,12 +103,19 @@ function FormLogin({ onLoginSuccess }) {
         }
       } else {
         //  Producción: llamada real al API 
-        // Descomentar cuando el backend esté listo
-        const data = await apiFetch(ENDPOINTS.auth.login, "POST", {
-          correo: form.correo,
-          contrasena: form.contrasena,
-        });
-        onLoginSuccess(data.usuario, data.token);
+        const data = await apiFetch(ENDPOINTS.usuarios.list);
+        const usuarios = data.usuarios ?? [];
+        const usuario = usuarios.find(u => u.correo === form.correo);
+
+        if (!usuario) {
+          setError("Usuario no encontrado.");
+          return;
+        }
+        if (!usuario.es_admin) {
+          setError("No tienes permisos para acceder al portal de administración.");
+          return;
+        }
+        onLoginSuccess(usuario, "token-" + usuario.id_usuario);
       }
     } catch (err) {
       // Si el API devuelve un error, lo mostramos al usuario

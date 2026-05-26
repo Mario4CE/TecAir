@@ -1,11 +1,12 @@
 /**
- * Auth.js - Funciones de autenticación para TECAir Cliente
- * NOTA: Sistema en fase de prueba - Sin autenticación real
- * Cuando la BD y API estén listas, descomentar las funciones y agregar validaciones
+ * auth.js — Funciones de autenticación para TECAir Cliente
+ *
+ * Maneja login, registro y sesión del usuario.
+ * Conectado al API real en http://localhost:5000/api
  */
 
 /**
- * Guardar usuario actual en localStorage
+ * Guarda el usuario actual en localStorage
  * @param {object} usuario - Datos del usuario
  */
 function guardarUsuarioActual(usuario) {
@@ -13,8 +14,8 @@ function guardarUsuarioActual(usuario) {
 }
 
 /**
- * Obtener usuario actual desde localStorage
- * @returns {object} Datos del usuario actual o null
+ * Obtiene el usuario actual desde localStorage
+ * @returns {object|null} Datos del usuario o null
  */
 function obtenerUsuarioActual() {
   const usuarioJson = localStorage.getItem('usuarioActual');
@@ -22,71 +23,43 @@ function obtenerUsuarioActual() {
 }
 
 /**
- * Verificar si el usuario está autenticado
- * @returns {boolean} true si está autenticado
+ * Verifica si el usuario está autenticado
+ * @returns {boolean}
  */
 function estaAutenticado() {
-  const usuario = obtenerUsuarioActual();
-  return !!usuario;
+  return !!obtenerUsuarioActual();
 }
 
 /**
- * Cerrar sesión del usuario
+ * Cierra la sesión del usuario
  */
 function salir() {
-  // Limpiar localStorage
   localStorage.removeItem('usuarioActual');
   sessionStorage.clear();
-
-  // Redirigir a página de login
   window.location.href = 'index.html';
 }
 
 /**
- * Cambiar contraseña del usuario
- * NOTA: Cuando la API esté lista, descomentar y hacer la petición
+ * Inicia sesión buscando el usuario por correo en el API
+ * @param {string} correo
+ * @returns {Promise<object>} Usuario autenticado
  */
-async function cambiarPassword(passwordActual, passwordNueva) {
+async function iniciarSesion(correo) {
   try {
-    if (!passwordActual || !passwordNueva) {
-      throw new Error('Por favor ingresa ambas contraseñas');
+    // Trae todos los usuarios y busca por correo
+    const data = await apiGet('usuarios');
+    const usuarios = data.usuarios ?? [];
+    const usuario = usuarios.find(u => u.correo === correo);
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado. Verifica tu correo.');
     }
 
-    // TODO: Conectar con API cuando esté lista
-    // const resultado = await apiPost('usuarios/cambiar-password', {
-    //   passwordActual,
-    //   passwordNueva
-    // });
-
-    alert('Contraseña cambiarú cuando la BD esté conectada');
-    return true;
-  } catch (error) {
-    console.error('Error al cambiar contraseña:', error);
-    throw error;
-  }
-}
-
-/**
- * Iniciar sesión del usuario
- * NOTA: Función simplificada para fase de prueba
- * Cuando la API esté lista, agregar validación real
- */
-async function iniciarSesion(nombre, email = null) {
-  try {
-    if (!nombre || nombre.trim() === '') {
-      throw new Error('Por favor ingresa tu nombre');
+    if (usuario.es_admin) {
+      throw new Error('Este portal es solo para clientes. Use el portal de administración.');
     }
 
-    // Por ahora, solo guardamos en localStorage
-    // Cuando BD esté lista, aquí hacemos la petición a la API
-    const usuario = {
-      nombreCompleto: nombre,
-      email: email || `${nombre.toLowerCase().replace(' ', '.')}@tecair.cr`,
-      telefono: '',
-      esEstudiante: false,
-      millas: 0
-    };
-
+    // Guarda el usuario en localStorage
     guardarUsuarioActual(usuario);
     return usuario;
   } catch (error) {
@@ -96,76 +69,35 @@ async function iniciarSesion(nombre, email = null) {
 }
 
 /**
- * Registrar un nuevo usuario
- * NOTA: Función simplificada para fase de prueba
- * Cuando la API esté lista, agregar validaciones y guardado en BD
+ * Registra un nuevo usuario en el API
+ * @param {object} datosUsuario
+ * @returns {Promise<object>} Usuario creado
  */
 async function registrarUsuario(datosUsuario) {
   try {
-    // Validar datos requeridos
-    if (!datosUsuario.nombreCompleto || !datosUsuario.email) {
-      throw new Error('Por favor completa los campos requeridos');
+    if (!datosUsuario.correo || !datosUsuario.nombre1) {
+      throw new Error('Por favor completa los campos requeridos.');
     }
 
-    // Por ahora, solo guardamos en localStorage
-    // Cuando BD esté lista, aquí hacemos la petición a la API
-    const usuario = {
-      nombreCompleto: datosUsuario.nombreCompleto,
-      email: datosUsuario.email,
-      telefono: datosUsuario.telefono || '',
-      esEstudiante: datosUsuario.esEstudiante === 'on' || datosUsuario.esEstudiante === true,
-      universidad: datosUsuario.universidad || '',
-      carnet: datosUsuario.carnet || '',
-      millas: 0
-    };
+    // Llama al endpoint POST /usuarios
+    const resultado = await apiPost('usuarios', {
+      nombre1:       datosUsuario.nombre1,
+      nombre2:       datosUsuario.nombre2 || '',
+      apellido1:     datosUsuario.apellido1,
+      apellido2:     datosUsuario.apellido2 || '',
+      telefono:      datosUsuario.telefono,
+      correo:        datosUsuario.correo,
+      es_estudiante: datosUsuario.esEstudiante === 'on' || datosUsuario.esEstudiante === true,
+      universidad:   datosUsuario.universidad || '',
+      carnet:        datosUsuario.carnet || '',
+      millas:        0,
+    });
 
+    const usuario = resultado.usuario ?? resultado;
     guardarUsuarioActual(usuario);
     return usuario;
   } catch (error) {
     console.error('Error al registrar usuario:', error);
-    throw error;
-  }
-}
-
-/**
- * Actualizar información del usuario
- * NOTA: Cuando la API esté lista, guardar en BD
- */
-async function actualizarDatosUsuario(datosActualizados) {
-  try {
-    // Obtener usuario actual
-    const usuarioActual = obtenerUsuarioActual();
-    
-    // Actualizar en memoria
-    const usuarioActualizado = { ...usuarioActual, ...datosActualizados };
-    guardarUsuarioActual(usuarioActualizado);
-
-    // TODO: Cuando BD esté lista
-    // const resultado = await apiPut('usuarios/perfil', datosActualizados);
-
-    return usuarioActualizado;
-  } catch (error) {
-    console.error('Error al actualizar usuario:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtener detalles completos del usuario
- * NOTA: Por ahora retorna datos locales
- * Cuando la API esté lista, hacer petición al servidor
- */
-async function obtenerDetallesUsuario() {
-  try {
-    const usuario = obtenerUsuarioActual();
-    
-    // TODO: Cuando BD esté lista
-    // const resultado = await apiGet('usuarios/detalles');
-    // return resultado.usuario;
-
-    return usuario;
-  } catch (error) {
-    console.error('Error al obtener detalles:', error);
     throw error;
   }
 }

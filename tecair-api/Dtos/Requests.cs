@@ -18,7 +18,8 @@ public sealed record UsuarioRequest(
     bool? EsEstudiante,
     string? Universidad,
     string? Carnet,
-    int? Millas);
+    int? Millas,
+    bool? EsAdmin);
 
 /*
 Descripción: Solicitud para registrar un aeropuerto.
