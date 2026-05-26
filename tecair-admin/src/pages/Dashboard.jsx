@@ -2,18 +2,17 @@
 //
 // Este archivo contiene toda la pantalla del admin:
 //   - Navbar arriba con el nombre y navegación
-//   - Tarjetas de resumen del día
+//   - Tarjetas de resumen del día con datos reales del API
 //   - Tabla de vuelos con acciones
 
-import { useState } from "react";
-import { MOCK_STATS, MOCK_VUELOS } from "../config/mockData";
+import { useState, useEffect } from "react";
+import { ENDPOINTS, apiFetch } from "../config/api";
 import SeccionVuelos from "./vuelos/SeccionVuelos";
 import SeccionCheckin from "./checkin/SeccionCheckin";
 import SeccionMaletas from "./maletas/SeccionMaletas";
 import SeccionPromociones from "./promociones/SeccionPromociones";
 import SeccionUsuarios from "./usuarios/SeccionUsuarios";
 
-// Colores y configuración visual
 const COLOR_PRINCIPAL = "#6d4fc2";
 const COLOR_FONDO = "#f5f3ff";
 
@@ -31,15 +30,13 @@ const NAV_ITEMS = [
 // Componente principal — lo que exportamos y usa App.jsx
 // Recibe: usuario (datos del admin) y onLogout (función para cerrar sesión)
 export default function Dashboard({ usuario, onLogout }) {
-
   // useState guarda qué sección está activa en el menú
-  // Por defecto arranca en "inicio"
   const [seccionActiva, setSeccionActiva] = useState("inicio");
 
   return (
     <div style={{ minHeight: "100vh", background: COLOR_FONDO }}>
 
-      {/* ── Navbar superior ── */}
+      {/* Navbar superior */}
       <nav style={{ background: COLOR_PRINCIPAL }}>
 
         {/* Fila 1: nombre de la app y datos del usuario */}
@@ -47,12 +44,10 @@ export default function Dashboard({ usuario, onLogout }) {
           className="d-flex align-items-center justify-content-between px-4 py-2"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}
         >
-          {/* Nombre de la aerolínea */}
           <span className="fw-bold text-white" style={{ fontSize: 16 }}>
             TECAir — Portal de Administración
           </span>
 
-          {/* Avatar y nombre del usuario logueado */}
           <div className="d-flex align-items-center gap-2">
             {/* Círculo con la inicial del nombre */}
             <div
@@ -63,13 +58,11 @@ export default function Dashboard({ usuario, onLogout }) {
                 color: "#fff", fontSize: 11, fontWeight: 600,
               }}
             >
-              {/* Toma la primera letra del nombre del usuario */}
               {usuario?.nombre1?.[0] ?? "A"}
             </div>
             <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 12 }}>
               {usuario?.nombre1} {usuario?.apellido1}
             </span>
-            {/* Botón de cerrar sesión */}
             <button
               className="btn btn-sm ms-2 text-white"
               style={{
@@ -85,7 +78,6 @@ export default function Dashboard({ usuario, onLogout }) {
 
         {/* Fila 2: links de navegación */}
         <div className="d-flex align-items-center gap-1 px-4 py-1">
-          {/* Recorremos la lista NAV_ITEMS y creamos un botón por cada uno */}
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
@@ -111,8 +103,7 @@ export default function Dashboard({ usuario, onLogout }) {
         </div>
       </nav>
 
-      {/* ── Contenido principal ── */}
-      {/* Según la sección activa, mostramos un componente diferente */}
+      {/* Contenido principal */}
       <main className="p-4">
         <ContenidoSeccion
           seccion={seccionActiva}
@@ -124,9 +115,7 @@ export default function Dashboard({ usuario, onLogout }) {
   );
 }
 
-// ContenidoSeccion — decide qué pantalla mostrar
-// Es como un "router" simple: según la sección activa
-// muestra el componente correspondiente
+// ContenidoSeccion — decide qué pantalla mostrar según la sección activa
 function ContenidoSeccion({ seccion, usuario, onNavegar }) {
   switch (seccion) {
     case "inicio":
@@ -146,20 +135,63 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
   }
 }
 
-// SeccionInicio — pantalla de inicio con tarjetas y tabla
+// SeccionInicio — pantalla de inicio con tarjetas y tabla de vuelos
+// Carga los datos reales del API al montar el componente
 function SeccionInicio({ usuario, onNavegar }) {
-  // Datos mockeados — reemplazar por llamada a la API cuando esté lista
-  const stats = MOCK_STATS;
-  const vuelos = MOCK_VUELOS;
+  // Estado para las estadísticas del dashboard
+  const [stats, setStats] = useState({
+    vuelos_hoy:          0,
+    pasajeros_hoy:       0,
+    checkins_pendientes: 0,
+    vuelos_cerrados:     0,
+  });
+
+  // Lista de vuelos para la tabla
+  const [vuelos, setVuelos] = useState([]);
+
+  // Controla el spinner de carga
+  const [cargando, setCargando] = useState(true);
+
+  // Se ejecuta una vez al cargar el componente
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        // Carga vuelos y checkins en paralelo
+        const [dataVuelos, dataCheckins] = await Promise.all([
+          apiFetch(ENDPOINTS.vuelos.list),
+          apiFetch(ENDPOINTS.checkins.list),
+        ]);
+
+        const listaVuelos   = dataVuelos.vuelos     ?? [];
+        const listaCheckins = dataCheckins.checkins ?? [];
+
+        setVuelos(listaVuelos);
+
+        // Calcula las estadísticas a partir de los datos reales
+        setStats({
+          vuelos_hoy:          listaVuelos.length,
+          pasajeros_hoy:       listaCheckins.length,
+          checkins_pendientes: listaCheckins.length,
+          vuelos_cerrados:     listaVuelos.filter((v) => v.estado === "cerrado").length,
+        });
+      } catch (err) {
+        console.log("Error cargando datos del inicio:", err);
+      } finally {
+        setCargando(false);
+      }
+    };
+    cargarDatos();
+  }, []);
 
   // Configuración visual de cada estado posible de un vuelo
   const estadoConfig = {
-    abierto:   { color: "#198754", bg: "#d1e7dd", label: "Abierto"   },
-    pendiente: { color: "#856404", bg: "#fff3cd", label: "Pendiente" },
-    cerrado:   { color: "#495057", bg: "#e2e3e5", label: "Cerrado"   },
+    abierto:    { color: "#198754", bg: "#d1e7dd", label: "Abierto"    },
+    programado: { color: "#856404", bg: "#fff3cd", label: "Programado" },
+    pendiente:  { color: "#856404", bg: "#fff3cd", label: "Pendiente"  },
+    cerrado:    { color: "#495057", bg: "#e2e3e5", label: "Cerrado"    },
   };
 
-  // Tarjetas de resumen — cada objeto es una tarjeta
+  // Definición de las tarjetas de resumen
   const tarjetas = [
     {
       label: "Vuelos hoy",
@@ -191,15 +223,23 @@ function SeccionInicio({ usuario, onNavegar }) {
     },
   ];
 
+  if (cargando) {
+    return (
+      <div className="d-flex align-items-center justify-content-center py-5">
+        <div className="spinner-border text-primary me-2"></div>
+        <span className="text-muted">Cargando...</span>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Saludo con nombre del usuario y fecha actual */}
       <div className="mb-4">
         <h2 className="fw-bold mb-0" style={{ color: "#3c3489" }}>
-          Bienvenido, {usuario?.nombre1} 
+          Bienvenido, {usuario?.nombre1}
         </h2>
         <p className="text-muted small mb-0">
-          {/* toLocaleDateString formatea la fecha según el idioma */}
           {new Date().toLocaleDateString("es-CR", {
             weekday: "long", year: "numeric",
             month: "long",   day: "numeric",
@@ -207,16 +247,13 @@ function SeccionInicio({ usuario, onNavegar }) {
         </p>
       </div>
 
-      {/* ── Tarjetas de resumen ── */}
-      {/* row y col-* son clases de Bootstrap para hacer columnas */}
+      {/* Tarjetas de resumen con datos reales */}
       <div className="row g-3 mb-4">
-        {/* Recorremos el arreglo de tarjetas y renderizamos cada una */}
         {tarjetas.map((card) => (
           <div key={card.label} className="col-6 col-md-3">
             <button
               className="card border-0 shadow-sm rounded-4 w-100 text-start h-100"
               style={{ cursor: "pointer", background: "#fff" }}
-              // Al hacer clic navega a la sección correspondiente
               onClick={() => onNavegar(card.seccion)}
             >
               <div className="card-body">
@@ -230,7 +267,7 @@ function SeccionInicio({ usuario, onNavegar }) {
         ))}
       </div>
 
-      {/* ── Tabla de vuelos del día ── */}
+      {/* Tabla de vuelos con datos reales */}
       <div className="card border-0 shadow-sm rounded-4">
         <div className="card-body">
           <div className="d-flex align-items-center justify-content-between mb-3">
@@ -246,7 +283,6 @@ function SeccionInicio({ usuario, onNavegar }) {
             </button>
           </div>
 
-          {/* table-responsive agrega scroll horizontal en pantallas pequeñas */}
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead>
@@ -261,102 +297,66 @@ function SeccionInicio({ usuario, onNavegar }) {
                 </tr>
               </thead>
               <tbody>
-                {/* Recorremos los vuelos mockeados y creamos una fila por cada uno */}
-                {vuelos.map((v) => {
-                  // Buscamos la configuración de color según el estado del vuelo
-                  const cfg = estadoConfig[v.estado] ?? estadoConfig.pendiente;
-                  return (
-                    <tr key={v.id_vuelo}>
-                      <td className="fw-semibold">#{v.id_vuelo}</td>
-                      <td>{v.ruta}</td>
-                      <td>
-                        {/* Formateamos la fecha para mostrar solo la hora */}
-                        {new Date(v.fecha_salida).toLocaleTimeString("es-CR", {
-                          hour: "2-digit", minute: "2-digit",
-                        })}
-                      </td>
-                      <td>{v.puerta}</td>
-                      <td><code className="small">{v.matricula}</code></td>
-                      <td>
-                        {/* Badge de estado con color dinámico */}
-                        <span
-                          className="badge rounded-pill px-2 py-1"
-                          style={{
-                            background: cfg.bg,
-                            color: cfg.color,
-                            fontSize: 12,
-                          }}
-                        >
-                          {cfg.label}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex gap-1">
-                          {/* Botón de check-in siempre visible */}
-                          <button
-                            className="btn btn-sm rounded-2"
-                            style={{
-                              background: "#ede9fa",
-                              color: COLOR_PRINCIPAL,
-                              fontSize: 12,
-                            }}
-                            onClick={() => onNavegar("checkin")}
+                {vuelos.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center text-muted py-4 small">
+                      No hay vuelos registrados.
+                    </td>
+                  </tr>
+                ) : (
+                  vuelos.map((v) => {
+                    const cfg = estadoConfig[v.estado] ?? estadoConfig.programado;
+                    return (
+                      <tr key={v.id_vuelo}>
+                        <td className="fw-semibold">#{v.id_vuelo}</td>
+                        <td>{v.origen} → {v.destino}</td>
+                        <td>{v.hora_salida}</td>
+                        <td>{v.puerta}</td>
+                        <td><code className="small">{v.matricula}</code></td>
+                        <td>
+                          <span
+                            className="badge rounded-pill px-2 py-1"
+                            style={{ background: cfg.bg, color: cfg.color, fontSize: 12 }}
                           >
-                            Check-in
-                          </button>
-
-                          {/* Botón Abrir: solo si el vuelo está pendiente */}
-                          {v.estado === "pendiente" && (
+                            {cfg.label}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="d-flex gap-1">
                             <button
                               className="btn btn-sm rounded-2"
-                              style={{
-                                background: "#d1e7dd",
-                                color: "#198754",
-                                fontSize: 12,
-                              }}
+                              style={{ background: "#ede9fa", color: COLOR_PRINCIPAL, fontSize: 12 }}
+                              onClick={() => onNavegar("checkin")}
                             >
-                              Abrir
+                              Check-in
                             </button>
-                          )}
-
-                          {/* Botón Cerrar: solo si el vuelo está abierto */}
-                          {v.estado === "abierto" && (
-                            <button
-                              className="btn btn-sm rounded-2"
-                              style={{
-                                background: "#f8d7da",
-                                color: "#842029",
-                                fontSize: 12,
-                              }}
-                            >
-                              Cerrar
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            {(v.estado === "pendiente" || v.estado === "programado") && (
+                              <button
+                                className="btn btn-sm rounded-2"
+                                style={{ background: "#d1e7dd", color: "#198754", fontSize: 12 }}
+                              >
+                                Abrir
+                              </button>
+                            )}
+                            {v.estado === "abierto" && (
+                              <button
+                                className="btn btn-sm rounded-2"
+                                style={{ background: "#f8d7da", color: "#842029", fontSize: 12 }}
+                              >
+                                Cerrar
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
     </>
-  );
-}
-
-// SeccionPlaceholder — pantalla temporal para secciones
-// que todavía no están desarrolladas
-function SeccionPlaceholder({ titulo }) {
-  return (
-    <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
-      <h4 className="fw-bold mb-2" style={{ color: "#3c3489" }}>
-        {titulo}
-      </h4>
-      <p className="text-muted">
-        Esta sección está en desarrollo. Pronto estará disponible.
-      </p>
-    </div>
   );
 }

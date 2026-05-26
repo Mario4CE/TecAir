@@ -1,111 +1,109 @@
--- ─────────────────────────────────────────────────────────
--- TECAir — Script de creación de base de datos
--- PostgreSQL
--- ─────────────────────────────────────────────────────────
+-- =============================================================
+-- TECAir — Script de datos iniciales (Initial State)
+-- PostgreSQL 18
+--
+-- Instrucciones:
+--   1. Asegurarse de haber corrido primero el 01_create.sql
+--   2. Detener el API antes de correr este script para evitar
+--      que el seeder inserte datos duplicados
+--   3. Abrir el Query Tool en la base "tecair"
+--   4. Pegar este script y presionar F5
+--   5. Arrancar el API nuevamente con: dotnet run
+-- =============================================================
 
--- ── Usuario ──
-CREATE TABLE Usuario (
-    id_usuario      SERIAL PRIMARY KEY,
-    nombre1         VARCHAR(50)  NOT NULL,
-    nombre2         VARCHAR(50),
-    apellido1       VARCHAR(50)  NOT NULL,
-    apellido2       VARCHAR(50),
-    telefono        VARCHAR(20)  NOT NULL,
-    correo          VARCHAR(100) NOT NULL UNIQUE,
-    -- La contraseña se guarda como hash, nunca en texto plano
-    -- En C# usar BCrypt.Net para hashear antes de guardar
-    contrasena      VARCHAR(255) NOT NULL,
-    es_estudiante   BOOLEAN      NOT NULL DEFAULT FALSE,
-    -- Solo aplican si es_estudiante = true
-    universidad     VARCHAR(100),
-    carnet          VARCHAR(50),
-    -- true = funcionario del aeropuerto, false = cliente normal
-    es_admin        BOOLEAN      NOT NULL DEFAULT FALSE
-);
+-- Limpia todas las tablas en orden correcto (respetando foreign keys)
+TRUNCATE TABLE Maleta      CASCADE;
+TRUNCATE TABLE Checkin     CASCADE;
+TRUNCATE TABLE Pago        CASCADE;
+TRUNCATE TABLE Reservacion CASCADE;
+TRUNCATE TABLE Promocion   CASCADE;
+TRUNCATE TABLE Escala      CASCADE;
+TRUNCATE TABLE Vuelo       CASCADE;
+TRUNCATE TABLE Ruta        CASCADE;
+TRUNCATE TABLE Aeropuerto  CASCADE;
+TRUNCATE TABLE Avion       CASCADE;
+TRUNCATE TABLE Usuario     CASCADE;
 
--- ── Avion ──
-CREATE TABLE Avion (
-    matricula   VARCHAR(20) PRIMARY KEY,
-    capacidad   INT         NOT NULL
-);
+-- Reinicia los contadores de IDs para que empiecen desde 1
+ALTER SEQUENCE usuario_id_usuario_seq     RESTART WITH 1;
+ALTER SEQUENCE ruta_id_ruta_seq           RESTART WITH 1;
+ALTER SEQUENCE aeropuerto_id_aeropuerto_seq RESTART WITH 1;
+ALTER SEQUENCE vuelo_id_vuelo_seq         RESTART WITH 1;
+ALTER SEQUENCE reservacion_id_reservacion_seq RESTART WITH 1;
+ALTER SEQUENCE pago_id_pago_seq           RESTART WITH 1;
+ALTER SEQUENCE checkin_id_checkin_seq     RESTART WITH 1;
+ALTER SEQUENCE promocion_id_promocion_seq RESTART WITH 1;
 
--- ── Ruta ──
-CREATE TABLE Ruta (
-    id_ruta     SERIAL PRIMARY KEY
-);
+-- Usuarios de prueba
+-- es_estudiante = true  → cliente universitario con programa de millas
+-- es_estudiante = false → cliente normal
+INSERT INTO Usuario (nombre1, nombre2, apellido1, apellido2, telefono, correo, es_estudiante, universidad, carnet, millas)
+VALUES
+    ('Admin',  '',     'TECAir',   '',      '2222-0000', 'admin@tecair.com',  FALSE, '', '', 0),
+    ('María',  'José', 'González', 'Pérez', '8888-1111', 'maria@correo.com',  TRUE,  'Instituto Tecnológico de Costa Rica', '2024001', 100),
+    ('Luis',   '',     'Pérez',    'Mora',  '8888-2222', 'luis@correo.com',   FALSE, '', '', 0);
 
--- ── Aeropuerto ──
-CREATE TABLE Aeropuerto (
-    id_aeropuerto   SERIAL PRIMARY KEY,
-    nombre          VARCHAR(100) NOT NULL,
-    ubicacion       VARCHAR(100) NOT NULL
-);
+-- Aviones de prueba
+INSERT INTO Avion (matricula, capacidad)
+VALUES
+    ('TI-TEC1', 120),
+    ('TI-TEC2', 180);
 
--- ── Escala ──
--- Guarda cada aeropuerto de una ruta con su orden
--- tipo puede ser: 'origen', 'escala', 'destino'
-CREATE TABLE Escala (
-    id_ruta         INT         NOT NULL REFERENCES Ruta(id_ruta),
-    orden           INT         NOT NULL,
-    id_aeropuerto   INT         NOT NULL REFERENCES Aeropuerto(id_aeropuerto),
-    tipo            VARCHAR(20) NOT NULL,
-    PRIMARY KEY (id_ruta, orden)
-);
+-- Aeropuertos de prueba
+INSERT INTO Aeropuerto (nombre, ubicacion)
+VALUES
+    ('SJO - Juan Santamaría', 'Alajuela, Costa Rica'),
+    ('LIR - Guanacaste',      'Liberia, Costa Rica'),
+    ('XQP - Quepos',          'Puntarenas, Costa Rica'),
+    ('GLF - Golfito',         'Puntarenas, Costa Rica');
 
--- ── Vuelo ──
--- id_ruta agregado para saber qué ruta sigue el vuelo
-CREATE TABLE Vuelo (
-    id_vuelo        SERIAL PRIMARY KEY,
-    fecha_salida    TIMESTAMP   NOT NULL,
-    puerta          VARCHAR(10) NOT NULL,
-    -- estado puede ser: 'pendiente', 'abierto', 'cerrado'
-    estado          VARCHAR(20) NOT NULL DEFAULT 'pendiente',
-    matricula       VARCHAR(20) NOT NULL REFERENCES Avion(matricula),
-    id_ruta         INT         NOT NULL REFERENCES Ruta(id_ruta)
-);
+-- Rutas de prueba
+-- Ruta 1: SJO → LIR (vuelo directo)
+-- Ruta 2: SJO → XQP → GLF (con escala en Quepos)
+INSERT INTO Ruta DEFAULT VALUES;
+INSERT INTO Ruta DEFAULT VALUES;
 
--- ── Reservacion ──
-CREATE TABLE Reservacion (
-    id_reservacion      SERIAL PRIMARY KEY,
-    -- estado puede ser: 'pendiente', 'confirmada', 'cancelada'
-    estado              VARCHAR(20)  NOT NULL DEFAULT 'pendiente',
-    fecha_reservacion   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    id_usuario          INT          NOT NULL REFERENCES Usuario(id_usuario),
-    id_vuelo            INT          NOT NULL REFERENCES Vuelo(id_vuelo)
-);
+-- Escalas de las rutas
+INSERT INTO Escala (id_ruta, orden, id_aeropuerto, tipo)
+VALUES
+    (1, 1, 1, 'origen'),
+    (1, 2, 2, 'destino'),
+    (2, 1, 1, 'origen'),
+    (2, 2, 3, 'escala'),
+    (2, 3, 4, 'destino');
 
--- ── Pago ──
-CREATE TABLE Pago (
-    id_pago         SERIAL PRIMARY KEY,
-    monto           DECIMAL(10,2)   NOT NULL,
-    -- metodo puede ser: 'tarjeta', 'efectivo', etc.
-    metodo          VARCHAR(50)     NOT NULL,
-    id_reservacion  INT             NOT NULL REFERENCES Reservacion(id_reservacion)
-);
+-- Vuelos de prueba
+INSERT INTO Vuelo (fecha_salida, hora_salida, puerta, estado, matricula, id_ruta, precio)
+VALUES
+    ('2026-06-01', '08:00:00', 'A3', 'programado', 'TI-TEC1', 1, 105.00),
+    ('2026-06-02', '14:30:00', 'B2', 'programado', 'TI-TEC2', 2, 160.00);
 
--- ── Check-in ──
-CREATE TABLE Checkin (
-    id_checkin  SERIAL PRIMARY KEY,
-    asiento     VARCHAR(10) NOT NULL,
-    id_usuario  INT         NOT NULL REFERENCES Usuario(id_usuario),
-    id_vuelo    INT         NOT NULL REFERENCES Vuelo(id_vuelo)
-);
+-- Reservaciones de prueba
+INSERT INTO Reservacion (estado, id_usuario, id_vuelo)
+VALUES
+    ('pendiente_pago', 2, 1),
+    ('pendiente_pago', 3, 1);
 
--- ── Maleta ──
-CREATE TABLE Maleta (
-    num_maleta  VARCHAR(50)     PRIMARY KEY,
-    peso        DECIMAL(5,2)    NOT NULL,
-    color       VARCHAR(30)     NOT NULL,
-    id_checkin  INT             NOT NULL REFERENCES Checkin(id_checkin)
-);
+-- Pagos de prueba
+INSERT INTO Pago (monto, metodo, id_reservacion)
+VALUES
+    (105.00, 'tarjeta', 1),
+    (105.00, 'tarjeta', 2);
 
--- ── Promocion ──
-CREATE TABLE Promocion (
-    id_promocion    SERIAL PRIMARY KEY,
-    precio          DECIMAL(10,2)   NOT NULL,
-    fecha_inicio    DATE            NOT NULL,
-    fecha_fin       DATE            NOT NULL,
-    -- imagen guarda la ruta o URL de la imagen (opcional)
-    imagen          VARCHAR(255),
-    id_ruta         INT             NOT NULL REFERENCES Ruta(id_ruta)
-);
+-- Check-ins de prueba
+INSERT INTO Checkin (asiento, id_usuario, id_vuelo)
+VALUES
+    ('12A', 2, 1),
+    ('7C',  3, 1);
+
+-- Maletas de prueba
+INSERT INTO Maleta (num_maleta, peso, color, id_checkin)
+VALUES
+    ('MAL-001', 23.5, 'Negro', 1),
+    ('MAL-002', 18.0, 'Azul',  2);
+
+-- Promociones de prueba
+INSERT INTO Promocion (precio, fecha_inicio, fecha_fin, imagen, id_ruta)
+VALUES
+    (89.99,  '2026-06-01', '2026-06-30', '', 1),
+    (129.50, '2026-05-20', '2026-05-31', '', 2);

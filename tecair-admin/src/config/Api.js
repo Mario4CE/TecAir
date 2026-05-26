@@ -85,7 +85,9 @@ export async function apiFetch(url, method = "GET", body = null, token = null) {
   const response = await fetch(url, options);
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Error ${response.status}`);
+    // Muestra el mensaje completo del API en consola
+    console.log("API Error Response:", errorData);
+    throw new Error(errorData.mensaje || errorData.message || `Error ${response.status}`);
   }
   return response.json();
 }

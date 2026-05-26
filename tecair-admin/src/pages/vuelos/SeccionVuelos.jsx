@@ -99,16 +99,17 @@ export default function SeccionVuelos() {
   // ── Crear vuelo nuevo ──
   // Llama al endpoint POST /vuelos
   const handleNuevoVuelo = async (datosVuelo) => {
-    try {
-      await apiFetch(ENDPOINTS.vuelos.create, "POST", datosVuelo);
-      mostrarMensaje("Vuelo registrado correctamente.");
-      setModalAbierto(false);
-      // Recarga la lista para mostrar el vuelo nuevo
-      cargarDatos();
-    } catch (err) {
-      mostrarMensaje(err.message || "Error al crear el vuelo.", "danger");
-    }
-  };
+  try {
+    console.log("Enviando:", datosVuelo); // agrega esto
+    await apiFetch(ENDPOINTS.vuelos.create, "POST", datosVuelo);
+    mostrarMensaje("Vuelo registrado correctamente.");
+    setModalAbierto(false);
+    cargarDatos();
+  } catch (err) {
+    console.log("Error detallado:", err.message); // agrega esto
+    mostrarMensaje(err.message || "Error al crear el vuelo.", "danger");
+  }
+};
 
   // Muestra spinner mientras cargan los datos
   if (cargando) {
@@ -259,14 +260,21 @@ function ModalNuevoVuelo({ rutas, aviones, onGuardar, onCancelar }) {
       setError("Todos los campos obligatorios deben completarse.");
       return;
     }
-    // Manda los datos tal como los espera el API
+
+    const horaSalida = form.hora_salida
+      ? form.hora_salida.length === 5
+        ? `${form.hora_salida}:00`
+        : form.hora_salida
+      : "08:00:00";
+
+    // El API usa snake_case para deserializar (SnakeCaseLower)
     onGuardar({
       id_ruta:      parseInt(form.id_ruta),
       matricula:    form.matricula,
       fecha_salida: form.fecha_salida,
-      hora_salida:  form.hora_salida || "08:00:00",
+      hora_salida:  horaSalida,
       puerta:       form.puerta,
-      precio:       form.precio ? parseFloat(form.precio) : undefined,
+      precio:       form.precio ? parseFloat(form.precio) : 0,
     });
   };
 

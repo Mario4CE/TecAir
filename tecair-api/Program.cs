@@ -59,10 +59,14 @@ builder.Services.AddDbContext<TecAirDb>(options =>
 
 {
 
-    builder.Services.AddCors(); // Agrega servicios de CORS para permitir solicitudes desde el frontend
+    //builder.Services.AddCors(); // Agrega servicios de CORS para permitir solicitudes desde el frontend
     //var connectionString = builder.Configuration.GetConnectionString("TecAirDb") ?? "Data Source=data/tecair.sqlite";
     //options.UseSqlite(connectionString);
-    options.UseInMemoryDatabase("TecAirDb");
+    //options.UseInMemoryDatabase("TecAirDb");
+
+    var connectionString = builder.Configuration.GetConnectionString("TecAirDb");
+    options.UseNpgsql(connectionString);
+    
 });
 
 var app = builder.Build();
@@ -71,11 +75,11 @@ app.MapGet("/", () => Results.Redirect(ApiGlobals.ApiBasePath));
 
 app.UseCors(ApiGlobals.CorsPolicyName);
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<TecAirDb>();
-    await DatabaseSeeder.SeedAsync(db);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<TecAirDb>();
+//    await DatabaseSeeder.SeedAsync(db);
+//}
 
 app.MapTecAirApiEndpoints();
 
