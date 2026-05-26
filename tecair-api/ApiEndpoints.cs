@@ -147,8 +147,22 @@ public static class ApiEndpoints
             }
         });
 
-        api.MapGet("/vuelos", async (string? origen, string? destino, IVueloService vueloService) =>
-            Results.Ok(new { vuelos = await vueloService.GetVuelosAsync(origen, destino) }));
+        api.MapGet("/vuelos", async (HttpRequest request, IVueloService vueloService) =>
+        {
+            var origen =
+                ObtenerTextoQuery(request, "origen") ??
+                ObtenerTextoQuery(request, "origin") ??
+                ObtenerTextoQuery(request, "origenCodigo") ??
+                ObtenerTextoQuery(request, "codigo_origen");
+
+            var destino =
+                ObtenerTextoQuery(request, "destino") ??
+                ObtenerTextoQuery(request, "destination") ??
+                ObtenerTextoQuery(request, "destinoCodigo") ??
+                ObtenerTextoQuery(request, "codigo_destino");
+
+            return Results.Ok(new { vuelos = await vueloService.GetVuelosAsync(origen, destino) });
+        });
 
         api.MapGet("/vuelos/{idVuelo:int}", async (int idVuelo, IVueloService vueloService) =>
         {
@@ -364,9 +378,47 @@ public static class ApiEndpoints
     */
     private static int ObtenerIdUsuarioHeader(HttpRequest request)
     {
-        return int.TryParse(request.Headers[ApiGlobals.UserIdHeaderName].FirstOrDefault(), out var idUsuario)
+        var idUsuarioHeader = ObtenerHeaderTexto(
+            request,
+            ApiGlobals.UserIdHeaderName,
+            "X-Usuario-Id",
+            "X-Id-Usuario");
+
+        return int.TryParse(idUsuarioHeader, out var idUsuario)
             ? idUsuario
             : ApiGlobals.DefaultUserId;
+    }
+
+    /*
+    Descripción: Obtiene un texto de header HTTP considerando aliases.
+    Entradas: Request HTTP y encabezados candidatos ordenados por prioridad.
+    Salidas: Texto limpiado o null si no existe.
+    Restricciones: No transforma mayúsculas/minúsculas del valor recibido.
+    */
+    private static string? ObtenerHeaderTexto(HttpRequest request, params string[] nombres)
+    {
+        foreach (var nombre in nombres)
+        {
+            var valor = request.Headers[nombre].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(valor))
+            {
+                return valor.Trim();
+            }
+        }
+
+        return null;
+    }
+
+    /*
+    Descripción: Obtiene un texto de query string y normaliza vacíos a null.
+    Entradas: Request HTTP y nombre del parámetro.
+    Salidas: Texto limpiado o null si no existe.
+    Restricciones: No transforma mayúsculas/minúsculas del valor recibido.
+    */
+    private static string? ObtenerTextoQuery(HttpRequest request, string nombre)
+    {
+        var valor = request.Query[nombre].FirstOrDefault();
+        return string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
     }
 
     /*
@@ -382,4 +434,3 @@ public static class ApiEndpoints
             : null;
     }
 }
-
