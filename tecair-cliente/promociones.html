@@ -77,10 +77,29 @@
         /**
          * Carga las promociones desde el API y las renderiza
          */
-        async function cargarPromociones() {
+       async function cargarPromociones() {
             try {
-                const data = await obtenerPromociones();
-                todasLasPromociones = data.promociones ?? [];
+                // Trae promociones y rutas en paralelo
+                const [dataPromociones, dataRutas] = await Promise.all([
+                    obtenerPromociones(),
+                    apiGet('rutas')
+                ]);
+
+                todasLasPromociones = dataPromociones.promociones ?? [];
+                const rutas = dataRutas.rutas ?? [];
+
+                // Agrega la descripción de la ruta a cada promoción
+                todasLasPromociones = todasLasPromociones.map(promo => {
+                    const ruta = rutas.find(r => r.id_ruta === promo.id_ruta);
+                    // Extrae origen y destino de las escalas
+                    const origen  = ruta?.escalas?.find(e => e.tipo === "origen")?.nombre  ?? `Ruta #${promo.id_ruta}`;
+                    const destino = ruta?.escalas?.find(e => e.tipo === "destino")?.nombre ?? "";
+                    return {
+                        ...promo,
+                        descripcionRuta: destino ? `${origen} → ${destino}` : origen,
+                    };
+                });
+
                 mostrarPromociones(todasLasPromociones);
             } catch (error) {
                 document.getElementById('promocionesGrid').innerHTML =
@@ -112,7 +131,7 @@
                     <div class="promo-card" onclick="abrirModal(${promo.id_promocion})">
                         <div class="promo-imagen">✈️</div>
                         <div class="promo-cuerpo">
-                            <h3>Ruta #${promo.id_ruta}</h3>
+                            <h3>Ruta #${promo.descripcionRuta}</h3>
                             <div class="promo-precios">
                                 <span class="precio-promo">$${promo.precio}</span>
                             </div>
@@ -180,7 +199,7 @@
                             : ''}
                     </div>
                     <button class="btn btn-primary btn-block"
-                        onclick="reservarPromo(${promo.id_ruta})">
+                        onclick="reservarPromo(${promo.descripcionRuta})">
                         Reservar Ahora
                     </button>
                 </div>

@@ -126,8 +126,12 @@
         async function cargarPromocionesRecientes() {
             const div = document.getElementById('promocionesRecientes');
             try {
-                const data = await obtenerPromociones();
-                const promociones = (data.promociones ?? []).slice(0, 2);
+                const [dataPromociones, dataRutas] = await Promise.all([
+                    obtenerPromociones(),
+                    apiGet('rutas')
+                ]);
+                const rutas = dataRutas.rutas ?? [];
+                const promociones = (dataPromociones.promociones ?? []).slice(0, 2);
 
                 if (promociones.length === 0) {
                     div.innerHTML = '<p>No hay promociones disponibles</p>';
@@ -136,9 +140,14 @@
 
                 let html = '';
                 promociones.forEach(promo => {
+                    const ruta    = rutas.find(r => r.id_ruta === promo.id_ruta);
+                    const origen  = ruta?.escalas?.find(e => e.tipo === "origen")?.nombre  ?? `Ruta #${promo.id_ruta}`;
+                    const destino = ruta?.escalas?.find(e => e.tipo === "destino")?.nombre ?? "";
+                    const descripcion = destino ? `${origen} → ${destino}` : origen;
+
                     html += `
                         <div class="promo-item">
-                            <strong>Ruta #${promo.id_ruta}</strong><br>
+                            <strong>${descripcion}</strong><br>
                             Desde <strong>$${promo.precio}</strong>
                             ${promo.fecha_fin ? `<br><small>Hasta: ${promo.fecha_fin}</small>` : ''}
                         </div>`;

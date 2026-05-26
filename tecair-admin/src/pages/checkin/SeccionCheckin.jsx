@@ -210,28 +210,99 @@ export default function SeccionCheckin() {
 }
 
 // ModalNuevoCheckin
-function ModalNuevoCheckin({ vuelos, usuarios, onGuardar, onCancelar }) {
-  const [form, setForm] = useState({
-    id_vuelo:   "",
-    id_usuario: "",
-    asiento:    "",
-  });
-  const [error, setError] = useState("");
+// ModalPaseAbordar — muestra el pase de abordar y permite generarlo como PDF
+// Recibe los datos del checkin y vuelo para mostrarlos
+function ModalPaseAbordar({ checkin, vuelo, onEnviarCorreo, onCerrar }) {
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.id_vuelo || !form.id_usuario || !form.asiento) {
-      setError("Todos los campos son obligatorios.");
-      return;
-    }
-    onGuardar({
-      id_vuelo:   parseInt(form.id_vuelo),
-      id_usuario: parseInt(form.id_usuario),
-      asiento:    form.asiento.toUpperCase(),
+  // Genera el PDF del pase de abordar usando jsPDF
+  const handleGenerarPDF = () => {
+    // jsPDF se carga desde el CDN en index.html
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: [100, 150], // Tamaño tipo tarjeta de embarque
     });
+
+    // Color morado de TECAir
+    const morado = [109, 79, 194];
+
+    // Encabezado con fondo morado
+    doc.setFillColor(...morado);
+    doc.rect(0, 0, 100, 35, "F");
+
+    // Título
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("TECAir", 10, 12);
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("Pase de Abordar", 10, 19);
+
+    // Ruta
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    // Divide la ruta en dos líneas si es muy larga
+    const origen  = vuelo?.origen  ?? "";
+    const destino = vuelo?.destino ?? "";
+    doc.setFontSize(11);
+    doc.text(origen,  10, 26);
+    doc.text(`-> ${destino}`, 10, 33);
+
+    // Línea divisora
+    doc.setDrawColor(...morado);
+    doc.setLineWidth(0.5);
+    doc.line(10, 40, 90, 40);
+
+    // Datos del pasajero y vuelo
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+
+    const datos = [
+      ["Pasajero",    checkin.nombrePasajero ?? `Usuario #${checkin.id_usuario}`],
+      ["Vuelo",       `#${checkin.id_vuelo}`],
+      ["Fecha",       vuelo?.fecha_salida ?? "--"],
+      ["Hora salida", vuelo?.hora_salida  ?? "--"],
+      ["Puerta",      vuelo?.puerta       ?? "--"],
+    ];
+
+    let y = 50;
+    datos.forEach(([etiqueta, valor]) => {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(130, 130, 130);
+      doc.text(etiqueta, 10, y);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(50, 50, 50);
+      doc.text(valor, 50, y);
+      y += 9;
+    });
+
+    // Asiento destacado
+    doc.setFillColor(245, 243, 255);
+    doc.roundedRect(10, y + 2, 80, 25, 3, 3, "F");
+
+    doc.setTextColor(130, 130, 130);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Asiento", 50, y + 10, { align: "center" });
+
+    doc.setTextColor(...morado);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text(checkin.asiento ?? "--", 50, y + 22, { align: "center" });
+
+    // Footer
+    doc.setTextColor(180, 180, 180);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.text("TECAir — Instituto Tecnologico de Costa Rica", 50, 145, { align: "center" });
+
+    // Descarga el PDF
+    doc.save(`pase-abordar-${checkin.id_checkin}.pdf`);
   };
 
   return (
@@ -239,96 +310,24 @@ function ModalNuevoCheckin({ vuelos, usuarios, onGuardar, onCancelar }) {
       className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
       style={{ background: "rgba(0,0,0,0.4)", zIndex: 1000 }}
     >
-      <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 420 }}>
-        <div className="card-body p-4">
-          <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>Nuevo check-in</h5>
-          <p className="text-muted small mb-4">Registre el check-in del pasajero</p>
-
-          {error && <div className="alert alert-danger py-2 small rounded-3">{error}</div>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label fw-semibold small text-secondary">
-                Vuelo <span className="text-danger">*</span>
-              </label>
-              <select name="id_vuelo" className="form-select rounded-3"
-                value={form.id_vuelo} onChange={handleChange} required>
-                <option value="">Seleccionar vuelo</option>
-                {/* Solo muestra vuelos abiertos */}
-                {vuelos.filter((v) => v.estado === "abierto").map((v) => (
-                  <option key={v.id_vuelo} value={v.id_vuelo}>
-                    #{v.id_vuelo} — {v.origen} → {v.destino}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label fw-semibold small text-secondary">
-                Pasajero <span className="text-danger">*</span>
-              </label>
-              <select name="id_usuario" className="form-select rounded-3"
-                value={form.id_usuario} onChange={handleChange} required>
-                <option value="">Seleccionar pasajero</option>
-                {usuarios.map((u) => (
-                  <option key={u.id_usuario} value={u.id_usuario}>
-                    {u.nombre1} {u.apellido1} — {u.correo}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="form-label fw-semibold small text-secondary">
-                Asiento <span className="text-danger">*</span>
-              </label>
-              <input type="text" name="asiento" className="form-control rounded-3"
-                placeholder="ej. 12A" value={form.asiento}
-                onChange={handleChange} required />
-            </div>
-
-            <div className="d-flex justify-content-end gap-2 pt-3"
-              style={{ borderTop: "0.5px solid #e8e4f8" }}>
-              <button type="button" className="btn rounded-3 fw-semibold"
-                style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL }}
-                onClick={onCancelar}>
-                Cancelar
-              </button>
-              <button type="submit" className="btn rounded-3 fw-semibold text-white"
-                style={{ background: COLOR_PRINCIPAL }}>
-                Registrar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ModalPaseAbordar
-function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar }) {
-  return (
-    <div
-      className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-      style={{ background: "rgba(0,0,0,0.4)", zIndex: 1000 }}
-    >
       <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 360 }}>
         <div className="card-body p-4">
-          <div className="rounded-3 p-3 mb-4" style={{ background: COLOR_PRINCIPAL }}>
+          {/* Encabezado del pase */}
+          <div className="rounded-3 p-3 mb-4" style={{ background: "#6d4fc2" }}>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, marginBottom: 4 }}>
               TECAir — Pase de abordar
             </p>
             <h3 className="fw-bold text-white mb-0" style={{ fontSize: 18 }}>
-              {vuelo?.origen} → {vuelo?.destino}
+              {vuelo?.origen ?? ""} → {vuelo?.destino ?? ""}
             </h3>
           </div>
 
+          {/* Datos del pasajero */}
           <div className="d-flex justify-content-between mb-3">
             <div>
               <p className="text-muted mb-1" style={{ fontSize: 11 }}>Pasajero</p>
               <p className="fw-bold mb-0" style={{ fontSize: 14, color: "#3c3489" }}>
-                {checkin.nombrePasajero}
+                {checkin.nombrePasajero ?? `Usuario #${checkin.id_usuario}`}
               </p>
             </div>
             <div className="text-end">
@@ -354,28 +353,41 @@ function ModalPaseAbordar({ checkin, vuelo, onImprimir, onEnviarCorreo, onCerrar
             </div>
           </div>
 
-          <div className="text-center rounded-3 py-3 mb-4" style={{ background: "#f5f3ff" }}>
+          {/* Asiento destacado */}
+          <div
+            className="text-center rounded-3 py-3 mb-4"
+            style={{ background: "#f5f3ff" }}
+          >
             <p className="text-muted mb-1" style={{ fontSize: 11 }}>Asiento</p>
-            <p className="fw-bold mb-0" style={{ fontSize: 36, color: COLOR_PRINCIPAL }}>
+            <p className="fw-bold mb-0" style={{ fontSize: 36, color: "#6d4fc2" }}>
               {checkin.asiento}
             </p>
           </div>
 
+          {/* Botones de acción */}
           <div className="d-flex gap-2 mb-2">
-            <button className="btn flex-fill rounded-3 fw-semibold"
-              style={{ background: "#f5f3ff", color: COLOR_PRINCIPAL, fontSize: 13 }}
-              onClick={onImprimir}>
-              Imprimir
+            {/* Genera y descarga el PDF */}
+            <button
+              className="btn flex-fill rounded-3 fw-semibold"
+              style={{ background: "#f5f3ff", color: "#6d4fc2", fontSize: 13 }}
+              onClick={handleGenerarPDF}
+            >
+              Descargar PDF
             </button>
-            <button className="btn flex-fill rounded-3 fw-semibold text-white"
-              style={{ background: COLOR_PRINCIPAL, fontSize: 13 }}
-              onClick={onEnviarCorreo}>
+            {/* Simula envío por correo */}
+            <button
+              className="btn flex-fill rounded-3 fw-semibold text-white"
+              style={{ background: "#6d4fc2", fontSize: 13 }}
+              onClick={onEnviarCorreo}
+            >
               Enviar correo
             </button>
           </div>
-          <button className="btn w-100 rounded-3 fw-semibold text-muted"
+          <button
+            className="btn w-100 rounded-3 fw-semibold text-muted"
             style={{ background: "#f5f3ff", fontSize: 13 }}
-            onClick={onCerrar}>
+            onClick={onCerrar}
+          >
             Cerrar
           </button>
         </div>
