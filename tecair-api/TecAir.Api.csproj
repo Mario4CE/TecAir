@@ -12,6 +12,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Remove="TecAir.Application/**/*.cs" />
+		<Compile Remove="TecAir.Contracts/**/*.cs" />
+		<Compile Remove="TecAir.Domain/**/*.cs" />
+		<Compile Remove="TecAir.Infrastructure/**/*.cs" />
+		<None Remove="TecAir.Application/**/*.cs" />
+		<None Remove="TecAir.Contracts/**/*.cs" />
+		<None Remove="TecAir.Domain/**/*.cs" />
+		<None Remove="TecAir.Infrastructure/**/*.cs" />
+		<EmbeddedResource Remove="TecAir.Application/**/*.cs" />
+		<EmbeddedResource Remove="TecAir.Contracts/**/*.cs" />
+		<EmbeddedResource Remove="TecAir.Domain/**/*.cs" />
+		<EmbeddedResource Remove="TecAir.Infrastructure/**/*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="TecAir.Application/TecAir.Application.csproj" />
 		<ProjectReference Include="TecAir.Contracts/TecAir.Contracts.csproj" />
 		<ProjectReference Include="TecAir.Infrastructure/TecAir.Infrastructure.csproj" />
