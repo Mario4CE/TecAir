@@ -75,6 +75,25 @@ async function apiPut(endpoint, datos) {
   }
 }
 
+
+async function apiPatch(endpoint, datos) {
+  try {
+    const respuesta = await fetch(`${API_BASE_URL}/${endpoint}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+    if (!respuesta.ok) {
+      const error = await respuesta.json().catch(() => ({}));
+      throw new Error(error.mensaje || `Error ${respuesta.status}`);
+    }
+    return await respuesta.json();
+  } catch (error) {
+    console.error('Error en apiPatch:', error);
+    throw error;
+  }
+}
+
 /**
  * Realiza una petición DELETE al API
  * @param {string} endpoint
@@ -128,7 +147,7 @@ async function crearReservacion(datosReservacion) {
  * @returns {Promise<object>}
  */
 async function cancelarReservacion(idReservacion) {
-  return await apiPost(`reservaciones/${idReservacion}/cancelar`, {});
+  return await apiPatch(`reservaciones/${idReservacion}/cancelar`, {});
 }
 
 /**

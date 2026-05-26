@@ -15,7 +15,6 @@ public sealed class Usuario
     public int Millas { get; set; }
     public bool EsAdmin { get; set; }
 
-
     public List<Reservacion> Reservaciones { get; set; } = [];
     public List<CheckIn> CheckIns { get; set; } = [];
 }

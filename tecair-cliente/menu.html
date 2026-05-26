@@ -110,7 +110,7 @@
             if (usuario) {
                 const nombre = usuario.nombre1
                     ? `${usuario.nombre1} ${usuario.apellido1}`
-                    : usuario.nombreCompleto ?? 'Usuario';
+                    : usuario.nombre_completo ?? usuario.nombreCompleto ?? 'Usuario';
                 document.getElementById('bienvenidaUsuario').innerHTML =
                     `¡Bienvenido, <strong>${nombre}</strong>!<br><em>Busca tu próximo destino</em>`;
                 document.getElementById('cantidadMillas').textContent = usuario.millas ?? 0;
