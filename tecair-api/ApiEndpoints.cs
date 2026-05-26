@@ -153,7 +153,10 @@ public static class ApiEndpoints
         api.MapGet("/vuelos/{idVuelo:int}", async (int idVuelo, IVueloService vueloService) =>
         {
             var vuelo = await vueloService.GetVueloByIdAsync(idVuelo);
-            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { vuelo });
+
+            return vuelo is null
+                ? Results.NotFound(new { mensaje = "Vuelo no encontrado." })
+                : Results.Ok(new { vuelo });
         });
 
         api.MapPost("/vuelos", async (VueloRequest datos, IVueloService vueloService) =>
@@ -161,7 +164,11 @@ public static class ApiEndpoints
             try
             {
                 var vuelo = await vueloService.CrearVueloAsync(datos);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/vuelos/{vuelo.IdVuelo}", new { mensaje = "Vuelo creado.", vuelo });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/vuelos/{vuelo.IdVuelo}",
+                    new { mensaje = "Vuelo creado.", vuelo }
+                );
             }
             catch (InvalidOperationException ex)
             {
@@ -172,25 +179,42 @@ public static class ApiEndpoints
         api.MapPatch("/vuelos/{idVuelo:int}/abrir", async (int idVuelo, IVueloService vueloService) =>
         {
             var vuelo = await vueloService.CambiarEstadoAsync(idVuelo, "abierto");
-            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { mensaje = "Vuelo abierto.", vuelo });
+
+            return vuelo is null
+                ? Results.NotFound(new { mensaje = "Vuelo no encontrado." })
+                : Results.Ok(new { mensaje = "Vuelo abierto.", vuelo });
         });
 
         api.MapPatch("/vuelos/{idVuelo:int}/cerrar", async (int idVuelo, IVueloService vueloService) =>
         {
             var vuelo = await vueloService.CambiarEstadoAsync(idVuelo, "cerrado");
-            return vuelo is null ? Results.NotFound(new { mensaje = "Vuelo no encontrado." }) : Results.Ok(new { mensaje = "Vuelo cerrado.", vuelo });
+
+            return vuelo is null
+                ? Results.NotFound(new { mensaje = "Vuelo no encontrado." })
+                : Results.Ok(new { mensaje = "Vuelo cerrado.", vuelo });
         });
 
         api.MapGet("/reservaciones", async (HttpRequest request, IReservacionService reservacionService) =>
         {
-            var filtroUsuario = ObtenerEnteroQuery(request, "id_usuario") ?? ObtenerEnteroQuery(request, "usuario_id") ?? ObtenerEnteroQuery(request, "idUsuario") ?? ObtenerEnteroQuery(request, "usuarioId");
-            return Results.Ok(new { reservaciones = await reservacionService.GetReservacionesAsync(filtroUsuario) });
+            var filtroUsuario =
+                ObtenerEnteroQuery(request, "id_usuario") ??
+                ObtenerEnteroQuery(request, "usuario_id") ??
+                ObtenerEnteroQuery(request, "idUsuario") ??
+                ObtenerEnteroQuery(request, "usuarioId");
+
+            return Results.Ok(new
+            {
+                reservaciones = await reservacionService.GetReservacionesAsync(filtroUsuario)
+            });
         });
 
         api.MapGet("/reservaciones/{idReservacion:int}", async (int idReservacion, IReservacionService reservacionService) =>
         {
             var reservacion = await reservacionService.GetReservacionByIdAsync(idReservacion);
-            return reservacion is null ? Results.NotFound(new { mensaje = "Reservación no encontrada." }) : Results.Ok(new { reservacion });
+
+            return reservacion is null
+                ? Results.NotFound(new { mensaje = "Reservación no encontrada." })
+                : Results.Ok(new { reservacion });
         });
 
         api.MapPost("/reservaciones", async (ReservacionRequest datos, IReservacionService reservacionService) =>
@@ -198,7 +222,11 @@ public static class ApiEndpoints
             try
             {
                 var reservacion = await reservacionService.CrearReservacionAsync(datos);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/reservaciones/{reservacion.IdReservacion}", new { mensaje = "Reservación creada.", reservacion });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/reservaciones/{reservacion.IdReservacion}",
+                    new { id_reservacion = reservacion.IdReservacion }
+                );
             }
             catch (InvalidOperationException ex)
             {
@@ -213,17 +241,25 @@ public static class ApiEndpoints
         api.MapPatch("/reservaciones/{idReservacion:int}/cancelar", async (int idReservacion, IReservacionService reservacionService) =>
         {
             var reservacion = await reservacionService.CancelarReservacionAsync(idReservacion);
-            return reservacion is null ? Results.NotFound(new { mensaje = "Reservación no encontrada." }) : Results.Ok(new { mensaje = "Reservación cancelada.", reservacion });
+
+            return reservacion is null
+                ? Results.NotFound(new { mensaje = "Reservación no encontrada." })
+                : Results.Ok(new { mensaje = "Reservación cancelada.", reservacion });
         });
 
-        api.MapGet("/pagos", async (IPagoService pagoService) => Results.Ok(new { pagos = await pagoService.GetPagosAsync() }));
+        api.MapGet("/pagos", async (IPagoService pagoService) =>
+            Results.Ok(new { pagos = await pagoService.GetPagosAsync() }));
 
         api.MapPost("/pagos", async (PagoRequest datos, IPagoService pagoService) =>
         {
             try
             {
                 var pago = await pagoService.CrearPagoAsync(datos);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/pagos/{pago.IdPago}", new { mensaje = "Pago registrado.", pago });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/pagos/{pago.IdPago}",
+                    new { mensaje = "Pago registrado.", pago }
+                );
             }
             catch (InvalidOperationException ex)
             {
@@ -243,7 +279,11 @@ public static class ApiEndpoints
             try
             {
                 var promocion = await promocionService.CrearPromocionAsync(datos);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/promociones/{promocion.IdPromocion}", new { mensaje = "Promoción creada.", promocion });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/promociones/{promocion.IdPromocion}",
+                    new { mensaje = "Promoción creada.", promocion }
+                );
             }
             catch (InvalidOperationException ex)
             {
@@ -257,7 +297,10 @@ public static class ApiEndpoints
         api.MapGet("/checkins/{idCheckin:int}/pase-abordar", async (int idCheckin, ICheckInService checkInService) =>
         {
             var pase = await checkInService.GetPaseAbordarAsync(idCheckin);
-            return pase is null ? Results.NotFound(new { mensaje = "Check-in no encontrado." }) : Results.Ok(new { pase_abordar = pase });
+
+            return pase is null
+                ? Results.NotFound(new { mensaje = "Check-in no encontrado." })
+                : Results.Ok(new { pase_abordar = pase });
         });
 
         api.MapPost("/checkins", async (CheckInRequest datos, ICheckInService checkInService) =>
@@ -266,11 +309,24 @@ public static class ApiEndpoints
             {
                 var checkIn = await checkInService.CrearCheckInAsync(datos);
                 var pase = await checkInService.GetPaseAbordarAsync(checkIn.IdCheckin);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/checkins/{checkIn.IdCheckin}", new { mensaje = "Check-in realizado.", pase_abordar = pase });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/checkins/{checkIn.IdCheckin}",
+                    new { mensaje = "Check-in realizado.", pase_abordar = pase }
+                );
             }
-            catch (InvalidOperationException ex) { return Results.BadRequest(new { mensaje = ex.Message }); }
-            catch (KeyNotFoundException ex) { return Results.NotFound(new { mensaje = ex.Message }); }
-            catch (ApplicationException ex) { return Results.Conflict(new { mensaje = ex.Message }); }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { mensaje = ex.Message });
+            }
+            catch (ApplicationException ex)
+            {
+                return Results.Conflict(new { mensaje = ex.Message });
+            }
         });
 
         api.MapGet("/maletas", async (IMaletaService maletaService) =>
@@ -281,10 +337,20 @@ public static class ApiEndpoints
             try
             {
                 var resultado = await maletaService.CrearMaletaAsync(datos);
-                return Results.Created($"{ApiGlobals.ApiBasePath}/maletas/{resultado.maleta.NumMaleta}", new { mensaje = "Maleta asignada.", resumen = resultado.resumen });
+
+                return Results.Created(
+                    $"{ApiGlobals.ApiBasePath}/maletas/{resultado.maleta.NumMaleta}",
+                    new { mensaje = "Maleta asignada.", resumen = resultado.resumen }
+                );
             }
-            catch (InvalidOperationException ex) { return Results.BadRequest(new { mensaje = ex.Message }); }
-            catch (KeyNotFoundException ex) { return Results.NotFound(new { mensaje = ex.Message }); }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { mensaje = ex.Message });
+            }
         });
 
         return app;
@@ -311,7 +377,9 @@ public static class ApiEndpoints
     */
     private static int? ObtenerEnteroQuery(HttpRequest request, string nombre)
     {
-        return int.TryParse(request.Query[nombre].FirstOrDefault(), out var valor) ? valor : null;
+        return int.TryParse(request.Query[nombre].FirstOrDefault(), out var valor)
+            ? valor
+            : null;
     }
 }
 
