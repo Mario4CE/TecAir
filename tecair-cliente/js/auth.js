@@ -55,7 +55,7 @@ async function iniciarSesion(correo) {
       throw new Error('Usuario no encontrado. Verifica tu correo.');
     }
 
-    if (usuario.es_admin) {
+    if (usuario.es_admin === true || usuario.esAdmin === true) {
       throw new Error('Este portal es solo para clientes. Use el portal de administración.');
     }
 
@@ -91,6 +91,7 @@ async function registrarUsuario(datosUsuario) {
       universidad:   datosUsuario.universidad || '',
       carnet:        datosUsuario.carnet || '',
       millas:        0,
+      es_admin:      false,
     });
 
     const usuario = resultado.usuario ?? resultado;

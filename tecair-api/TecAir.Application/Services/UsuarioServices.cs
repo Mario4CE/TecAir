@@ -82,7 +82,8 @@ public sealed class UsuarioService(IUsuarioRepository usuarioRepository) : IUsua
             EsEstudiante = datos.EsEstudiante ?? false,
             Universidad = datos.Universidad ?? string.Empty,
             Carnet = datos.Carnet ?? string.Empty,
-            Millas = datos.Millas ?? 0
+            Millas = datos.Millas ?? 0,
+            EsAdmin = datos.EsAdmin ?? false
         };
 
         await usuarioRepository.AddAsync(usuario);
@@ -116,6 +117,8 @@ public sealed class UsuarioService(IUsuarioRepository usuarioRepository) : IUsua
         usuario.EsEstudiante = datos.EsEstudiante ?? usuario.EsEstudiante;
         usuario.Universidad = datos.Universidad ?? usuario.Universidad;
         usuario.Carnet = datos.Carnet ?? usuario.Carnet;
+        usuario.Millas = datos.Millas ?? usuario.Millas;
+        usuario.EsAdmin = datos.EsAdmin ?? usuario.EsAdmin;
 
         await usuarioRepository.SaveChangesAsync();
         return usuario;

@@ -243,11 +243,11 @@
 
             const usuario = obtenerUsuarioActual();
             if (usuario) {
-                document.getElementById('nombre').value = usuario.nombreCompleto || '';
-                document.getElementById('email').value = usuario.email || '';
+                document.getElementById('nombre').value = usuario.nombre_completo || usuario.nombre1 || '';
+                document.getElementById('email').value = usuario.correo || usuario.email || '';
                 document.getElementById('telefono').value = usuario.telefono || '';
                 
-                if (usuario.esEstudiante) {
+                if (usuario.es_estudiante === true || usuario.esEstudiante === true) {
                     document.getElementById('esEstudiante').checked = true;
                     document.getElementById('datosEstudiantePerfil').style.display = 'block';
                     document.getElementById('universidad').value = usuario.universidad || '';
