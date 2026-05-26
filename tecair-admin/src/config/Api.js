@@ -7,7 +7,7 @@
  */
 
 // URL base del API. Cambiar esto cuando el backend esté listo.
-export const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "/api";
 
 /**
  * Endpoints agrupados por recurso.
@@ -27,24 +27,19 @@ export const ENDPOINTS = {
     abrir:  (id) => `${BASE_URL}/vuelos/${id}/abrir`,
     cerrar: (id) => `${BASE_URL}/vuelos/${id}/cerrar`,
   },
-  checkin: {
-    list:   `${BASE_URL}/checkin`,
-    create: `${BASE_URL}/checkin`,
-    byId:   (id) => `${BASE_URL}/checkin/${id}`,
-  },
-  maletas: {
-    create:     `${BASE_URL}/maletas`,
-    byCheckin:  (checkinId) => `${BASE_URL}/maletas/checkin/${checkinId}`,
+  checkins: {
+    list:        `${BASE_URL}/checkins`,
+    create:      `${BASE_URL}/checkins`,
+    paseAbordar: (id) => `${BASE_URL}/checkins/${id}/pase-abordar`,
   },
   promociones: {
     list:   `${BASE_URL}/promociones`,
     create: `${BASE_URL}/promociones`,
-    byId:   (id) => `${BASE_URL}/promociones/${id}`,
-    update: (id) => `${BASE_URL}/promociones/${id}`,
     delete: (id) => `${BASE_URL}/promociones/${id}`,
   },
   usuarios: {
     list:   `${BASE_URL}/usuarios`,
+    create: `${BASE_URL}/usuarios`,
     byId:   (id) => `${BASE_URL}/usuarios/${id}`,
     update: (id) => `${BASE_URL}/usuarios/${id}`,
     delete: (id) => `${BASE_URL}/usuarios/${id}`,
@@ -58,6 +53,15 @@ export const ENDPOINTS = {
     list:   `${BASE_URL}/rutas`,
     create: `${BASE_URL}/rutas`,
     byId:   (id) => `${BASE_URL}/rutas/${id}`,
+  },
+  aviones: {
+    list:   `${BASE_URL}/aviones`,
+    create: `${BASE_URL}/aviones`,
+    byId:   (id) => `${BASE_URL}/aviones/${id}`,
+  },
+  maletas: {
+    list:   `${BASE_URL}/maletas`,
+    create: `${BASE_URL}/maletas`,
   },
 };
 
