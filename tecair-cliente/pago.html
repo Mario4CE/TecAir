@@ -291,14 +291,14 @@
                 id_usuario: idUsuario,
                 id_vuelo: parseInt(reservacionTemporal.idVuelo)
 });
-                const idReservacion = respReservacion.reservacion?.idReservacion;
+                const idReservacion = respReservacion.reservacion?.id_reservacion || respReservacion.id_reservacion;
 
                 // Paso 2: Registrar el pago en la API
-                await procesarPago({
-                    idReservacion: idReservacion,
-                    monto: montoTotal,
-                    metodo: metodo
-                });
+                await apiPost('pagos', {
+                    id_reservacion: idReservacion,
+                     monto: montoTotal,
+                     metodo: metodo
+                    });
 
                 // Pago exitoso
                 mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
