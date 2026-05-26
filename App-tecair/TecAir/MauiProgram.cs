@@ -21,6 +21,7 @@ namespace TecAir
                 });
 
             // Registrar servicios
+            builder.Services.AddSingleton<SyncService>();
             builder.Services.AddSingleton<DatabaseService>();
             builder.Services.AddSingleton<AuthenticationService>();
             
@@ -32,13 +33,23 @@ namespace TecAir
             builder.Services.AddSingleton<PromotionViewModel>();
 
             // Registrar Pages
+            // Las páginas que usan SyncService necesitan recibirlo por constructor
+            builder.Services.AddSingleton<Views.HomePage>(sp =>
+                new Views.HomePage(sp.GetRequiredService<SyncService>()));
+
+            builder.Services.AddSingleton<Views.FlightsSearchPage>(sp =>
+                new Views.FlightsSearchPage(sp.GetRequiredService<SyncService>()));
+
+            builder.Services.AddSingleton<Views.ReservationsPage>(sp =>
+                new Views.ReservationsPage(sp.GetRequiredService<SyncService>()));
+
+            builder.Services.AddSingleton<Views.PromotionsPage>(sp =>
+                new Views.PromotionsPage(sp.GetRequiredService<SyncService>()));
+
+            // Estas no usan SyncService, se registran normal
             builder.Services.AddSingleton<Views.LoginPage>();
             builder.Services.AddSingleton<Views.RegisterPage>();
-            builder.Services.AddSingleton<Views.HomePage>();
-            builder.Services.AddSingleton<Views.FlightsSearchPage>();
-            builder.Services.AddSingleton<Views.ReservationsPage>();
             builder.Services.AddSingleton<Views.ReservationDetailPage>();
-            builder.Services.AddSingleton<Views.PromotionsPage>();
 
 #if DEBUG
     		builder.Logging.AddDebug();

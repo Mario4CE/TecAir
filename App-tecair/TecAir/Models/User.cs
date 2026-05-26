@@ -34,5 +34,11 @@ namespace TecAir.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public int Role { get; set; } = 0; // 0: Customer, 1: AirportStaff, 2: Admin
+
+        // Indica si el usuario ya fue sincronizado con el API
+        public bool IsSynced { get; set; } = false;
+
+        // ID del usuario en el API remoto (0 = no sincronizado aún)
+        public int ApiId { get; set; } = 0;
     }
 }

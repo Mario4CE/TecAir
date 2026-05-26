@@ -22,5 +22,8 @@ namespace TecAir.Models
 
         [NotNull]
         public string Country { get; set; }
+
+        // ID del aeropuerto en el API remoto
+        public int ApiId { get; set; } = 0;
     }
 }

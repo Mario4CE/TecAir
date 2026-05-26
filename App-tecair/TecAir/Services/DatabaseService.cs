@@ -452,5 +452,82 @@ namespace TecAir.Services
                 .Where(bp => bp.ReservationId == reservationId)
                 .FirstOrDefaultAsync();
         }
+
+        // Busca un vuelo por su ID del API
+        public async Task<Flight> GetFlightByApiIdAsync(int apiId)
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<Flight>()
+                .Where(f => f.ApiId == apiId)
+                .FirstOrDefaultAsync();
+        }
+
+        // Busca una promoción por su ID del API
+        public async Task<Promotion> GetPromotionByApiIdAsync(int apiId)
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<Promotion>()
+                .Where(p => p.ApiId == apiId)
+                .FirstOrDefaultAsync();
+        }
+
+        // Busca un aeropuerto por su ID del API
+        public async Task<Airport> GetAirportByApiIdAsync(int apiId)
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<Airport>()
+                .Where(a => a.ApiId == apiId)
+                .FirstOrDefaultAsync();
+        }
+
+        // Devuelve usuarios que aún no han sido sincronizados
+        public async Task<List<User>> GetUnsyncedUsersAsync()
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<User>()
+                .Where(u => !u.IsSynced)
+                .ToListAsync();
+        }
+
+        // Devuelve reservaciones que aún no han sido sincronizadas
+        public async Task<List<Reservation>> GetUnsyncedReservationsAsync()
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<Reservation>()
+                .Where(r => !r.IsSynced)
+                .ToListAsync();
+        }
+
+        // Actualiza un vuelo en SQLite
+        public async Task UpdateFlightAsync(Flight flight)
+        {
+            await EnsureConnectionAsync();
+            await _connection.UpdateAsync(flight);
+        }
+
+        // Crea un aeropuerto en SQLite
+        public async Task<Airport> CreateAirportAsync(Airport airport)
+        {
+            await EnsureConnectionAsync();
+            await _connection.InsertAsync(airport);
+            return airport;
+        }
+
+        // Crea una promoción en SQLite
+        public async Task<Promotion> CreatePromotionAsync(Promotion promotion)
+        {
+            await EnsureConnectionAsync();
+            await _connection.InsertAsync(promotion);
+            return promotion;
+        }
+
+        // Crea un vuelo en SQLite
+        public async Task<Flight> CreateFlightAsync(Flight flight)
+        {
+            await EnsureConnectionAsync();
+            await _connection.InsertAsync(flight);
+            return flight;
+        }
+
     }
 }

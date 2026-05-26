@@ -31,5 +31,8 @@ namespace TecAir.Models
         public string Description { get; set; }
 
         public bool IsActive { get; set; }
+
+        // ID de la promoción en el API remoto
+        public int ApiId { get; set; } = 0;
     }
 }

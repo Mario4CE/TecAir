@@ -29,5 +29,8 @@ namespace TecAir.Models
         public bool PreCheckIn { get; set; }
 
         public int LuggageCount { get; set; } = 0;
+
+        // Indica si la reservación ya fue sincronizada con el API
+        public bool IsSynced { get; set; } = false;
     }
 }

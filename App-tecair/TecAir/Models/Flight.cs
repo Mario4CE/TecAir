@@ -29,5 +29,8 @@ namespace TecAir.Models
         public int Status { get; set; } = 0; // 0: Scheduled, 1: CheckedIn, 2: Open, 3: Closed, 4: Cancelled
 
         public int AvailableSeats { get; set; }
+
+        // ID del vuelo en el API remoto (0 = no sincronizado aún)
+        public int ApiId { get; set; } = 0;
     }
 }
