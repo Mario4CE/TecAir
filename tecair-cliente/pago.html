@@ -188,7 +188,7 @@
         });
 
         function cargarDetallesReservacion() {
-            const reservacion = JSON.parse(sessionStorage.getItem('reservacionTemporal') || '{}');
+            const reservacion = JSON.parse(sessionStorage.getItem('reservacionPago') || '{}');
             const tarifa = reservacion.monto || 95;
             const impuestos = Math.round(tarifa * 0.13);
             const cargo = 5;
@@ -259,14 +259,27 @@
                 document.querySelector('.btn-lg').disabled = true;
                 document.querySelector('.btn-lg').textContent = 'Procesando...';
 
-                // Simular procesamiento
+                const reservacion = JSON.parse(sessionStorage.getItem('reservacionPago') || '{}');
+                const montoTexto = document.getElementById('montoTotal').textContent.replace('$', '');
+                const monto = Number(montoTexto) || 0;
+
+                if (!reservacion.id_reservacion) {
+                    throw new Error('No se encontró la reservación a pagar');
+                }
+
+                const metodoSeleccionado = document.querySelector('input[name="metodoPago"]:checked');
+                const metodo = metodoSeleccionado ? metodoSeleccionado.value : 'tarjeta';
+
+                await procesarPagoApi({
+                    id_reservacion: reservacion.id_reservacion,
+                    monto,
+                    metodo,
+                });
+
+                mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
                 setTimeout(() => {
-                    mostrarAlerta('¡Pago procesado exitosamente! 🎉', 'exito');
-                    
-                    setTimeout(() => {
-                        sessionStorage.removeItem('reservacionTemporal');
-                        window.location.href = 'reservaciones.html';
-                    }, 2000);
+                    sessionStorage.removeItem('reservacionPago');
+                    window.location.href = 'reservaciones.html';
                 }, 2000);
             } catch (error) {
                 mostrarAlerta('Error al procesar el pago', 'error');
@@ -277,7 +290,7 @@
 
         function cancelarPago() {
             if (confirm('¿Deseas cancelar esta transacción?')) {
-                sessionStorage.removeItem('reservacionTemporal');
+                sessionStorage.removeItem('reservacionPago');
                 window.location.href = 'reservaciones.html';
             }
         }
