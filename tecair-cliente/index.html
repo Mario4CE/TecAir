@@ -2,11 +2,8 @@
 <html lang="es">
 <head>
     <!--
-    =====================================
-    CONFIGURACIÓN DEL DOCUMENTO
-    =====================================
-    Define la codificación UTF-8, viewport responsivo y títulos de página
-    Importa los estilos generales (styles.css) y específicos de login (login.css)
+    index.html — Página de inicio de sesión y registro de TECAir
+    Conectado al API real en http://localhost:5000/api
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,183 +12,99 @@
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-    <!--
-    =====================================
-    CONTENEDOR PRINCIPAL DE AUTENTICACIÓN
-    =====================================
-    Estructura general que envuelve toda la interfaz de login/registro
-    -->
     <div class="auth-wrapper">
         <div class="auth-container">
-            <!--
-            ENCABEZADO CON BRANDING
-            Muestra el logo y descripción de TECAir
-            -->
+            <!-- Encabezado con branding -->
             <div class="auth-header">
                 <h1>✈️ TECAir</h1>
                 <p>Tu aerolínea de bajo costo para estudiantes</p>
             </div>
 
-            <!--
-            CUERPO PRINCIPAL DE AUTENTICACIÓN
-            Contiene alertas, indicador de carga y tabs para login/registro
-            -->
             <div class="auth-body">
-                <!--
-                ALERTAS DE FEEDBACK
-                Mostrar mensajes de error y éxito de las operaciones
-                -->
-                <div
-                PESTAÑA 1: FORMULARIO DE LOGIN
-                Permite iniciar sesión con solo nombre (sistema en fase de prueba)
-                -->
-                <div id="loginTab" class="tab-content active">
-                    <form id="loginForm" class="auth-form">
-                        <div class="form-group">
-                            <label for="loginNombre">Nombre de Usuario</label>
-                            <input 
-                                type="text" 
-                                id="loginNombre" 
-                                name="nombre" 
-                                placeholder="Tu nombre"
-                                required
-                            >
-                        </div>
+                <!-- Alertas de feedback -->
+                <div id="alertError" class="alert alert-error"></div>
+                <div id="alertSuccess" class="alert alert-success"></div>
 
-                        <button type="submit" class="btn-auth">Ingresar</button>
-                    </form>
-                    <p style="text-align: center; margin-top: 1rem; color: #7f8c8d; font-size: 12px;">
-                        ℹ️ Sistema en fase de prueba - No se requiere contraseña
-                    </p>
+                <!-- Indicador de carga -->
+                <div id="loading" class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                    <p>Procesando...</p>
                 </div>
 
-                <!--
-                PESTAÑA 2: FORMULARIO DE REGISTRO
-                Recopila información completa del nuevo usuario (nombre, email, teléfono, estado estudiante)
-               >
+                <!-- Tabs de login y registro -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="cambiarTab('login', event)">Iniciar Sesión</button>
+                    <button class="tab-btn" onclick="cambiarTab('registro', event)">Registrarse</button>
+                </div>
+
+                <!-- PESTAÑA 1: LOGIN -->
                 <div id="loginTab" class="tab-content active">
                     <form id="loginForm" class="auth-form">
                         <div class="form-group">
-                            <label for="loginNombre">Nombre de Usuario</label>
-                            <input 
-                                type="text" 
-                                id="loginNombre" 
-                                name="nombre" 
-                                placeholder="Tu nombre"
-                                required
-                            >
+                            <label for="loginCorreo">Correo Electrónico</label>
+                            <input type="email" id="loginCorreo" name="correo"
+                                placeholder="tu@correo.com" required>
                         </div>
-
                         <button type="submit" class="btn-auth">Ingresar</button>
                     </form>
-                    <p style="text-align: center; margin-top: 1rem; color: #7f8c8d; font-size: 12px;">
-                        ℹ️ Sistema en fase de prueba - No se requiere contraseña
-                    </p>!--
-                        DATOS BÁSICOS DEL USUARIO
-                        Campos obligatorios: nombre completo, email y teléfono
-                        -->
-                        <div class="form-group">
-                            <label for="regNombre">Nombre Completo</label>
-                            <input 
-                                type="text" 
-                                id="regNombre" 
-                                name="nombreCompleto" 
-                                placeholder="Juan Pérez"
-                                required
-                            >
-                        </div>
+                </div>
 
+                <!-- PESTAÑA 2: REGISTRO -->
+                <div id="registroTab" class="tab-content">
+                    <form id="registroForm" class="auth-form">
                         <div class="form-group">
-                            <label for="regEmail">Correo Electrónico</label>
-                            <input 
-                                type="email" 
-                                id="regEmail" 
-                                name="email" 
-                                placeholder="tu@email.com"
-                                required
-                            >
+                            <label for="regNombre1">Primer Nombre <span style="color:red">*</span></label>
+                            <input type="text" id="regNombre1" name="nombre1"
+                                placeholder="Juan" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="regTelefono">Teléfono</label>
-                            <input 
-                                type="tel" 
-                                id="regTelefono" 
-                                name="telefono" 
-                                placeholder="+506 2345 6789"
-                                required
-                            >
+                            <label for="regNombre2">Segundo Nombre</label>
+                            <input type="text" id="regNombre2" name="nombre2"
+                                placeholder="Carlos">
                         </div>
-
-                        <!--
-                        CHECKBOX PARA ESTADO ESTUDIANTE
-                        Si se marca, muestra campos adicionales para datos estudiantiles
-                        -->
-                        <div class="form-group col-full">
+                        <div class="form-group">
+                            <label for="regApellido1">Primer Apellido <span style="color:red">*</span></label>
+                            <input type="text" id="regApellido1" name="apellido1"
+                                placeholder="Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regApellido2">Segundo Apellido</label>
+                            <input type="text" id="regApellido2" name="apellido2"
+                                placeholder="Mora">
+                        </div>
+                        <div class="form-group">
+                            <label for="regCorreo">Correo Electrónico <span style="color:red">*</span></label>
+                            <input type="email" id="regCorreo" name="correo"
+                                placeholder="tu@correo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regTelefono">Teléfono <span style="color:red">*</span></label>
+                            <input type="tel" id="regTelefono" name="telefono"
+                                placeholder="8888-8888" required>
+                        </div>
+                        <div class="form-group">
                             <label>
                                 <input type="checkbox" id="esEstudiante" name="esEstudiante">
-                                Soy estudiante
+                                Soy estudiante universitario
                             </label>
                         </div>
-
-                        <!--
-                        DATOS ESTUDIANTILES OPCIONALES
-                        Aparecen solo cuando se marca "Soy estudiante"
-                        Solicita universidad y número de carnet
-                        -->                        <div class="form-group col-full">
-                            <label>
-                                <input type="checkbox" id="esEstudiante" name="esEstudiante">
-                                Soy estudiante
-                            </label>
-                        </div>
-
-                        <div id="datosEstudiante" class="datos-estudiante" style="display: none;">
+                        <div id="datosEstudiante" style="display:none;">
                             <div class="form-group">
-                                <label for="universidad">Universidad</label>
-                                <input 
-                                    type="text" 
-                                    id="universidad" 
-                                    name="universidad" 
-                                    placeholder="Ej: TEC"
-                
-            FOOTER CON INFORMACIÓN LEGAL
-            Copyright y derechos reservados de TECAir
-            -->
-            <div class="auth-footer">
-                <p>&copy; 2026 TECAir. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </div>
-
-    <!--
-    SCRIPTS EXTERNOS
-    utils.js: Funciones utilitarias globales
-    api.js: Funciones para llamadas a API
-    auth.js: Funciones de autenticación
-    -->
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <!--
-    LÓGICA DE PÁGINA INLINE
-    Gestiona:
-    - Cambio de tabs (login/registro)
-    - Validación de formularios
-    - Guardado de usuario en localStorage
-    - Redirección después de autenticación
-    - Mostrar/ocultar alertas
-    --laceholder="Número de carnet"
-                                >
+                                <label for="universidad">Universidad <span style="color:red">*</span></label>
+                                <input type="text" id="universidad" name="universidad"
+                                    placeholder="ej. Instituto Tecnológico de Costa Rica">
+                            </div>
+                            <div class="form-group">
+                                <label for="carnet">Carnet <span style="color:red">*</span></label>
+                                <input type="text" id="carnet" name="carnet"
+                                    placeholder="ej. 2024123456">
                             </div>
                         </div>
-
                         <button type="submit" class="btn-auth">Registrarse</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="auth-footer">
                 <p>&copy; 2026 TECAir. Todos los derechos reservados.</p>
             </div>
@@ -203,91 +116,80 @@
     <script src="js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cambiar tab para mostrar datos de estudiante
+            // Si ya hay sesión activa, redirigir al menú
+            if (estaAutenticado()) {
+                window.location.href = 'menu.html';
+                return;
+            }
+
+            // Mostrar/ocultar campos de estudiante
             document.getElementById('esEstudiante').addEventListener('change', function() {
-                const datosEstudiante = document.getElementById('datosEstudiante');
-                if (this.checked) {
-                    datosEstudiante.style.display = 'block';
-                } else {
-                    datosEstudiante.style.display = 'none';
-                }
+                document.getElementById('datosEstudiante').style.display =
+                    this.checked ? 'block' : 'none';
             });
 
             // Manejar login
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const nombre = document.getElementById('loginNombre').value;
-                
-                if (!nombre.trim()) {
-                    mostrarAlerta('Por favor ingresa tu nombre', 'error');
+                const correo = document.getElementById('loginCorreo').value.trim();
+                if (!correo) {
+                    mostrarAlerta('Por favor ingresa tu correo', 'error');
                     return;
                 }
-
-                // Guardar usuario en localStorage de forma simple
-                const usuario = {
-                    nombreCompleto: nombre,
-                    email: `${nombre.toLowerCase().replace(' ', '.')}@tecair.cr`,
-                    telefono: '',
-                    esEstudiante: false,
-                    universidad: '',
-                    carnet: '',
-                    millas: 0
-                };
-                
-                guardarUsuarioActual(usuario);
-                mostrarAlerta('¡Bienvenido a TECAir!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'menu.html';
-                }, 1000);
+                document.getElementById('loading').style.display = 'flex';
+                try {
+                    await iniciarSesion(correo);
+                    mostrarAlerta('¡Bienvenido a TECAir!', 'success');
+                    setTimeout(() => window.location.href = 'menu.html', 1000);
+                } catch (error) {
+                    mostrarAlerta(error.message || 'Error al iniciar sesión', 'error');
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
             });
 
             // Manejar registro
-            document.getElementById('registroForm').addEventListener('submit', (e) => {
+            document.getElementById('registroForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const formData = new FormData(document.getElementById('registroForm'));
-                const datos = Object.fromEntries(formData);
-                
-                if (!datos.nombreCompleto.trim() || !datos.email.trim()) {
-                    mostrarAlerta('Por favor completa los campos requeridos', 'error');
+                const datos = {
+                    nombre1:      document.getElementById('regNombre1').value.trim(),
+                    nombre2:      document.getElementById('regNombre2').value.trim(),
+                    apellido1:    document.getElementById('regApellido1').value.trim(),
+                    apellido2:    document.getElementById('regApellido2').value.trim(),
+                    correo:       document.getElementById('regCorreo').value.trim(),
+                    telefono:     document.getElementById('regTelefono').value.trim(),
+                    esEstudiante: document.getElementById('esEstudiante').checked,
+                    universidad:  document.getElementById('universidad').value.trim(),
+                    carnet:       document.getElementById('carnet').value.trim(),
+                };
+                if (!datos.nombre1 || !datos.apellido1 || !datos.correo || !datos.telefono) {
+                    mostrarAlerta('Por favor completa los campos obligatorios', 'error');
                     return;
                 }
-
-                // Guardar usuario en localStorage
-                const usuario = {
-                    nombreCompleto: datos.nombreCompleto,
-                    email: datos.email,
-                    telefono: datos.telefono || '',
-                    esEstudiante: datos.esEstudiante === 'on',
-                    universidad: datos.universidad || '',
-                    carnet: datos.carnet || '',
-                    millas: 0
-                };
-                
-                guardarUsuarioActual(usuario);
-                mostrarAlerta('¡Registro exitoso! Bienvenido a TECAir', 'success');
-                setTimeout(() => {
-                    window.location.href = 'menu.html';
-                }, 1000);
+                document.getElementById('loading').style.display = 'flex';
+                try {
+                    await registrarUsuario(datos);
+                    mostrarAlerta('¡Registro exitoso! Bienvenido a TECAir', 'success');
+                    setTimeout(() => window.location.href = 'menu.html', 1000);
+                } catch (error) {
+                    mostrarAlerta(error.message || 'Error al registrarse', 'error');
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
             });
         });
 
-        function cambiarTab(tab) {
+        // Cambia entre las pestañas de login y registro
+        function cambiarTab(tab, event) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (tab === 'login') {
-                document.querySelector('[onclick="cambiarTab(\'login\')"]').classList.add('active');
-                document.getElementById('loginTab').classList.add('active');
-            } else {
-                document.querySelector('[onclick="cambiarTab(\'registro\')"]').classList.add('active');
-                document.getElementById('registroTab').classList.add('active');
-            }
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if (event) event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
         }
 
         function mostrarAlerta(mensaje, tipo) {
-            const alertError = document.getElementById('alertError');
+            const alertError   = document.getElementById('alertError');
             const alertSuccess = document.getElementById('alertSuccess');
-            
             if (tipo === 'error') {
                 alertError.textContent = mensaje;
                 alertError.classList.add('show');

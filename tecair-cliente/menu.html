@@ -2,11 +2,8 @@
 <html lang="es">
 <head>
     <!--
-    =====================================
-    CONFIGURACIÓN DEL DOCUMENTO
-    =====================================
-    Página principal después de autenticarse
-    Importa estilos generales de la aplicación
+    menu.html — Página principal después de autenticarse
+    Muestra bienvenida, accesos rápidos y últimas promociones del API
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,18 +11,9 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!--
-    =====================================
-    BARRA DE NAVEGACIÓN
-    =====================================
-    Menú superior con logo y enlaces a todas las secciones principales
-    Incluye opción de cerrar sesión
-    -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-brand">
-                <h2>✈️ TECAir</h2>
-            </div>
+            <div class="navbar-brand"><h2>✈️ TECAir</h2></div>
             <ul class="navbar-menu">
                 <li><a href="menu.html" class="active">Inicio</a></li>
                 <li><a href="vuelos.html">Buscar Vuelos</a></li>
@@ -37,48 +25,31 @@
         </div>
     </nav>
 
-    <!--
-    =====================================
-    CONTENIDO PRINCIPAL
-    =====================================
-    Página de bienvenida con tarjeta de presentación e información sobre servicios
-    -->
     <div class="container">
-        <!--
-        TARJETA DE BIENVENIDA
-        Saludo personalizado y accesos rápidos a funciones principales
-        -->
+        <!-- Tarjeta de bienvenida -->
         <div class="card welcome-card">
             <div class="card-header text-center">
                 <h2>Bienvenido a TECAir</h2>
                 <p id="bienvenidaUsuario">¡Tu aerolínea de bajo costo para estudiantes!</p>
             </div>
             <div class="card-body text-center">
-                <!--
-                GRID DE ACCESOS RÁPIDOS
-                Muestra 4 opciones principales con iconos y descripción
-                Cada uno redirige a su página correspondiente
-                -->
                 <div class="welcome-grid">
-                    <div class="welcome-item" onclick="redirigir('vuelos.html')">
+                    <div class="welcome-item" onclick="window.location.href='vuelos.html'">
                         <div class="icon">🔍</div>
                         <h3>Buscar Vuelos</h3>
                         <p>Encuentra el vuelo perfecto para tu destino</p>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('reservaciones.html')">
+                    <div class="welcome-item" onclick="window.location.href='reservaciones.html'">
                         <div class="icon">📋</div>
                         <h3>Mis Reservaciones</h3>
                         <p>Consulta y gestiona tus reservaciones</p>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('promociones.html')">
+                    <div class="welcome-item" onclick="window.location.href='promociones.html'">
                         <div class="icon">🎉</div>
                         <h3>Promociones</h3>
                         <p>Descubre las mejores ofertas disponibles</p>
                     </div>
-
-                    <div class="welcome-item" onclick="redirigir('perfil.html')">
+                    <div class="welcome-item" onclick="window.location.href='perfil.html'">
                         <div class="icon">👤</div>
                         <h3>Mi Perfil</h3>
                         <p>Actualiza tu información personal</p>
@@ -87,17 +58,8 @@
             </div>
         </div>
 
-        <!--
-        =====================================
-        SECCIÓN DE INFORMACIÓN
-        =====================================
-        Tres cards con información relevante sobre la aerolínea
-        -->
         <div class="info-section">
-            <!--
-            CARD 1: BENEFICIOS
-            Lista de ventajas de viajar con TECAir
-            -->
+            <!-- Beneficios -->
             <div class="info-card">
                 <h3>¿Por qué viajar con TECAir?</h3>
                 <ul>
@@ -108,11 +70,7 @@
                 </ul>
             </div>
 
-            <!--
-            CARD 2: PROMOCIONES RECIENTES
-            Muestra últimas promociones disponibles
-            Se cargan dinámicamente desde la API
-            -->
+            <!-- Promociones recientes — cargadas desde el API -->
             <div class="info-card">
                 <h3>Últimas Promociones</h3>
                 <div id="promocionesRecientes">
@@ -120,95 +78,84 @@
                 </div>
             </div>
 
-            <!--
-            CARD 3: PROGRAMA DE LEALTAD
-            Información sobre millas y beneficios
-            Muestra millas acumuladas del usuario actual
-            -->
+            <!-- Programa de lealtad — millas del usuario actual -->
             <div class="info-card">
                 <h3>Programa de Lealtad</h3>
                 <p>Acumula millas en cada reservación y canjéalas por vuelos gratis.</p>
-                <div id="milasUsuario" class="millas-info">
-                    <p>Millas disponibles: <strong>0</strong></p>
+                <div id="millasUsuario" class="millas-info">
+                    <p>Millas disponibles: <strong id="cantidadMillas">0</strong></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!--
-    =====================================
-    FOOTER
-    =====================================
-    Información de copyright
-    -->
     <footer class="footer">
         <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
     </footer>
 
-    <!--
-    SCRIPTS
-    Carga de librerías utilitarias y lógica específica de la página
-    -->
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // protegerRuta(); // Desactivado para fase de prueba
-            const usuario = obtenerUsuarioActual();
-            
-            // Si no hay usuario, crear uno por defecto
-            if (!usuario) {
-                const usuarioDefecto = {
-                    nombreCompleto: 'Usuario Visitante',
-                    email: 'visitante@tecair.cr',
-                    telefono: '',
-                    esEstudiante: false,
-                    millas: 0
-                };
-                guardarUsuarioActual(usuarioDefecto);
-            }
-            
-            const usuarioActual = obtenerUsuarioActual();
-            if (usuarioActual && usuarioActual.nombreCompleto) {
-                document.getElementById('bienvenidaUsuario').innerHTML = 
-                    `¡Bienvenido, <strong>${usuarioActual.nombreCompleto}</strong>!<br><em>Busca tu próximo destino</em>`;
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Si no hay sesión, redirigir al login
+            if (!estaAutenticado()) {
+                window.location.href = 'index.html';
+                return;
             }
 
-            // Simular carga de promociones
-            cargarPromociones();
-            cargarMillas();
+            const usuario = obtenerUsuarioActual();
+
+            // Muestra el saludo personalizado con el nombre del usuario
+            if (usuario) {
+                const nombre = usuario.nombre1
+                    ? `${usuario.nombre1} ${usuario.apellido1}`
+                    : usuario.nombreCompleto ?? 'Usuario';
+                document.getElementById('bienvenidaUsuario').innerHTML =
+                    `¡Bienvenido, <strong>${nombre}</strong>!<br><em>Busca tu próximo destino</em>`;
+                document.getElementById('cantidadMillas').textContent = usuario.millas ?? 0;
+            }
+
+            // Carga las últimas promociones del API
+            await cargarPromocionesRecientes();
         });
 
-        function cargarPromociones() {
-            const promocionesDiv = document.getElementById('promocionesRecientes');
-            // Datos simulados
-            const promociones = [
-                { origen: 'San José', destino: 'Liberia', precio: '$45', descuento: '30%' },
-                { origen: 'San José', destino: 'Limón', precio: '$35', descuento: '25%' }
-            ];
+        /**
+         * Carga las últimas 2 promociones del API y las muestra en el menú
+         */
+        async function cargarPromocionesRecientes() {
+            const div = document.getElementById('promocionesRecientes');
+            try {
+                const [dataPromociones, dataRutas] = await Promise.all([
+                    obtenerPromociones(),
+                    apiGet('rutas')
+                ]);
+                const rutas = dataRutas.rutas ?? [];
+                const promociones = (dataPromociones.promociones ?? []).slice(0, 2);
 
-            let html = '';
-            promociones.forEach(promo => {
-                html += `<div class="promo-item">
-                    <strong>${promo.origen} → ${promo.destino}</strong><br>
-                    Desde ${promo.precio} <span class="descuento">${promo.descuento} desc.</span>
-                </div>`;
-            });
+                if (promociones.length === 0) {
+                    div.innerHTML = '<p>No hay promociones disponibles</p>';
+                    return;
+                }
 
-            promocionesDiv.innerHTML = html;
-        }
+                let html = '';
+                promociones.forEach(promo => {
+                    const ruta    = rutas.find(r => r.id_ruta === promo.id_ruta);
+                    const origen  = ruta?.escalas?.find(e => e.tipo === "origen")?.nombre  ?? `Ruta #${promo.id_ruta}`;
+                    const destino = ruta?.escalas?.find(e => e.tipo === "destino")?.nombre ?? "";
+                    const descripcion = destino ? `${origen} → ${destino}` : origen;
 
-        function cargarMillas() {
-            const usuario = obtenerUsuarioActual();
-            if (usuario && usuario.millas !== undefined) {
-                document.getElementById('milasUsuario').innerHTML = 
-                    `<p>Millas disponibles: <strong>${usuario.millas}</strong></p>`;
+                    html += `
+                        <div class="promo-item">
+                            <strong>${descripcion}</strong><br>
+                            Desde <strong>$${promo.precio}</strong>
+                            ${promo.fecha_fin ? `<br><small>Hasta: ${promo.fecha_fin}</small>` : ''}
+                        </div>`;
+                });
+                div.innerHTML = html;
+            } catch (error) {
+                div.innerHTML = '<p>Error al cargar promociones</p>';
             }
-        }
-
-        function redirigir(ruta) {
-            window.location.href = ruta;
         }
     </script>
 </body>

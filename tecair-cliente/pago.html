@@ -236,7 +236,10 @@
             });
         }
 
-        function procesarPago() {
+        /**
+         * Procesa el pago — llama al API real con los datos de la reservación
+         */
+        async function procesarPago() {
             const aceptarTerminos = document.getElementById('aceptarTerminos').checked;
 
             if (!aceptarTerminos) {
