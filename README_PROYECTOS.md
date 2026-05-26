@@ -8,13 +8,13 @@
   - `Configuration/`
   - `Properties/`
   - `Docs/`
-- `tecair-api/src/TecAir.Contracts/` → DTOs y contratos compartidos
-- `tecair-api/src/TecAir.Domain/` → Entidades y reglas de dominio
-- `tecair-api/src/TecAir.Application/` → Servicios, interfaces de casos de uso y configuración de aplicación
-- `tecair-api/src/TecAir.Infrastructure/` → Repositorios, EF Core, persistencia
+- `tecair-api/TecAir.Contracts/` → DTOs y contratos compartidos
+- `tecair-api/TecAir.Domain/` → Entidades y reglas de dominio
+- `tecair-api/TecAir.Application/` → Servicios, interfaces de casos de uso y configuración de aplicación
+- `tecair-api/TecAir.Infrastructure/` → Repositorios, EF Core, persistencia
 - `tests/TecAir.Api.Tests/` → Pruebas
 
 ## Regla práctica
 
 - Todo lo HTTP/API vive en `tecair-api`.
-- Todo lo reusable entre apps vive en `tecair-api/src/*`.
+- Todo lo reusable entre apps vive en `tecair-api/*`.

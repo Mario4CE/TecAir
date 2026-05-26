@@ -14,10 +14,10 @@ fi
 
 dotnet sln TecAir.sln add \
   tecair-api/TecAir.Api.csproj \
-  tecair-api/src/TecAir.Contracts/TecAir.Contracts.csproj \
-  tecair-api/src/TecAir.Domain/TecAir.Domain.csproj \
-  tecair-api/src/TecAir.Application/TecAir.Application.csproj \
-  tecair-api/src/TecAir.Infrastructure/TecAir.Infrastructure.csproj \
+  tecair-api/TecAir.Contracts/TecAir.Contracts.csproj \
+  tecair-api/TecAir.Domain/TecAir.Domain.csproj \
+  tecair-api/TecAir.Application/TecAir.Application.csproj \
+  tecair-api/TecAir.Infrastructure/TecAir.Infrastructure.csproj \
   tests/TecAir.Api.Tests/TecAir.Api.Tests.csproj
 
 echo "TecAir.sln actualizada correctamente."
