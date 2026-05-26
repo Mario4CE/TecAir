@@ -41,6 +41,7 @@ public sealed class TecAirDb(DbContextOptions<TecAirDb> options) : DbContext(opt
             entity.Property(x => x.Universidad).HasColumnName("universidad");
             entity.Property(x => x.Carnet).HasColumnName("carnet");
             entity.Property(x => x.Millas).HasColumnName("millas");
+            entity.Property(x => x.EsAdmin).HasColumnName("es_admin");
         });
 
         modelBuilder.Entity<Avion>(entity =>

@@ -1,35 +1,25 @@
 /**
- * API.js - Funciones para comunicación con la API
+ * api.js — Funciones para comunicación con la API de TECAir
+ *
+ * URL base centralizada — cambiar aquí si el servidor cambia de dirección.
+ * Todos los demás archivos usan estas funciones, nunca llaman a fetch directamente.
  */
 
-// URL base de la API (cambiar según necesidad)
+// URL base del API
 const API_BASE_URL = 'http://localhost:5000/api';
 
 /**
- * Realiza una petición GET a la API
- * @param {string} endpoint - Endpoint de la API
- * @returns {Promise} Respuesta de la API
+ * Realiza una petición GET al API
+ * @param {string} endpoint - Endpoint sin la base URL
+ * @returns {Promise<object>} Respuesta del API en JSON
  */
 async function apiGet(endpoint) {
   try {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const respuesta = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: 'GET',
-      headers: headers
+      headers: { 'Content-Type': 'application/json' }
     });
-
-    if (!respuesta.ok) {
-      throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
-    }
-
+    if (!respuesta.ok) throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
     return await respuesta.json();
   } catch (error) {
     console.error('Error en apiGet:', error);
@@ -38,33 +28,22 @@ async function apiGet(endpoint) {
 }
 
 /**
- * Realiza una petición POST a la API
- * @param {string} endpoint - Endpoint de la API
- * @param {object} datos - Datos a enviar
- * @returns {Promise} Respuesta de la API
+ * Realiza una petición POST al API
+ * @param {string} endpoint
+ * @param {object} datos - Cuerpo de la petición
+ * @returns {Promise<object>}
  */
 async function apiPost(endpoint, datos) {
   try {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const respuesta = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: 'POST',
-      headers: headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datos)
     });
-
     if (!respuesta.ok) {
-      const error = await respuesta.json();
+      const error = await respuesta.json().catch(() => ({}));
       throw new Error(error.mensaje || `Error ${respuesta.status}`);
     }
-
     return await respuesta.json();
   } catch (error) {
     console.error('Error en apiPost:', error);
@@ -73,33 +52,22 @@ async function apiPost(endpoint, datos) {
 }
 
 /**
- * Realiza una petición PUT a la API
- * @param {string} endpoint - Endpoint de la API
- * @param {object} datos - Datos a actualizar
- * @returns {Promise} Respuesta de la API
+ * Realiza una petición PUT al API
+ * @param {string} endpoint
+ * @param {object} datos
+ * @returns {Promise<object>}
  */
 async function apiPut(endpoint, datos) {
   try {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const respuesta = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: 'PUT',
-      headers: headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datos)
     });
-
     if (!respuesta.ok) {
-      const error = await respuesta.json();
+      const error = await respuesta.json().catch(() => ({}));
       throw new Error(error.mensaje || `Error ${respuesta.status}`);
     }
-
     return await respuesta.json();
   } catch (error) {
     console.error('Error en apiPut:', error);
@@ -108,30 +76,17 @@ async function apiPut(endpoint, datos) {
 }
 
 /**
- * Realiza una petición DELETE a la API
- * @param {string} endpoint - Endpoint de la API
- * @returns {Promise} Respuesta de la API
+ * Realiza una petición DELETE al API
+ * @param {string} endpoint
+ * @returns {Promise<object>}
  */
 async function apiDelete(endpoint) {
   try {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const respuesta = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: 'DELETE',
-      headers: headers
+      headers: { 'Content-Type': 'application/json' }
     });
-
-    if (!respuesta.ok) {
-      throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
-    }
-
+    if (!respuesta.ok) throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
     return await respuesta.json();
   } catch (error) {
     console.error('Error en apiDelete:', error);
@@ -140,62 +95,55 @@ async function apiDelete(endpoint) {
 }
 
 /**
- * Obtiene la lista de vuelos disponibles
- * @param {object} parametros - Parámetros de búsqueda
- * @returns {Promise} Lista de vuelos
+ * Obtiene vuelos disponibles, con filtro opcional de origen y destino
+ * @param {object} parametros - { origen, destino }
+ * @returns {Promise<object>}
  */
-async function obtenerVuelos(parametros) {
+async function obtenerVuelos(parametros = {}) {
   const query = new URLSearchParams(parametros).toString();
-  return await apiGet(`vuelos?${query}`);
+  return await apiGet(`vuelos${query ? '?' + query : ''}`);
 }
 
 /**
- * Obtiene las reservaciones del usuario
- * @returns {Promise} Lista de reservaciones
+ * Obtiene las reservaciones de un usuario
+ * @param {number} idUsuario
+ * @returns {Promise<object>}
  */
-async function obtenerReservaciones() {
-  return await apiGet('reservaciones');
+async function obtenerReservaciones(idUsuario) {
+  return await apiGet(`reservaciones?id_usuario=${idUsuario}`);
 }
 
 /**
  * Crea una nueva reservación
- * @param {object} datosReservacion - Datos de la reservación
- * @returns {Promise} Confirmación de reservación
+ * @param {object} datosReservacion
+ * @returns {Promise<object>}
  */
 async function crearReservacion(datosReservacion) {
   return await apiPost('reservaciones', datosReservacion);
 }
 
 /**
+ * Cancela una reservación
+ * @param {number} idReservacion
+ * @returns {Promise<object>}
+ */
+async function cancelarReservacion(idReservacion) {
+  return await apiPost(`reservaciones/${idReservacion}/cancelar`, {});
+}
+
+/**
  * Obtiene las promociones disponibles
- * @returns {Promise} Lista de promociones
+ * @returns {Promise<object>}
  */
 async function obtenerPromociones() {
   return await apiGet('promociones');
 }
 
 /**
- * Obtiene el perfil del usuario actual
- * @returns {Promise} Datos del usuario
+ * Procesa un pago para una reservación
+ * @param {object} datosPago - { id_reservacion, monto, metodo }
+ * @returns {Promise<object>}
  */
-async function obtenerPerfil() {
-  return await apiGet('usuarios/perfil');
-}
-
-/**
- * Actualiza el perfil del usuario
- * @param {object} datos - Datos a actualizar
- * @returns {Promise} Confirmación de actualización
- */
-async function actualizarPerfil(datos) {
-  return await apiPut('usuarios/perfil', datos);
-}
-
-/**
- * Procesa un pago
- * @param {object} datosPago - Datos de pago
- * @returns {Promise} Confirmación de pago
- */
-async function procesarPago(datosPago) {
+async function procesarPagoApi(datosPago) {
   return await apiPost('pagos', datosPago);
 }
