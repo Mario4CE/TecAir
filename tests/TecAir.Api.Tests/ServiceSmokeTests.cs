@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using TecAir.Api.Data;
-using TecAir.Api.Dtos;
-using TecAir.Api.Repositories;
-using TecAir.Api.Services;
+using TecAir.Application.Configuration;
+using TecAir.Infrastructure.Persistence;
+using TecAir.Contracts.Dtos;
+using TecAir.Infrastructure.Repositories;
+using TecAir.Application.Services;
 using Xunit;
 
 namespace TecAir.Api.Tests;

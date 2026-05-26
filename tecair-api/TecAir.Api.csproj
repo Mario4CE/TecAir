@@ -10,4 +10,11 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../src/TecAir.Application/TecAir.Application.csproj" />
+		<ProjectReference Include="../src/TecAir.Contracts/TecAir.Contracts.csproj" />
+		<ProjectReference Include="../src/TecAir.Infrastructure/TecAir.Infrastructure.csproj" />
+	</ItemGroup>
+
 </Project>

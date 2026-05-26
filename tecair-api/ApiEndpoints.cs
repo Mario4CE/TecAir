@@ -1,6 +1,6 @@
 using TecAir.Api.Config;
-using TecAir.Api.Dtos;
-using TecAir.Api.Interfaces;
+using TecAir.Contracts.Dtos;
+using TecAir.Application.Interfaces;
 
 namespace TecAir.Api;
 
