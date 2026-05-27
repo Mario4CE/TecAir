@@ -7,7 +7,7 @@
  */
 
 // URL base del API. Cambiar esto cuando el backend esté listo.
-export const BASE_URL = "/api";
+export const BASE_URL = "http://localhost:5000/api";
 
 /**
  * Endpoints agrupados por recurso.
@@ -62,6 +62,11 @@ export const ENDPOINTS = {
   maletas: {
     list:   `${BASE_URL}/maletas`,
     create: `${BASE_URL}/maletas`,
+  },
+  reservaciones: {
+    list:     `${BASE_URL}/reservaciones`,
+    create:   `${BASE_URL}/reservaciones`,
+    cancelar: (id) => `${BASE_URL}/reservaciones/${id}/cancelar`,
   },
 };
 
