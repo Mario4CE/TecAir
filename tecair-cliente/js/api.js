@@ -6,7 +6,7 @@
  */
 
 // URL base del API
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 /**
  * Realiza una petición GET al API

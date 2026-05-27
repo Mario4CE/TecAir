@@ -23,7 +23,7 @@ namespace TecAir.Services
         private readonly HttpClient _httpClient;
 
         // URL base del API — cambiar si el servidor está en otra dirección
-        private const string ApiBaseUrl = "http://192.168.0.12:5001/api";
+        private const string ApiBaseUrl = "http://192.168.0.12:5000/api";
         // Nota: en Android el emulador usa 10.0.2.2 para acceder al localhost
         // Si se prueba en dispositivo físico, usar la IP local del servidor
         // Ejemplo: "http://192.168.1.100:5000/api"
