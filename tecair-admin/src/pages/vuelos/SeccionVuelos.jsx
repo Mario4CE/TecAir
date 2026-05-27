@@ -237,9 +237,7 @@ export default function SeccionVuelos() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
 // ModalNuevoVuelo — ahora recibe rutas y aviones del API
-// ─────────────────────────────────────────────────────────
 function ModalNuevoVuelo({ rutas, aviones, onGuardar, onCancelar }) {
   const [form, setForm] = useState({
     id_ruta:      "",

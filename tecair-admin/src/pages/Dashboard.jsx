@@ -12,6 +12,7 @@ import SeccionCheckin from "./checkin/SeccionCheckin";
 import SeccionMaletas from "./maletas/SeccionMaletas";
 import SeccionPromociones from "./promociones/SeccionPromociones";
 import SeccionUsuarios from "./usuarios/SeccionUsuarios";
+import SeccionReservaciones from "./reservaciones/SeccionReservaciones";
 
 const COLOR_PRINCIPAL = "#6d4fc2";
 const COLOR_FONDO = "#f5f3ff";
@@ -21,6 +22,7 @@ const COLOR_FONDO = "#f5f3ff";
 const NAV_ITEMS = [
   { id: "inicio",      etiqueta: "Inicio"       },
   { id: "vuelos",      etiqueta: "Vuelos"        },
+  { id: "reservaciones", etiqueta: "Reservaciones" },
   { id: "checkin",     etiqueta: "Check-in"      },
   { id: "maletas",     etiqueta: "Maletas"       },
   { id: "promociones", etiqueta: "Promociones"   },
@@ -122,6 +124,8 @@ function ContenidoSeccion({ seccion, usuario, onNavegar }) {
       return <SeccionInicio usuario={usuario} onNavegar={onNavegar} />;
     case "vuelos":
       return <SeccionVuelos usuario={usuario} onNavegar={onNavegar} />;
+    case "reservaciones":
+      return <SeccionReservaciones usuario={usuario} onNavegar={onNavegar} />;
     case "checkin":
       return <SeccionCheckin usuario={usuario} onNavegar={onNavegar} />;
     case "maletas":

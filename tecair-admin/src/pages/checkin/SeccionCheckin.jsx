@@ -395,3 +395,99 @@ function ModalPaseAbordar({ checkin, vuelo, onEnviarCorreo, onCerrar }) {
     </div>
   );
 }
+
+// ModalNuevoCheckin — formulario para registrar un check-in
+function ModalNuevoCheckin({ vuelos, usuarios, onGuardar, onCancelar }) {
+  const [form, setForm] = useState({
+    id_vuelo:   "",
+    id_usuario: "",
+    asiento:    "",
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.id_vuelo || !form.id_usuario || !form.asiento) {
+      setError("Todos los campos son obligatorios.");
+      return;
+    }
+    onGuardar({
+      id_vuelo:   parseInt(form.id_vuelo),
+      id_usuario: parseInt(form.id_usuario),
+      asiento:    form.asiento.toUpperCase(),
+    });
+  };
+
+  return (
+    <div
+      className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+      style={{ background: "rgba(0,0,0,0.4)", zIndex: 1000 }}
+    >
+      <div className="card border-0 shadow rounded-4" style={{ width: "100%", maxWidth: 420 }}>
+        <div className="card-body p-4">
+          <h5 className="fw-bold mb-1" style={{ color: "#3c3489" }}>Nuevo check-in</h5>
+          <p className="text-muted small mb-4">Registre el check-in del pasajero</p>
+
+          {error && <div className="alert alert-danger py-2 small rounded-3">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label fw-semibold small text-secondary">
+                Vuelo <span className="text-danger">*</span>
+              </label>
+              <select name="id_vuelo" className="form-select rounded-3"
+                value={form.id_vuelo} onChange={handleChange} required>
+                <option value="">Seleccionar vuelo</option>
+                {vuelos.filter((v) => v.estado === "abierto").map((v) => (
+                  <option key={v.id_vuelo} value={v.id_vuelo}>
+                    #{v.id_vuelo} — {v.origen} → {v.destino}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label fw-semibold small text-secondary">
+                Pasajero <span className="text-danger">*</span>
+              </label>
+              <select name="id_usuario" className="form-select rounded-3"
+                value={form.id_usuario} onChange={handleChange} required>
+                <option value="">Seleccionar pasajero</option>
+                {usuarios.map((u) => (
+                  <option key={u.id_usuario} value={u.id_usuario}>
+                    {u.nombre1} {u.apellido1} — {u.correo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label fw-semibold small text-secondary">
+                Asiento <span className="text-danger">*</span>
+              </label>
+              <input type="text" name="asiento" className="form-control rounded-3"
+                placeholder="ej. 12A" value={form.asiento}
+                onChange={handleChange} required />
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 pt-3"
+              style={{ borderTop: "0.5px solid #e8e4f8" }}>
+              <button type="button" className="btn rounded-3 fw-semibold"
+                style={{ background: "#f5f3ff", color: "#6d4fc2" }}
+                onClick={onCancelar}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn rounded-3 fw-semibold text-white"
+                style={{ background: "#6d4fc2" }}>
+                Registrar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
