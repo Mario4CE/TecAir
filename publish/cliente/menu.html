@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--
+    menu.html — Página principal después de autenticarse
+    Muestra bienvenida, accesos rápidos y últimas promociones del API
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECAir - Menú Principal</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand"><h2>✈️ TECAir</h2></div>
+            <ul class="navbar-menu">
+                <li><a href="menu.html" class="active">Inicio</a></li>
+                <li><a href="vuelos.html">Buscar Vuelos</a></li>
+                <li><a href="reservaciones.html">Mis Reservaciones</a></li>
+                <li><a href="promociones.html">Promociones</a></li>
+                <li><a href="perfil.html">Mi Perfil</a></li>
+                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Tarjeta de bienvenida -->
+        <div class="card welcome-card">
+            <div class="card-header text-center">
+                <h2>Bienvenido a TECAir</h2>
+                <p id="bienvenidaUsuario">¡Tu aerolínea de bajo costo para estudiantes!</p>
+            </div>
+            <div class="card-body text-center">
+                <div class="welcome-grid">
+                    <div class="welcome-item" onclick="window.location.href='vuelos.html'">
+                        <div class="icon">🔍</div>
+                        <h3>Buscar Vuelos</h3>
+                        <p>Encuentra el vuelo perfecto para tu destino</p>
+                    </div>
+                    <div class="welcome-item" onclick="window.location.href='reservaciones.html'">
+                        <div class="icon">📋</div>
+                        <h3>Mis Reservaciones</h3>
+                        <p>Consulta y gestiona tus reservaciones</p>
+                    </div>
+                    <div class="welcome-item" onclick="window.location.href='promociones.html'">
+                        <div class="icon">🎉</div>
+                        <h3>Promociones</h3>
+                        <p>Descubre las mejores ofertas disponibles</p>
+                    </div>
+                    <div class="welcome-item" onclick="window.location.href='perfil.html'">
+                        <div class="icon">👤</div>
+                        <h3>Mi Perfil</h3>
+                        <p>Actualiza tu información personal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <!-- Beneficios -->
+            <div class="info-card">
+                <h3>¿Por qué viajar con TECAir?</h3>
+                <ul>
+                    <li>✓ Tarifas especiales para estudiantes</li>
+                    <li>✓ Programa de millas de lealtad</li>
+                    <li>✓ Reservaciones seguras y confiables</li>
+                    <li>✓ Atención al cliente 24/7</li>
+                </ul>
+            </div>
+
+            <!-- Promociones recientes — cargadas desde el API -->
+            <div class="info-card">
+                <h3>Últimas Promociones</h3>
+                <div id="promocionesRecientes">
+                    <p>Cargando promociones...</p>
+                </div>
+            </div>
+
+            <!-- Programa de lealtad — millas del usuario actual -->
+            <div class="info-card">
+                <h3>Programa de Lealtad</h3>
+                <p>Acumula millas en cada reservación y canjéalas por vuelos gratis.</p>
+                <div id="millasUsuario" class="millas-info">
+                    <p>Millas disponibles: <strong id="cantidadMillas">0</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Si no hay sesión, redirigir al login
+            if (!estaAutenticado()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const usuario = obtenerUsuarioActual();
+
+            // Muestra el saludo personalizado con el nombre del usuario
+            if (usuario) {
+                const nombre = usuario.nombre1
+                    ? `${usuario.nombre1} ${usuario.apellido1}`
+                    : usuario.nombre_completo ?? usuario.nombreCompleto ?? 'Usuario';
+                document.getElementById('bienvenidaUsuario').innerHTML =
+                    `¡Bienvenido, <strong>${nombre}</strong>!<br><em>Busca tu próximo destino</em>`;
+                document.getElementById('cantidadMillas').textContent = usuario.millas ?? 0;
+            }
+
+            // Carga las últimas promociones del API
+            await cargarPromocionesRecientes();
+        });
+
+        /**
+         * Carga las últimas 2 promociones del API y las muestra en el menú
+         */
+        async function cargarPromocionesRecientes() {
+            const div = document.getElementById('promocionesRecientes');
+            try {
+                const [dataPromociones, dataRutas] = await Promise.all([
+                    obtenerPromociones(),
+                    apiGet('rutas')
+                ]);
+                const rutas = dataRutas.rutas ?? [];
+                const promociones = (dataPromociones.promociones ?? []).slice(0, 2);
+
+                if (promociones.length === 0) {
+                    div.innerHTML = '<p>No hay promociones disponibles</p>';
+                    return;
+                }
+
+                let html = '';
+                promociones.forEach(promo => {
+                    const ruta    = rutas.find(r => r.id_ruta === promo.id_ruta);
+                    const origen  = ruta?.escalas?.find(e => e.tipo === "origen")?.nombre  ?? `Ruta #${promo.id_ruta}`;
+                    const destino = ruta?.escalas?.find(e => e.tipo === "destino")?.nombre ?? "";
+                    const descripcion = destino ? `${origen} → ${destino}` : origen;
+
+                    html += `
+                        <div class="promo-item">
+                            <strong>${descripcion}</strong><br>
+                            Desde <strong>$${promo.precio}</strong>
+                            ${promo.fecha_fin ? `<br><small>Hasta: ${promo.fecha_fin}</small>` : ''}
+                        </div>`;
+                });
+                div.innerHTML = html;
+            } catch (error) {
+                div.innerHTML = '<p>Error al cargar promociones</p>';
+            }
+        }
+    </script>
+</body>
+</html>

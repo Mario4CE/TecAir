@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--
+    =====================================
+    CONFIGURACIÓN DEL DOCUMENTO
+    =====================================
+    Página para buscar vuelos disponibles
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECAir - Buscar Vuelos</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!--
+    =====================================
+    BARRA DE NAVEGACIÓN
+    =====================================
+    Menú superior con acceso a todas las secciones
+    -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h2>✈️ TECAir</h2>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="menu.html">Inicio</a></li>
+                <li><a href="vuelos.html" class="active">Buscar Vuelos</a></li>
+                <li><a href="reservaciones.html">Mis Reservaciones</a></li>
+                <li><a href="promociones.html">Promociones</a></li>
+                <li><a href="perfil.html">Mi Perfil</a></li>
+                <li><a href="#" onclick="salir(); return false;">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--
+    =====================================
+    CONTENIDO PRINCIPAL
+    =====================================
+    Sección de búsqueda y resultados de vuelos
+    -->
+    <div class="container">
+        <div class="search-section">
+            <h1>Buscar Vuelos</h1>
+
+            <!--
+            FORMULARIO DE BÚSQUEDA
+            Permite especificar criterios de búsqueda:
+            - Origen y destino
+            - Fechas de viaje
+            - Cantidad de pasajeros
+            -->
+            <div class="card search-card">
+                <form id="busquedaForm" class="search-form">
+                    <!--
+                    PRIMERA FILA: Origen, Destino y Fecha Salida
+                    -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="origen">Aeropuerto de Origen</label>
+                            <select id="origen" name="origen" required>
+                                <option value="">-- Selecciona origen --</option>
+                                <option value="SJO">San José (SJO)</option>
+                                <option value="LIR">Liberia (LIR)</option>
+                                <option value="LIM">Limón (LIM)</option>
+                                <option value="QST">Quepos (QST)</option>
+                                <option value="PJM">Palmar (PJM)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="destino">Aeropuerto de Destino</label>
+                            <select id="destino" name="destino" required>
+                                <option value="">-- Selecciona destino --</option>
+                                <option value="SJO">San José (SJO)</option>
+                                <option value="LIR">Liberia (LIR)</option>
+                                <option value="LIM">Limón (LIM)</option>
+                                <option value="QST">Quepos (QST)</option>
+                                <option value="PJM">Palmar (PJM)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fechaSalida">Fecha de Salida</label>
+                            <input type="date" id="fechaSalida" name="fechaSalida" required>
+                        </div>
+                    </div>
+
+                    <!--
+                    SEGUNDA FILA: Fecha Regreso, Pasajeros y Botón Buscar
+                    -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaRegreso">Fecha de Regreso (opcional)</label>
+                            <input type="date" id="fechaRegreso" name="fechaRegreso">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pasajeros">Pasajeros</label>
+                            <select id="pasajeros" name="pasajeros" required>
+                                <option value="1">1 Pasajero</option>
+                                <option value="2">2 Pasajeros</option>
+                                <option value="3">3 Pasajeros</option>
+                                <option value="4">4 Pasajeros</option>
+                                <option value="5">5 Pasajeros</option>
+                                <option value="6">6 Pasajeros</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary">Buscar Vuelos</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!--
+            ALERTAS DE FEEDBACK
+            Mostrar mensajes de error o éxito en la búsqueda
+            -->
+            <div id="alertError" class="alert alert-error"></div>
+            <div id="alertSuccess" class="alert alert-success"></div>
+
+            <!--
+            INDICADOR DE CARGA
+            Spinner animado mientras se buscan vuelos
+            -->
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Buscando vuelos...</p>
+            </div>
+
+            <!-- Resultados de Búsqueda -->
+            <div id="resultados" class="resultados-section" style="display: none;">
+                <h2>Vuelos Disponibles</h2>
+                <div id="listaVuelos" class="vuelos-grid">
+                    <!-- Los vuelos se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 TECAir. Instituto Tecnológico de Costa Rica. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // protegerRuta(); // Desactivado para fase de prueba
+
+            // Establecer fecha mínima en hoy
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaSalida').min = hoy;
+            document.getElementById('fechaRegreso').min = hoy;
+
+            // Manejar cambios en fecha de salida
+            document.getElementById('fechaSalida').addEventListener('change', function() {
+                document.getElementById('fechaRegreso').min = this.value;
+            });
+
+            // Manejar búsqueda
+            document.getElementById('busquedaForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await buscarVuelos();
+            });
+        });
+
+        async function buscarVuelos() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+
+            if (!origen || !destino) {
+                mostrarAlerta('Por favor selecciona origen y destino', 'error');
+                return;
+            }
+
+            if (origen === destino) {
+                mostrarAlerta('El origen y destino no pueden ser iguales', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('resultados').style.display = 'none';
+
+                // Simular búsqueda de vuelos
+                const vuelos = generarVuelosSimulados(origen, destino);
+
+                if (vuelos.length === 0) {
+                    mostrarAlerta('No se encontraron vuelos para esa ruta', 'error');
+                } else {
+                    mostrarResultados(vuelos);
+                    document.getElementById('resultados').style.display = 'block';
+                }
+            } catch (error) {
+                mostrarAlerta('Error al buscar vuelos', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function generarVuelosSimulados(origen, destino) {
+            const aeropuertos = {
+                'SJO': 'San José',
+                'LIR': 'Liberia',
+                'LIM': 'Limón',
+                'QST': 'Quepos',
+                'PJM': 'Palmar'
+            };
+
+            // Simular 3-5 vuelos
+            const vuelos = [];
+            for (let i = 0; i < 4; i++) {
+                const hora = String(8 + i).padStart(2, '0');
+                vuelos.push({
+                    id: i + 1,
+                    numero: `TEC${Math.floor(Math.random() * 9000) + 1000}`,
+                    origen: origen,
+                    destino: destino,
+                    originNombre: aeropuertos[origen],
+                    destinoNombre: aeropuertos[destino],
+                    salida: `${hora}:00`,
+                    llegada: `${String(hora + 2).padStart(2, '0')}:15`,
+                    duracion: '2h 15m',
+                    precio: Math.floor(Math.random() * 150) + 45,
+                    asientosDisponibles: Math.floor(Math.random() * 50) + 10,
+                    escala: i % 2 === 0 ? 'Directo' : '1 escala'
+                });
+            }
+            return vuelos;
+        }
+
+        function mostrarResultados(vuelos) {
+            const listaVuelos = document.getElementById('listaVuelos');
+            let html = '';
+
+            vuelos.forEach(vuelo => {
+                html += `
+                    <div class="vuelo-card">
+                        <div class="vuelo-header">
+                            <h3>${vuelo.numero}</h3>
+                            <span class="escala-badge">${vuelo.escala}</span>
+                        </div>
+                        
+                        <div class="vuelo-ruta">
+                            <div class="aeropuerto">
+                                <div class="hora">${vuelo.salida}</div>
+                                <div class="codigo">${vuelo.origen}</div>
+                                <small>${vuelo.originNombre}</small>
+                            </div>
+                            <div class="linea-ruta">
+                                <div class="flecha">→</div>
+                                <div class="duracion">${vuelo.duracion}</div>
+                            </div>
+                            <div class="aeropuerto">
+                                <div class="hora">${vuelo.llegada}</div>
+                                <div class="codigo">${vuelo.destino}</div>
+                                <small>${vuelo.destinoNombre}</small>
+                            </div>
+                        </div>
+
+                        <div class="vuelo-footer">
+                            <div class="detalles">
+                                <span>💺 ${vuelo.asientosDisponibles} asientos</span>
+                                <span>💰 $${vuelo.precio} p/p</span>
+                            </div>
+                            <button class="btn btn-sm btn-success" onclick="seleccionarVuelo(${vuelo.id})">
+                                Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listaVuelos.innerHTML = html;
+        }
+
+        function seleccionarVuelo(vueloId) {
+            // Guardar vuelo seleccionado y redirigir a reservación
+            sessionStorage.setItem('vueloSeleccionado', vueloId);
+            mostrarAlerta('Vuelo seleccionado. Redirigiendo...', 'success');
+            setTimeout(() => {
+                window.location.href = 'reservaciones.html';
+            }, 1500);
+        }
+
+        function mostrarAlerta(mensaje, tipo) {
+            const alertError = document.getElementById('alertError');
+            const alertSuccess = document.getElementById('alertSuccess');
+
+            if (tipo === 'error') {
+                alertError.textContent = mensaje;
+                alertError.classList.add('show');
+                alertSuccess.classList.remove('show');
+            } else {
+                alertSuccess.textContent = mensaje;
+                alertSuccess.classList.add('show');
+                alertError.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

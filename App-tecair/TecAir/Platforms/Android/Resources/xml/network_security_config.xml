@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Permitir conexiones HTTP a la red local (172.18.x.x) -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">172.18.34.148</domain>
-        <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">127.0.0.1</domain>
-        <!-- Rango de red local: 172.18.0.0/16 -->
-        <domain includeSubdomains="true">172.18.0.0</domain>
-    </domain-config>
+
+	<!-- Permitir conexiones HTTP a la red local actual -->
+	<domain-config cleartextTrafficPermitted="true">
+
+		<!-- IP de la PC/servidor donde está corriendo IIS o la API -->
+		<domain includeSubdomains="true">192.168.0.12</domain>
+
+		<!-- Localhost del propio dispositivo/emulador -->
+		<domain includeSubdomains="true">localhost</domain>
+		<domain includeSubdomains="true">127.0.0.1</domain>
+
+	</domain-config>
+
 </network-security-config>
