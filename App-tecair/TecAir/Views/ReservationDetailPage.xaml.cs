@@ -1,0 +1,188 @@
+using TecAir.ViewModels;
+
+namespace TecAir.Views;
+
+public partial class ReservationDetailPage : ContentPage
+{
+    private ReservationDetailViewModel? _viewModel;
+    private int _flightId;
+    private Dictionary<string, Button> _seatButtonMap = new Dictionary<string, Button>();
+
+    public ReservationDetailPage()
+    {
+        InitializeComponent();
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (_viewModel == null)
+        {
+            _viewModel = new ReservationDetailViewModel();
+            BindingContext = _viewModel;
+        }
+
+        // Cargar detalles del vuelo si se pasó un ID
+        if (_flightId > 0)
+        {
+            await _viewModel.LoadFlightDetailsAsync(_flightId);
+            await GenerateSeatGridAsync();
+        }
+    }
+
+    private async Task GenerateSeatGridAsync()
+    {
+        try
+        {
+            // Generar mapa de asientos (6 columnas x 8 filas = 48 asientos)
+            // Simulando un avión pequeño
+            var grid = this.FindByName<Grid>("SeatGrid");
+
+            if (grid == null)
+            {
+                // Si no existe, buscar el Grid en la jerarquía
+                var frame = this.FindByName<Frame>("SeatSelectionFrame");
+                if (frame is not null)
+                {
+                    // Encontrar el Grid dentro del Frame
+                    var layout = frame.Content as VerticalStackLayout;
+                    grid = layout?.FindByName<Grid>("SeatGrid") as Grid;
+                }
+            }
+
+            if (grid == null) return;
+
+            grid.Clear();
+
+            int cols = 6;
+            const int totalSeats = 48;
+
+            // Obtener asientos ya reservados desde la base de datos
+            var databaseService = MauiProgram.DatabaseService;
+            var occupiedSeats = await databaseService.GetReservedSeatsForFlightAsync(_flightId);
+
+            for (int i = 0; i < totalSeats; i++)
+            {
+                int row = i / cols;
+                int col = i % cols;
+
+                // Crear identificador del asiento (1A, 1B, 1C, 1D, 1E, 1F, 2A, etc.)
+                string seatNumber = $"{row + 1}{(char)('A' + col)}";
+                bool isOccupied = occupiedSeats.Contains(seatNumber);
+
+                var button = new Button
+                {
+                    Text = seatNumber,
+                    FontSize = 10,
+                    Padding = 5,
+                    CornerRadius = 6,
+                    BackgroundColor = isOccupied ? Colors.Gray : Colors.LightGray,
+                    TextColor = isOccupied ? Colors.White : Colors.Black,
+                    IsEnabled = !isOccupied
+                };
+
+                button.Clicked += (s, e) => OnSeatSelected(seatNumber, button);
+
+                // Guardar referencia del botón
+                _seatButtonMap[seatNumber] = button;
+
+                grid.Add(button, col, row);
+            }
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await DisplayAlert("Error", $"Error al generar asientos: {ex.Message}", "OK");
+            });
+        }
+    }
+
+    private void OnSeatSelected(string seatNumber, Button button)
+    {
+        if (_viewModel == null) return;
+
+        // Verificar si el asiento ya está seleccionado
+        if (_viewModel.SelectedSeats.Contains(seatNumber))
+        {
+            // Deseleccionar
+            _viewModel.SelectedSeats.Remove(seatNumber);
+            button.BackgroundColor = Colors.LightGray;
+            button.TextColor = Colors.Black;
+        }
+        else
+        {
+            // Seleccionar
+            _viewModel.SelectedSeats.Add(seatNumber);
+            button.BackgroundColor = Colors.Blue;
+            button.TextColor = Colors.White;
+        }
+
+        // Actualizar etiqueta de asientos seleccionados
+        if (_viewModel.SelectedSeats.Count == 0)
+        {
+            SelectedSeatLabel.Text = "Asientos no seleccionados";
+        }
+        else
+        {
+            SelectedSeatLabel.Text = $"Asientos seleccionados: {string.Join(", ", _viewModel.SelectedSeats)}";
+        }
+    }
+
+    private void OnIncreaseLuggageClicked(object sender, EventArgs e)
+    {
+        if (_viewModel != null && _viewModel.LuggageCount < 10) // Máximo 10 maletas
+        {
+            _viewModel.LuggageCount++;
+        }
+    }
+
+    private void OnDecreaseLuggageClicked(object sender, EventArgs e)
+    {
+        if (_viewModel != null && _viewModel.LuggageCount > 0)
+        {
+            _viewModel.LuggageCount--;
+        }
+    }
+
+    private async void OnConfirmReservationClicked(object sender, EventArgs e)
+    {
+        if (_viewModel == null) return;
+
+        // Validar campos de pago
+        if (string.IsNullOrWhiteSpace(CardNumberEntry.Text))
+        {
+            await DisplayAlert("Validación", "Ingresa el número de tarjeta", "OK");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(ExpirationEntry.Text))
+        {
+            await DisplayAlert("Validación", "Ingresa la fecha de expiración", "OK");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(CVVEntry.Text))
+        {
+            await DisplayAlert("Validación", "Ingresa el CVV", "OK");
+            return;
+        }
+
+        // Validar formato de tarjeta (simple)
+        if (CardNumberEntry.Text.Replace(" ", "").Length != 16)
+        {
+            await DisplayAlert("Validación", "El número de tarjeta debe tener 16 dígitos", "OK");
+            return;
+        }
+
+        // Procesar reservación
+        await _viewModel.ConfirmReservationAsync();
+    }
+
+    // Método para establecer el ID del vuelo desde la página anterior
+    public void SetFlightId(int flightId)
+    {
+        _flightId = flightId;
+    }
+}

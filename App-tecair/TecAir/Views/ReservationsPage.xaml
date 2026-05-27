@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TecAir.Views.ReservationsPage"
+             Title="Mis Reservaciones"
+             BackgroundColor="#F5F5F5">
+
+    <VerticalStackLayout Padding="15" Spacing="15">
+        
+        <!-- Resumen de millas -->
+        <Frame BorderColor="#FFD700" CornerRadius="10" HasShadow="False" Padding="15" BackgroundColor="#FFFACD">
+            <StackLayout Orientation="Horizontal" Spacing="15">
+                <Label Text="⭐" FontSize="24" VerticalOptions="Center"/>
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="Millas de Lealtad" FontAttributes="Bold" FontSize="12" TextColor="Black"/>
+                    <Label Text="{Binding CurrentUser.LoyaltyMiles, StringFormat='{0:N0} millas'}" FontSize="14" TextColor="#FF9500" FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </StackLayout>
+        </Frame>
+
+        <!-- Reservaciones -->
+        <Label Text="Mis Reservaciones:" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
+        
+        <CollectionView 
+            x:Name="ReservationsCollectionView"
+            ItemsSource="{Binding Reservations}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.EmptyViewTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="20" Spacing="10" VerticalOptions="Center">
+                        <Label Text="📋" FontSize="48" HorizontalTextAlignment="Center"/>
+                        <Label Text="No tienes reservaciones" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#666666"/>
+                        <Label Text="Busca y reserva un vuelo para comenzar" FontSize="12" HorizontalTextAlignment="Center" TextColor="#999999"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.EmptyViewTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="#E0E0E0" CornerRadius="10" HasShadow="False" Padding="15">
+                        <VerticalStackLayout Spacing="10">
+                            <!-- Encabezado: Número de vuelo y estado -->
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Label Text="{Binding FlightNumber, StringFormat='✈️ {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#007AFF" HorizontalOptions="StartAndExpand"/>
+                                <Frame BorderColor="{Binding StatusColor}" CornerRadius="5" HasShadow="False" Padding="8,4" BackgroundColor="Transparent">
+                                    <Label Text="{Binding StatusDisplay}" FontSize="10" FontAttributes="Bold" TextColor="{Binding StatusColor}"/>
+                                </Frame>
+                            </StackLayout>
+
+                            <!-- Información de la ruta y horarios -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding RouteDisplay, StringFormat='Ruta: {0}'}" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                                <Label Text="{Binding CityDisplay}" FontSize="11" TextColor="#666666"/>
+                                <Label Text="{Binding DepartureTime, StringFormat='Salida: {0:dd/MM/yyyy HH:mm}'}" FontSize="11" TextColor="#666666"/>
+                            </VerticalStackLayout>
+
+                            <!-- Detalles de la reservación -->
+                            <StackLayout Orientation="Horizontal" Spacing="20">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Asiento" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding SeatNumber}" FontSize="14" FontAttributes="Bold" TextColor="Black"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Fecha de Reserva" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding ReservationDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" TextColor="Black"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="EndAndExpand">
+                                    <Label Text="Precio Total" FontSize="10" TextColor="#999999" FontAttributes="Bold"/>
+                                    <Label Text="{Binding TotalPrice, StringFormat='${0:F2}'}" FontSize="14" FontAttributes="Bold" TextColor="#34C759"/>
+                                </VerticalStackLayout>
+                            </StackLayout>
+
+                            <!-- Botones de acción -->
+                            <StackLayout Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
+                                <Button 
+                                    Text="✓ Check-in"
+                                    FontSize="11"
+                                    Padding="12,8"
+                                    CornerRadius="5"
+                                    BackgroundColor="#34C759"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="FillAndExpand"
+                                    Clicked="OnCheckInClicked"
+                                    CommandParameter="{Binding .}"/>
+                                <Button 
+                                    Text="✕ Cancelar"
+                                    FontSize="11"
+                                    Padding="12,8"
+                                    CornerRadius="5"
+                                    BackgroundColor="#FF3B30"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="FillAndExpand"
+                                    Clicked="OnCancelClicked"
+                                    CommandParameter="{Binding .}"/>
+                            </StackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+
+</ContentPage>
