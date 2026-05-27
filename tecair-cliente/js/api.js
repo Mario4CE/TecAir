@@ -147,7 +147,15 @@ async function crearReservacion(datosReservacion) {
  * @returns {Promise<object>}
  */
 async function cancelarReservacion(idReservacion) {
-  return await apiPatch(`reservaciones/${idReservacion}/cancelar`, {});
+  const respuesta = await fetch(`${API_BASE_URL}/reservaciones/${idReservacion}/cancelar`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!respuesta.ok) {
+    const error = await respuesta.json().catch(() => ({}));
+    throw new Error(error.mensaje || `Error ${respuesta.status}`);
+  }
+  return await respuesta.json();
 }
 
 /**
