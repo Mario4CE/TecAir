@@ -34,6 +34,59 @@ public static class ApiEndpoints
             }
         }));
 
+        /*
+        Descripción: Endpoint de autenticación de usuarios.
+        Entradas: LoginRequest con Correo y Contraseña.
+        Salidas: LoginResponse con datos del usuario.
+        Restricciones: El usuario debe existir en la BD.
+        */
+        api.MapPost("/auth/login", async (LoginRequest datos, IUsuarioService usuarioService) =>
+        {
+            try
+            {
+                // Normalizar entrada (soportar 'correo' o 'email')
+                var correo = datos.Correo ?? datos.Email;
+
+                if (string.IsNullOrWhiteSpace(correo))
+                {
+                    return Results.BadRequest(new { mensaje = "El correo es requerido." });
+                }
+
+                // Buscar usuario por correo
+                var usuarios = await usuarioService.GetUsuariosAsync();
+                var usuario = usuarios.FirstOrDefault(u => 
+                    u.Correo.Equals(correo, StringComparison.OrdinalIgnoreCase));
+
+                if (usuario == null)
+                {
+                    return Results.NotFound(new { mensaje = "Usuario no encontrado." });
+                }
+
+                // Retornar datos del usuario (sin contraseña)
+                var respuesta = new LoginResponse(
+                    Token: null, // Token será null por ahora (implementar JWT después)
+                    IdUsuario: usuario.IdUsuario,
+                    Nombre1: usuario.Nombre1,
+                    Nombre2: usuario.Nombre2,
+                    Apellido1: usuario.Apellido1,
+                    Apellido2: usuario.Apellido2,
+                    Correo: usuario.Correo,
+                    Telefono: usuario.Telefono,
+                    EsEstudiante: usuario.EsEstudiante,
+                    Universidad: usuario.Universidad,
+                    Carnet: usuario.Carnet,
+                    Millas: usuario.Millas,
+                    EsAdmin: usuario.EsAdmin
+                );
+
+                return Results.Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return Results.InternalServerError();
+            }
+        });
+
         api.MapGet("/usuarios", async (IUsuarioService usuarioService) =>
             Results.Ok(new { usuarios = await usuarioService.GetUsuariosAsync() }));
 
@@ -80,6 +133,12 @@ public static class ApiEndpoints
             catch (InvalidOperationException ex)
             {
                 return Results.BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al crear usuario: {ex.GetType().Name} - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                return Results.BadRequest(new { mensaje = $"Error al crear usuario: {ex.Message}" });
             }
         });
 

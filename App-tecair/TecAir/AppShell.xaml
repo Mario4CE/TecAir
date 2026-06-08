@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:TecAir"
     xmlns:views="clr-namespace:TecAir.Views"
-    Title="TecAir">
+    Title="TecAir"
+    FlyoutBehavior="Disabled">
 
     <!-- Rutas de navegación -->
     <ShellContent

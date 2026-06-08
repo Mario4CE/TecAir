@@ -64,6 +64,8 @@ public sealed class UsuarioService(IUsuarioRepository usuarioRepository) : IUsua
     */
     public async Task<Usuario> CrearUsuarioAsync(UsuarioRequest datos)
     {
+        System.Diagnostics.Debug.WriteLine($"CrearUsuarioAsync recibió: Nombre1={datos.Nombre1}, Apellido1={datos.Apellido1}, Correo={datos.Correo}, Email={datos.Email}");
+
         var correo = datos.Correo ?? datos.Email;
         if (string.IsNullOrWhiteSpace(datos.Nombre1) && string.IsNullOrWhiteSpace(datos.NombreCompleto))
             throw new InvalidOperationException("El nombre es obligatorio.");
@@ -85,6 +87,8 @@ public sealed class UsuarioService(IUsuarioRepository usuarioRepository) : IUsua
             Millas = datos.Millas ?? 0,
             EsAdmin = datos.EsAdmin ?? false
         };
+
+        System.Diagnostics.Debug.WriteLine($"Usuario a guardar: {usuario.Nombre1} {usuario.Apellido1} - {usuario.Correo}");
 
         await usuarioRepository.AddAsync(usuario);
         await usuarioRepository.SaveChangesAsync();

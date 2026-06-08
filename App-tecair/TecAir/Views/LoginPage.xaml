@@ -30,18 +30,9 @@
             x:Name="EmailEntry"
             Placeholder="usuario@ejemplo.com"
             Keyboard="Email"
-            Margin="0,0,0,10"
+            Margin="0,0,0,20"
             TextColor="Black"
             />
-
-        <!-- Password Input -->
-        <Label Text="Contraseña:" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
-        <Entry 
-            x:Name="PasswordEntry"
-            Placeholder="Contraseña"
-            IsPassword="True"
-            Margin="0,0,0,20"
-            TextColor="Black"/>
 
         <!-- Login Button -->
         <Button 

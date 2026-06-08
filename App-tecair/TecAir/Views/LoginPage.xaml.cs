@@ -15,24 +15,23 @@ public partial class LoginPage : ContentPage
         
     }
 
-    private async void OnLoginClicked(object sender, EventArgs e)
+	private async void OnLoginClicked(object sender, EventArgs e)
 	{
 		var email = EmailEntry.Text;
-		var password = PasswordEntry.Text;
 
-		if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+		if (string.IsNullOrWhiteSpace(email))
 		{
-			await DisplayAlert("Error", "Por favor completa todos los campos", "OK");
+			await DisplayAlert("Error", "Por favor ingresa tu email", "OK");
 			return;
 		}
 
-		// Validar credenciales con el servicio de autenticación
-		var (success, message, user) = await MauiProgram.AuthenticationService.LoginAsync(email, password);
+		// Validar credenciales con el servicio de autenticación (solo email)
+		var (success, message, user) = await MauiProgram.AuthenticationService.LoginAsync(email);
 
 		if (success)
 		{
-            await Shell.Current.GoToAsync(nameof(HomePage));
-        }
+			await Shell.Current.GoToAsync(nameof(HomePage));
+		}
 		else
 		{
 			await DisplayAlert("Error de autenticación", message, "OK");

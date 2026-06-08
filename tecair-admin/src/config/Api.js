@@ -7,7 +7,7 @@
  */
 
 // URL base del API. Cambiar esto cuando el backend esté listo.
-export const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "http://192.168.137.1:5000/api";
 
 /**
  * Endpoints agrupados por recurso.

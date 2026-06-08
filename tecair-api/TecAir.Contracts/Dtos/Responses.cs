@@ -1,6 +1,27 @@
 namespace TecAir.Contracts.Dtos;
 
 /*
+Descripción: Respuesta de login con datos del usuario.
+Entradas: Usuario autenticado.
+Salidas: Token (opcional) y datos del usuario.
+Restricciones: Se retorna solo si la autenticación es exitosa.
+*/
+public sealed record LoginResponse(
+    string? Token,
+    int? IdUsuario,
+    string? Nombre1,
+    string? Nombre2,
+    string? Apellido1,
+    string? Apellido2,
+    string? Correo,
+    string? Telefono,
+    bool? EsEstudiante,
+    string? Universidad,
+    string? Carnet,
+    int? Millas,
+    bool? EsAdmin);
+
+/*
 Descripción:
 Representa la salida detallada de una ruta para respuestas del API.
 Entradas:

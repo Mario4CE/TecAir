@@ -1,6 +1,18 @@
 namespace TecAir.Contracts.Dtos;
 
 /*
+Descripción: Solicitud para login de usuario.
+Entradas: Correo y Contraseña.
+Salidas: Datos normalizados para verificación.
+Restricciones: Correo es obligatorio.
+*/
+public sealed record LoginRequest(
+    string? Correo,
+    string? Email,
+    string? Password,
+    string? Contraseña);
+
+/*
 Descripción: Solicitud para crear o actualizar un usuario.
 Entradas: NombreCompleto, Nombre1, Nombre2, Apellido1, Apellido2, Telefono, Correo, Email, EsEstudiante, Universidad, Carnet y Millas.
 Salidas: Datos normalizados para persistencia en la entidad Usuario.

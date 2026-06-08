@@ -24,15 +24,16 @@ namespace TecAir.Services
         }
 
         /// <summary>
-        /// Intenta autenticar un usuario con email y contraseña
+        /// Intenta autenticar un usuario con solo email.
+        /// La contraseña se almacena localmente en SQLite y no se valida durante login.
         /// </summary>
-        public async Task<(bool success, string message, User user)> LoginAsync(string email, string password)
+        public async Task<(bool success, string message, User user)> LoginAsync(string email)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                if (string.IsNullOrWhiteSpace(email))
                 {
-                    return (false, "Email y contraseña son requeridos", null);
+                    return (false, "El email es requerido", null);
                 }
 
                 // Buscar usuario por email
@@ -41,12 +42,6 @@ namespace TecAir.Services
                 if (user == null)
                 {
                     return (false, "Usuario no encontrado", null);
-                }
-
-                // Validar contraseña
-                if (user.Password != password)
-                {
-                    return (false, "Contraseña incorrecta", null);
                 }
 
                 _currentUser = user;

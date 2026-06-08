@@ -2,7 +2,7 @@
  * auth.js — Funciones de autenticación para TECAir Cliente
  *
  * Maneja login, registro y sesión del usuario.
- * Conectado al API real en http://localhost:5000/api
+ * Conectado al API real en http://172.18.48.117:5000/api
  */
 
 /**

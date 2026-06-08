@@ -23,10 +23,10 @@ namespace TecAir.Services
         private readonly HttpClient _httpClient;
 
         // URL base del API — cambiar si el servidor está en otra dirección
-        private const string ApiBaseUrl = "http://192.168.0.12:5000/api";
+        private const string ApiBaseUrl = "http://192.168.137.1:5000/api";
         // Nota: en Android el emulador usa 10.0.2.2 para acceder al localhost
         // Si se prueba en dispositivo físico, usar la IP local del servidor
-        // Ejemplo: "http://192.168.1.100:5000/api"
+        // Ejemplo: "http://192.168.137.1:5000/api"
 
         // Opciones de serialización — el API usa snake_case
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -65,6 +65,7 @@ namespace TecAir.Services
             try
             {
                 // Descarga datos del API hacia SQLite local
+                await DescargarUsuariosAsync();
                 await DescargarVuelosAsync();
                 await DescargarPromocionesAsync();
                 await DescargarAeropuertosAsync();
@@ -226,8 +227,73 @@ namespace TecAir.Services
         }
 
         /// <summary>
+        /// Descarga los usuarios del API y los sincroniza con SQLite.
+        /// IMPORTANTE: Preserva las contraseñas locales, nunca las sobrescribe.
+        /// Solo sincroniza email y datos del perfil del usuario.
+        /// </summary>
+        private async Task DescargarUsuariosAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{ApiBaseUrl}/usuarios");
+                if (!response.IsSuccessStatusCode) return;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var data = JsonSerializer.Deserialize<UsuariosResponse>(json, JsonOptions);
+                if (data?.Usuarios == null) return;
+
+                foreach (var usuarioApi in data.Usuarios)
+                {
+                    // Busca si ya existe el usuario en local por email
+                    var usuarioLocal = await _databaseService.GetUserByEmailAsync(usuarioApi.Correo);
+
+                    if (usuarioLocal == null)
+                    {
+                        // No existe localmente — lo crea SIN contraseña (quedará en blanco)
+                        await _databaseService.CreateUserAsync(new User
+                        {
+                            ApiId = usuarioApi.IdUsuario,
+                            FullName = $"{usuarioApi.Nombre1} {usuarioApi.Apellido1}".Trim(),
+                            Email = usuarioApi.Correo,
+                            Password = "", // ← Sin contraseña (descargado del API)
+                            Phone = usuarioApi.Telefono ?? "",
+                            IsStudent = usuarioApi.EsEstudiante,
+                            University = usuarioApi.Universidad ?? "",
+                            StudentID = usuarioApi.Carnet ?? "",
+                            LoyaltyMiles = usuarioApi.Millas ?? 0,
+                            IsSynced = true, // Ya está sincronizado con el API
+                            CreatedAt = DateTime.Now,
+                        });
+                    }
+                    else
+                    {
+                        // Ya existe localmente — ACTUALIZA solo datos, preserva la contraseña
+                        usuarioLocal.ApiId = usuarioApi.IdUsuario;
+                        usuarioLocal.Phone = usuarioApi.Telefono ?? usuarioLocal.Phone;
+                        usuarioLocal.IsStudent = usuarioApi.EsEstudiante;
+                        usuarioLocal.University = usuarioApi.Universidad ?? usuarioLocal.University;
+                        usuarioLocal.StudentID = usuarioApi.Carnet ?? usuarioLocal.StudentID;
+                        usuarioLocal.LoyaltyMiles = usuarioApi.Millas ?? usuarioLocal.LoyaltyMiles;
+                        usuarioLocal.IsSynced = true;
+                        // NO MODIFICA usuarioLocal.Password — se mantiene la contraseña local
+
+                        await _databaseService.UpdateUserAsync(usuarioLocal);
+                    }
+                }
+
+                Debug.WriteLine($"Usuarios sincronizados: {data.Usuarios.Count}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error descargando usuarios: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Sube al API los usuarios registrados localmente que aún no
         /// han sido sincronizados (IsSynced = false).
+        /// IMPORTANTE: La contraseña NO se envía al API, se mantiene solo localmente en SQLite.
         /// </summary>
         private async Task SubirUsuariosPendientesAsync()
         {
@@ -238,7 +304,7 @@ namespace TecAir.Services
 
                 foreach (var usuario in usuariosPendientes)
                 {
-                    // Arma el objeto que espera el API
+                    // Arma el objeto que espera el API — SIN CONTRASEÑA
                     var body = new
                     {
                         nombre1 = usuario.FullName.Split(' ')[0],
@@ -265,10 +331,27 @@ namespace TecAir.Services
 
                     if (response.IsSuccessStatusCode)
                     {
+                        // Intenta obtener el ApiId de la respuesta
+                        try
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var responseData = JsonSerializer.Deserialize<JsonElement>(responseContent, JsonOptions);
+
+                            if (responseData.TryGetProperty("id_usuario", out var idProp) || 
+                                responseData.TryGetProperty("IdUsuario", out idProp))
+                            {
+                                usuario.ApiId = idProp.GetInt32();
+                            }
+                        }
+                        catch
+                        {
+                            // Si no puede obtener el ID, lo deja como está
+                        }
+
                         // Marca el usuario como sincronizado en SQLite
                         usuario.IsSynced = true;
                         await _databaseService.UpdateUserAsync(usuario);
-                        Debug.WriteLine($"Usuario sincronizado: {usuario.Email}");
+                        Debug.WriteLine($"Usuario sincronizado: {usuario.Email} (ApiId: {usuario.ApiId})");
                     }
                     else
                     {
@@ -395,5 +478,25 @@ namespace TecAir.Services
         public int IdAeropuerto { get; set; }
         public string Nombre { get; set; } = "";
         public string Ubicacion { get; set; } = "";
+    }
+
+    internal class UsuariosResponse
+    {
+        public List<UsuarioApiDto> Usuarios { get; set; } = [];
+    }
+
+    internal class UsuarioApiDto
+    {
+        public int IdUsuario { get; set; }
+        public string Nombre1 { get; set; } = "";
+        public string Nombre2 { get; set; } = "";
+        public string Apellido1 { get; set; } = "";
+        public string Apellido2 { get; set; } = "";
+        public string Correo { get; set; } = "";
+        public string? Telefono { get; set; }
+        public bool EsEstudiante { get; set; }
+        public string? Universidad { get; set; }
+        public string? Carnet { get; set; }
+        public decimal? Millas { get; set; }
     }
 }
