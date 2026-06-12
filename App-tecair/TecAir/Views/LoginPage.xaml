@@ -46,6 +46,10 @@
             TextColor="White"
             Clicked="OnLoginClicked"/>
 
+        <Button
+            Text="Ver usuarios SQLite"
+            Clicked="OnTestSQLiteClicked"/>
+
         <!-- Register Link -->
         <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="5">
             <Label Text="¿No tienes cuenta?" FontSize="12" TextColor="Black"/>

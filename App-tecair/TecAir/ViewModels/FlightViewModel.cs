@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using TecAir.Models;
 using TecAir.Services;
 
@@ -103,34 +104,82 @@ namespace TecAir.ViewModels
                     return;
                 }
 
-                // Buscar ruta
-                var route = await _databaseService.GetRouteByAirportsAsync(SelectedOrigin.Id, SelectedDestination.Id);
-                if (route == null)
+                // Buscar vuelos usando Origin/Destination sincronizados
+                // Airport.Name ya contiene el formato completo "CODE - NombreLargo"
+                // Ejemplo: "SJO - Juan Santamaría", "LIR - Guanacaste"
+                var origin = SelectedOrigin.Name;
+                var destination = SelectedDestination.Name;
+
+                // ================= DEBUG =================
+                var allFlights = await _databaseService.GetAllFlightsAsync();
+
+                Debug.WriteLine("======================================");
+                Debug.WriteLine("VUELOS GUARDADOS EN SQLITE");
+                Debug.WriteLine($"Cantidad total: {allFlights.Count}");
+                Debug.WriteLine("======================================");
+
+                foreach (var f in allFlights)
+                {
+                    Debug.WriteLine(
+                        $"Flight={f.FlightNumber} | Origin='{f.Origin}' | Destination='{f.Destination}' | RouteId={f.RouteId}"
+                    );
+                }
+
+                Debug.WriteLine("======================================");
+                Debug.WriteLine(
+                    $"BUSCANDO Origin='{origin}' Destination='{destination}'"
+                );
+                Debug.WriteLine("======================================");
+                // =========================================
+
+                var flights = await _databaseService.GetFlightsByOriginDestinationAsync(
+                    origin,
+                    destination);
+
+                if (flights == null || flights.Count == 0)
                 {
                     Flights.Clear();
-                    await Application.Current.MainPage.DisplayAlert("Información", "No hay vuelos disponibles para esta ruta", "OK");
+
+                    Debug.WriteLine(
+                        $"[SearchFlightsAsync] No se encontraron vuelos para {origin} → {destination}"
+                    );
+
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Información",
+                        "No hay vuelos disponibles para esta ruta",
+                        "OK");
+
                     return;
                 }
 
-                // Obtener vuelos para la ruta
-                var flights = await _databaseService.GetFlightsByRouteAsync(route.Id);
                 Flights.Clear();
-                
+
                 foreach (var flight in flights)
                 {
                     var flightWithRoute = new FlightWithRoute
                     {
                         Flight = flight,
-                        Route = route,
+                        Route = null,
                         OriginAirport = SelectedOrigin,
                         DestinationAirport = SelectedDestination
                     };
+
                     Flights.Add(flightWithRoute);
                 }
+
+                Debug.WriteLine(
+                    $"[SearchFlightsAsync] Se encontraron {flights.Count} vuelos para {origin} → {destination}"
+                );
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Error en búsqueda: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"Error en búsqueda: {ex.Message}",
+                    "OK");
+
+                Debug.WriteLine($"[SearchFlightsAsync] ERROR: {ex}");
+
                 Flights.Clear();
             }
             finally

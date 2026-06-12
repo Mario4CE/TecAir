@@ -1,0 +1,135 @@
+📋 RESUMEN DE CAMBIOS: Sincronización de Vuelos (Origen, Destino, Precio)
+========================================================================
+
+## ✅ CAMBIOS COMPLETADOS
+
+### 1. Modelo Flight.cs
+📁 Ubicación: TecAir/Models/Flight.cs
+
+Propiedades agregadas:
+- ✅ Origin (string): Código de aeropuerto y nombre de origen
+- ✅ Destination (string): Código de aeropuerto y nombre de destino  
+- ✅ Price (decimal): Precio del vuelo
+
+Ejemplo de datos:
+```
+Origin: "SJO - Juan Santamaría"
+Destination: "LIR - Guanacaste"
+Price: 105.00
+```
+
+
+### 2. VueloApiDto.cs
+📁 Ubicación: TecAir/Services/SyncService.cs (líneas ~490-500)
+
+Propiedades agregadas:
+- ✅ Origen (string): Desde el endpoint del API
+- ✅ Destino (string): Desde el endpoint del API
+
+Nota: La propiedad Precio ya existía, solo se renombró de Precio
+
+
+### 3. SyncService.DescargarVuelosAsync()
+📁 Ubicación: TecAir/Services/SyncService.cs
+
+Cambios realizados:
+✅ CREACIÓN DE VUELO (línea ~130-140):
+   - Ahora mapea: Origin = vueloApi.Origen
+   - Ahora mapea: Destination = vueloApi.Destino
+   - Ahora mapea: Price = vueloApi.Precio
+
+✅ ACTUALIZACIÓN DE VUELO (línea ~145-150):
+   - Ahora actualiza: vueloLocal.Origin = vueloApi.Origen
+   - Ahora actualiza: vueloLocal.Destination = vueloApi.Destino
+   - Ahora actualiza: vueloLocal.Price = vueloApi.Precio
+
+
+## 🔄 FLUJO DE SINCRONIZACIÓN
+
+1. API devuelve vuelos con estructura:
+   {
+	 "id_vuelo": 1,
+	 "origen": "SJO - Juan Santamaría",
+	 "destino": "LIR - Guanacaste",
+	 "precio": 105.00,
+	 "fecha_salida": "2026-06-01",
+	 "hora_salida": "08:00:00",
+	 "asientos_disponibles": 116
+   }
+
+2. SyncService.DescargarVuelosAsync() deserializa en VueloApiDto
+
+3. Mapea a modelo Flight de SQLite:
+   - Origin ← Origen (del API)
+   - Destination ← Destino (del API)
+   - Price ← Precio (del API)
+
+4. Guarda/Actualiza en SQLite local
+
+
+## 🗄️ ESQUEMA SQLite
+
+Tabla: Flights
+Nuevas columnas:
+- Origin TEXT DEFAULT ''
+- Destination TEXT DEFAULT ''
+- Price DECIMAL DEFAULT 0
+
+Nota: SQLite-net crea/altera automáticamente al llamar CreateTableAsync<Flight>()
+
+
+## 📡 SINCRONIZACIÓN AUTOMÁTICA EN BACKGROUND
+
+Ya implementada en AutoSyncService.cs:
+- ✅ Se ejecuta cada 1 minuto
+- ✅ Verifica conectividad antes de sincronizar
+- ✅ Se pausa en background, reanuda en foreground
+- ✅ Registra errores sin interrumpir la app
+- ✅ Iniciada automáticamente en MauiProgram.cs
+
+
+## 🚀 SINCRONIZACIÓN MANUAL EN OPERACIONES CRÍTICAS
+
+Para operaciones importantes, llama:
+```csharp
+await _autoSyncService.SincronizarAhoraAsync();
+```
+
+Ubicaciones recomendadas:
+✓ Después de registrar usuario
+✓ Después de crear reservación
+✓ Después de cancelar reservación
+✓ Después de actualizar perfil de usuario
+✓ Cualquier operación financiera o crítica
+
+Ver: TecAir/Examples/SyncExamples.cs para ejemplos completos
+
+
+## ✨ VALIDACIÓN
+
+✅ Proyecto compila sin errores
+✅ Flight.cs tiene las propiedades Origin, Destination, Price
+✅ VueloApiDto tiene las propiedades Origen, Destino
+✅ SyncService.DescargarVuelosAsync() mapea correctamente
+✅ AutoSyncService ejecuta sincronización cada 1 minuto
+✅ MauiProgram.cs inicializa AutoSyncService
+
+## 📊 PRÓXIMOS PASOS (Recomendados)
+
+1. Probar sincronización en el emulador/dispositivo
+2. Verificar en SQLite que se almacenan Origin, Destination, Price
+3. Usar los datos en vistas (mostrar origen/destino en reservaciones)
+4. Agregar SincronizarAhoraAsync() en operaciones críticas
+5. Monitorear logs para asegurar que sincronización funciona correctamente
+
+## 🐛 TROUBLESHOOTING
+
+Si SQLite no muestra las nuevas columnas:
+1. Limpiar la app data (reinstalar)
+2. Verificar que DatabaseService llama CreateTableAsync<Flight>()
+3. Revisar logs en Output Window
+
+Si no se sincronizan los vuelos:
+1. Verificar conectividad de red
+2. Revisar que el endpoint /api/vuelos devuelve origen, destino, precio
+3. Revisar logs de SyncService en Output Window

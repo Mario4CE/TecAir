@@ -32,5 +32,14 @@ namespace TecAir.Models
 
         // ID del vuelo en el API remoto (0 = no sincronizado aún)
         public int ApiId { get; set; } = 0;
+
+        // Información del origen del vuelo
+        public string Origin { get; set; } = "";
+
+        // Información del destino del vuelo
+        public string Destination { get; set; } = "";
+
+        // Precio del vuelo
+        public decimal Price { get; set; }
     }
 }

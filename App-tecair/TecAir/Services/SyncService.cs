@@ -60,35 +60,53 @@ namespace TecAir.Services
         {
             // Si no hay conexión, no se puede sincronizar
             if (!HayConexion())
+            {
+                Debug.WriteLine("[SincronizarAsync] Sin conexión a internet");
                 return (false, "Sin conexión a internet. Los datos se sincronizarán cuando haya conexión.");
+            }
 
             try
             {
+                Debug.WriteLine("[SincronizarAsync] ========== INICIANDO SINCRONIZACIÓN ==========");
+                Debug.WriteLine($"[SincronizarAsync] URL del API: {ApiBaseUrl}");
+
                 // Descarga datos del API hacia SQLite local
+                Debug.WriteLine("[SincronizarAsync] Descargando usuarios...");
                 await DescargarUsuariosAsync();
+
+                Debug.WriteLine("[SincronizarAsync] Descargando vuelos...");
                 await DescargarVuelosAsync();
+
+                Debug.WriteLine("[SincronizarAsync] Descargando promociones...");
                 await DescargarPromocionesAsync();
+
+                Debug.WriteLine("[SincronizarAsync] Descargando aeropuertos...");
                 await DescargarAeropuertosAsync();
 
                 // Sube datos locales pendientes al API
+                Debug.WriteLine("[SincronizarAsync] Subiendo usuarios pendientes...");
                 await SubirUsuariosPendientesAsync();
+
+                Debug.WriteLine("[SincronizarAsync] Subiendo reservaciones pendientes...");
                 await SubirReservacionesPendientesAsync();
 
+                Debug.WriteLine("[SincronizarAsync] ✓ SINCRONIZACIÓN COMPLETADA");
                 return (true, "Sincronización completada correctamente.");
             }
             catch (HttpRequestException ex)
             {
-                Debug.WriteLine($"Error de conexión al API: {ex.Message}");
+                Debug.WriteLine($"[SincronizarAsync] ✗ Error de conexión al API: {ex.Message}");
                 return (false, "No se pudo conectar al servidor. Intente más tarde.");
             }
             catch (TaskCanceledException ex)
             {
-                Debug.WriteLine($"Timeout durante sincronización: {ex.Message}");
+                Debug.WriteLine($"[SincronizarAsync] ✗ Timeout durante sincronización: {ex.Message}");
                 return (false, "La sincronización tardó demasiado y se canceló. Verifique su conexión e intente de nuevo.");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error durante sincronización: {ex.Message}");
+                Debug.WriteLine($"[SincronizarAsync] ✗ Error general: {ex.GetType().Name} - {ex.Message}");
+                Debug.WriteLine($"[SincronizarAsync] Stack trace: {ex.StackTrace}");
                 return (false, $"Error durante sincronización: {ex.Message}");
             }
         }
@@ -125,13 +143,19 @@ namespace TecAir.Services
                             ArrivalTime = DateTime.Parse($"{vueloApi.FechaSalida} {vueloApi.HoraSalida}"),
                             Status = MapearEstado(vueloApi.Estado),
                             AvailableSeats = vueloApi.AsientosDisponibles,
+                            Origin = vueloApi.Origen,
+                            Destination = vueloApi.Destino,
+                            Price = vueloApi.Precio,
                         });
                     }
                     else
                     {
-                        // Ya existe — actualiza el estado y asientos
+                        // Ya existe — actualiza el estado, asientos y datos de origen/destino
                         vueloLocal.Status = MapearEstado(vueloApi.Estado);
                         vueloLocal.AvailableSeats = vueloApi.AsientosDisponibles;
+                        vueloLocal.Origin = vueloApi.Origen;
+                        vueloLocal.Destination = vueloApi.Destino;
+                        vueloLocal.Price = vueloApi.Precio;
                         await _databaseService.UpdateFlightAsync(vueloLocal);
                     }
                 }
@@ -235,22 +259,41 @@ namespace TecAir.Services
         {
             try
             {
+                Debug.WriteLine($"[DescargarUsuariosAsync] Iniciando descarga desde: {ApiBaseUrl}/usuarios");
+
                 var response = await _httpClient.GetAsync($"{ApiBaseUrl}/usuarios");
-                if (!response.IsSuccessStatusCode) return;
+
+                Debug.WriteLine($"[DescargarUsuariosAsync] Respuesta del API: {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"[DescargarUsuariosAsync] Error HTTP: {response.StatusCode} - {response.ReasonPhrase}");
+                    return;
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"[DescargarUsuariosAsync] JSON recibido: {json}");
+
                 var data = JsonSerializer.Deserialize<UsuariosResponse>(json, JsonOptions);
-                if (data?.Usuarios == null) return;
+                if (data?.Usuarios == null)
+                {
+                    Debug.WriteLine("[DescargarUsuariosAsync] No se pudo deserializar la respuesta o está vacía");
+                    return;
+                }
+
+                Debug.WriteLine($"[DescargarUsuariosAsync] Total de usuarios a sincronizar: {data.Usuarios.Count}");
 
                 foreach (var usuarioApi in data.Usuarios)
                 {
+                    Debug.WriteLine($"[DescargarUsuariosAsync] Procesando usuario: {usuarioApi.Correo}");
+
                     // Busca si ya existe el usuario en local por email
                     var usuarioLocal = await _databaseService.GetUserByEmailAsync(usuarioApi.Correo);
 
                     if (usuarioLocal == null)
                     {
                         // No existe localmente — lo crea SIN contraseña (quedará en blanco)
-                        await _databaseService.CreateUserAsync(new User
+                        var newUser = new User
                         {
                             ApiId = usuarioApi.IdUsuario,
                             FullName = $"{usuarioApi.Nombre1} {usuarioApi.Apellido1}".Trim(),
@@ -263,7 +306,10 @@ namespace TecAir.Services
                             LoyaltyMiles = usuarioApi.Millas ?? 0,
                             IsSynced = true, // Ya está sincronizado con el API
                             CreatedAt = DateTime.Now,
-                        });
+                        };
+
+                        await _databaseService.CreateUserAsync(newUser);
+                        Debug.WriteLine($"[DescargarUsuariosAsync] ✓ Usuario creado: {usuarioApi.Correo}");
                     }
                     else
                     {
@@ -278,14 +324,16 @@ namespace TecAir.Services
                         // NO MODIFICA usuarioLocal.Password — se mantiene la contraseña local
 
                         await _databaseService.UpdateUserAsync(usuarioLocal);
+                        Debug.WriteLine($"[DescargarUsuariosAsync] ✓ Usuario actualizado: {usuarioApi.Correo}");
                     }
                 }
 
-                Debug.WriteLine($"Usuarios sincronizados: {data.Usuarios.Count}");
+                Debug.WriteLine($"[DescargarUsuariosAsync] ✓ Usuarios sincronizados: {data.Usuarios.Count}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error descargando usuarios: {ex.Message}");
+                Debug.WriteLine($"[DescargarUsuariosAsync] ✗ Error: {ex.GetType().Name} - {ex.Message}");
+                Debug.WriteLine($"[DescargarUsuariosAsync] Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
@@ -355,7 +403,11 @@ namespace TecAir.Services
                     }
                     else
                     {
-                        Debug.WriteLine($"Error subiendo usuario {usuario.Email}: {response.StatusCode}");
+                        var errorBody = await response.Content.ReadAsStringAsync();
+
+                        Debug.WriteLine($"Error subiendo usuario {usuario.Email}");
+                        Debug.WriteLine($"StatusCode: {response.StatusCode}");
+                        Debug.WriteLine($"Respuesta API: {errorBody}");
                     }
                 }
             }
@@ -451,6 +503,8 @@ namespace TecAir.Services
         public int IdRuta { get; set; }
         public decimal Precio { get; set; }
         public int AsientosDisponibles { get; set; }
+        public string Origen { get; set; } = "";
+        public string Destino { get; set; } = "";
     }
 
     internal class PromocionesResponse

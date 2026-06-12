@@ -1,19 +1,21 @@
 namespace TecAir.Views;
 
+using System.Net.Http;
+
 public partial class LoginPage : ContentPage
 {
-    public LoginPage()
-    {
-        InitializeComponent();
+	public LoginPage()
+	{
+		InitializeComponent();
 
-        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
-        {
-            IsEnabled = false,
-            IsVisible = false
-        });
+		Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+		{
+			IsEnabled = false,
+			IsVisible = false
+		});
 
-        
-    }
+
+	}
 
 	private async void OnLoginClicked(object sender, EventArgs e)
 	{
@@ -43,4 +45,31 @@ public partial class LoginPage : ContentPage
 		// Navegar a la página de registro
 		await Shell.Current.GoToAsync(nameof(RegisterPage));
 	}
+
+    private async void OnTestSQLiteClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var usuarios = await MauiProgram.DatabaseService.GetAllUsersAsync();
+
+            string mensaje = $"Cantidad: {usuarios.Count}\n\n";
+
+            foreach (var u in usuarios)
+            {
+                mensaje += $"{u.Email}\n";
+            }
+
+            await DisplayAlert(
+                "SQLite",
+                mensaje,
+                "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(
+                "Error",
+                ex.ToString(),
+                "OK");
+        }
+    }
 }

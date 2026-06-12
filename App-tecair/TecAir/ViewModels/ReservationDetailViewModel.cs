@@ -152,15 +152,18 @@ namespace TecAir.ViewModels
                     return;
                 }
 
-                // Obtener ruta
-                _route = await _databaseService.GetRouteByIdAsync(SelectedFlight.RouteId);
+                // Usar Origin/Destination sincronizados del vuelo
+                // Extraer códigos de aeropuerto (primer token)
+                // Ejemplo: De "SJO - Juan Santamaría" extraer "SJO"
+                var originCode = SelectedFlight.Origin.Split(' ')[0];
+                var destinationCode = SelectedFlight.Destination.Split(' ')[0];
 
-                // Obtener aeropuertos
-                OriginAirport = await _databaseService.GetAirportByIdAsync(_route.OriginAirportId);
-                DestinationAirport = await _databaseService.GetAirportByIdAsync(_route.DestinationAirportId);
+                // Buscar aeropuertos por código
+                OriginAirport = await _databaseService.GetAirportByCodeAsync(originCode);
+                DestinationAirport = await _databaseService.GetAirportByCodeAsync(destinationCode);
 
-                // Establecer precio base
-                BaseCost = _route.BasePrice;
+                // Usar precio sincronizado directamente del vuelo
+                BaseCost = SelectedFlight.Price;
                 UpdateTotalCost();
             }
             catch (Exception ex)

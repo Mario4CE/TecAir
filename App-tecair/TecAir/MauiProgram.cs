@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
 using TecAir.Services;
 using TecAir.ViewModels;
 
@@ -24,6 +25,7 @@ namespace TecAir
             builder.Services.AddSingleton<SyncService>();
             builder.Services.AddSingleton<DatabaseService>();
             builder.Services.AddSingleton<AuthenticationService>();
+            builder.Services.AddSingleton<AutoSyncService>();
             
             // Registrar ViewModels
             builder.Services.AddSingleton<UserViewModel>();
@@ -56,21 +58,21 @@ namespace TecAir
 #endif
 
             var app = builder.Build();
-            
-            // Inicializar base de datos
+
+            // Inicializar base de datos y servicios
             DatabaseService = app.Services.GetRequiredService<DatabaseService>();
             AuthenticationService = app.Services.GetRequiredService<AuthenticationService>();
-            
+            var autoSyncService = app.Services.GetRequiredService<AutoSyncService>();
+
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 await DatabaseService.InitializeAsync();
-                
-                // Autenticar usuario demo automáticamente para demostración
-                var demoUser = await DatabaseService.GetUserByEmailAsync("demorera@estudiantec.cr");
-                if (demoUser != null)
-                {
-                    AuthenticationService.CurrentUser = demoUser;
-                }
+
+                // Iniciar sincronización automática en segundo plano
+                autoSyncService.Start();
+
+                System.Diagnostics.Debug.WriteLine(
+                    "[MauiProgram] Inicialización completada - Sincronización automática iniciada");
             });
 
             return app;

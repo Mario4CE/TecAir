@@ -77,145 +77,12 @@ namespace TecAir.Services
 
         /// <summary>
         /// Carga datos iniciales si la base de datos está vacía
+        /// Nota: Con la conexión al API, los datos se sincronizan automáticamente
         /// </summary>
         private async Task SeedDataAsync()
         {
-            // Verificar si ya hay datos
-            var userCount = await _connection.Table<User>().CountAsync();
-            if (userCount > 0)
-                return;
-
-            // Crear usuario por defecto para demostración
-            var defaultUser = new User
-            {
-                FullName = "Usuario Demo",
-                Email = "demorera@estudiantec.cr",
-                Password = "1234",  // ← Contraseña demo
-                Phone = "+506 8765-4321",
-                IsStudent = true,
-                University = "Instituto Tecnológico de Costa Rica",
-                StudentID = "2020001234",
-                LoyaltyMiles = 5250,
-                CreatedAt = DateTime.Now,
-                Role = 0 // Customer
-            };
-            await _connection.InsertAsync(defaultUser);
-
-            // Crear aeropuertos
-            var airports = new List<Airport>
-            {
-                new() { Code = "SJO", Name = "Juan Manuel Gálvez International", City = "San José", Country = "Costa Rica" },
-                new() { Code = "LAX", Name = "Los Angeles International", City = "Los Angeles", Country = "United States" },
-                new() { Code = "MIA", Name = "Miami International", City = "Miami", Country = "United States" },
-                new() { Code = "MAD", Name = "Adolfo Suárez Madrid", City = "Madrid", Country = "Spain" },
-                new() { Code = "CCS", Name = "Simón Bolívar International", City = "Caracas", Country = "Venezuela" }
-            };
-            await _connection.InsertAllAsync(airports);
-
-            // Crear aeronaves
-            var aircrafts = new List<Aircraft>
-            {
-                new() { Registration = "N12345", Model = "Boeing 737", Capacity = 180, Manufacturer = "Boeing" },
-                new() { Registration = "N67890", Model = "Airbus A320", Capacity = 195, Manufacturer = "Airbus" },
-                new() { Registration = "N11111", Model = "Boeing 757", Capacity = 239, Manufacturer = "Boeing" }
-            };
-            await _connection.InsertAllAsync(aircrafts);
-
-            // Crear rutas
-            var routes = new List<Route>
-            {
-                new() { OriginAirportId = 1, DestinationAirportId = 2, BasePrice = 450, Duration = 360 },
-                new() { OriginAirportId = 1, DestinationAirportId = 3, BasePrice = 420, Duration = 300 },
-                new() { OriginAirportId = 2, DestinationAirportId = 4, BasePrice = 650, Duration = 480 },
-                new() { OriginAirportId = 1, DestinationAirportId = 5, BasePrice = 380, Duration = 240 }
-            };
-            await _connection.InsertAllAsync(routes);
-
-            // Crear vuelos
-            var flights = new List<Flight>
-            {
-                new() 
-                { 
-                    FlightNumber = "TC-001", 
-                    RouteId = 1, 
-                    AircraftId = 1, 
-                    DepartureTime = DateTime.Now.AddDays(1).Date.AddHours(8),
-                    ArrivalTime = DateTime.Now.AddDays(1).Date.AddHours(14),
-                    Status = 0,
-                    AvailableSeats = 180
-                },
-                new() 
-                { 
-                    FlightNumber = "TC-002", 
-                    RouteId = 2, 
-                    AircraftId = 2, 
-                    DepartureTime = DateTime.Now.AddDays(2).Date.AddHours(10),
-                    ArrivalTime = DateTime.Now.AddDays(2).Date.AddHours(14),
-                    Status = 0,
-                    AvailableSeats = 195
-                },
-                new() 
-                { 
-                    FlightNumber = "TC-003", 
-                    RouteId = 3, 
-                    AircraftId = 3, 
-                    DepartureTime = DateTime.Now.AddDays(3).Date.AddHours(15),
-                    ArrivalTime = DateTime.Now.AddDays(4).Date.AddHours(6),
-                    Status = 0,
-                    AvailableSeats = 239
-                }
-            };
-            await _connection.InsertAllAsync(flights);
-
-            // Crear promociones
-            var promotions = new List<Promotion>
-            {
-                new() 
-                { 
-                    OriginAirportId = 1,
-                    DestinationAirportId = 2,
-                    PromotionalPrice = 350,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(30),
-                    Description = "Promoción especial para estudiantes",
-                    IsActive = true
-                },
-                new() 
-                { 
-                    OriginAirportId = 1,
-                    DestinationAirportId = 5,
-                    PromotionalPrice = 280,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(15),
-                    Description = "Vuelo económico a Venezuela",
-                    IsActive = true
-                }
-            };
-            await _connection.InsertAllAsync(promotions);
-
-            // Crear reservaciones de demostración
-            var reservations = new List<Reservation>
-            {
-                new()
-                {
-                    UserId = 1,
-                    FlightId = 1,
-                    SeatNumber = "12A",
-                    ReservationDate = DateTime.Now,
-                    Status = 0, // Pending
-                    TotalPrice = 450
-                },
-                new()
-                {
-                    UserId = 1,
-                    FlightId = 2,
-                    SeatNumber = "5B",
-                    ReservationDate = DateTime.Now.AddDays(-2),
-                    Status = 1, // Confirmed
-                    TotalPrice = 420
-                }
-            };
-            await _connection.InsertAllAsync(reservations);
+            // Sin datos de demostración. Los datos se cargan desde el API mediante sincronización.
+            await Task.CompletedTask;
         }
 
         // ==================== USUARIOS ====================
@@ -286,6 +153,18 @@ namespace TecAir.Services
         {
             await EnsureConnectionAsync();
             return await _connection.Table<Flight>().Where(f => f.RouteId == routeId).ToListAsync();
+        }
+
+        /// <summary>
+        /// Busca vuelos por origen y destino directamente (sin usar tabla Routes)
+        /// Útil cuando RouteId del API no coincide con Route.Id local
+        /// </summary>
+        public async Task<List<Flight>> GetFlightsByOriginDestinationAsync(string origin, string destination)
+        {
+            await EnsureConnectionAsync();
+            return await _connection.Table<Flight>()
+                .Where(f => f.Origin == origin && f.Destination == destination)
+                .ToListAsync();
         }
 
         public async Task<List<Flight>> GetAllFlightsAsync()
