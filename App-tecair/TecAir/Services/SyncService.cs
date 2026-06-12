@@ -194,9 +194,18 @@ namespace TecAir.Services
                             ApiId = promoApi.IdPromocion,
                             OriginAirportId = promoApi.IdRuta,
                             PromotionalPrice = promoApi.Precio,
-                            StartDate = promoApi.FechaInicio?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now,
-                            EndDate = promoApi.FechaFin?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.Now.AddMonths(1),
+
+                            StartDate = promoApi.FechaInicio?.ToDateTime(TimeOnly.MinValue)
+                                        ?? DateTime.Now,
+
+                            EndDate = promoApi.FechaFin?.ToDateTime(TimeOnly.MaxValue)
+                                        ?? DateTime.Now.AddMonths(1),
+
                             ImageUrl = promoApi.Imagen ?? "",
+
+                            Description = $"Promoción especial Ruta #{promoApi.IdRuta}",
+
+                            IsActive = true
                         });
                     }
                 }

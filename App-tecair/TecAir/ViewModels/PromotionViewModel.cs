@@ -35,16 +35,26 @@ namespace TecAir.ViewModels
             try
             {
                 IsBusy = true;
-                var promotions = await _databaseService.GetActivePromotionsAsync();
+
+                var promotions = await _databaseService.GetAllPromotionsAsync();
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"Promociones totales encontradas: {promotions.Count}");
+
                 Promotions.Clear();
+
                 foreach (var promotion in promotions)
                 {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"ID={promotion.Id} | " +
+                        $"ApiId={promotion.ApiId} | " +
+                        $"Precio={promotion.PromotionalPrice} | " +
+                        $"Inicio={promotion.StartDate} | " +
+                        $"Fin={promotion.EndDate} | " +
+                        $"Activa={promotion.IsActive}");
+
                     Promotions.Add(promotion);
                 }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Error al cargar promociones: {ex.Message}", "OK");
             }
             finally
             {
